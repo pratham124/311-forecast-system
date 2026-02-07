@@ -8,7 +8,7 @@
 
 ## Assumptions / Test Harness Requirements
 - A way to trigger evaluation:
-  - on-demand request by Performance Analyst
+  - on-demand request by city planner
   - scheduled evaluation cycle event
 - Controllable data layer/stubs for:
   - historical demand data (present/absent)
@@ -38,7 +38,7 @@
 - Storage is healthy.
 
 **Steps**
-1. Performance Analyst initiates an evaluation.
+1. city planner initiates an evaluation.
 2. Wait for evaluation completion.
 3. Query evaluation results store for `E_new`.
 4. Inspect `E_new` contents.

@@ -30,7 +30,7 @@ Proactive311 — A Time Series Forecasting + Alerting System for Edmonton 311 Se
 **So that** I can judge likely demand, know how confident the system is, and plan for high/low scenarios
 
 ## User Story 6: Forecast Evaluation Against Baselines
-**As a** performance analyst  
+**As a** city planner 
 **I want to** have the forecasting engine evaluated against baselines (e.g. seasonal naive, moving average)  
 **So that** we know the system adds value over simple rules
 
@@ -70,7 +70,7 @@ Proactive311 — A Time Series Forecasting + Alerting System for Edmonton 311 Se
 **So that** I receive alerts in the way that fits my workflow and am not overwhelmed by duplicate or excessive alerts
 
 ## User Story 14: View Forecast Accuracy
-**As a** city planner or performance analyst  
+**As a** city planner
 **I want to** see recent forecast accuracy and compare past predictions to actuals  
 **So that** I can evaluate and improve trust in the system
 
