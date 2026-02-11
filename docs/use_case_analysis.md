@@ -2,7 +2,7 @@
 
 ---
 
-## **UC-1**
+## **UC-01**
 
 - Every narrative is a valid, plausible instantiation of a documented flow and correctly supports the user story’s goal.  
 - The set of scenarios cover all flows listed in the use case.  
@@ -30,7 +30,7 @@ Satisfies Success End Condition (dataset verified current).
 
 ---
 
-## **UC-2**
+## **UC-02**
 
 - Every narrative is valid and supports the user story’s goal.  
 - Scenarios cover all flows.  
@@ -39,7 +39,7 @@ Satisfies Success End Condition (dataset verified current).
 
 ---
 
-## **UC-3**
+## **UC-03**
 
 - Every narrative is valid and supports the user story’s goal.  
 - Scenarios cover all flows.  
@@ -68,7 +68,7 @@ Satisfies Success End Condition.
 
 ---
 
-## **UC-4**
+## **UC-04**
 
 - Every narrative is valid and supports the user story’s goal.  
 - Scenarios cover all flows.  
@@ -97,7 +97,7 @@ Satisfies Success End Condition.
 
 ---
 
-## **UC-5**
+## **UC-05**
 
 - Every narrative is valid and supports the user story’s goal.  
 - Scenarios cover all flows.  
@@ -106,7 +106,7 @@ Satisfies Success End Condition.
 
 ---
 
-## **UC-6**
+## **UC-06**
 
 - Every narrative is valid and supports the user story’s goal.  
 - Scenarios cover all flows.  
@@ -161,3 +161,89 @@ After the City Planner selects a multi-year time range covering the entire city,
 Instead of immediately running the query, the system displays a warning notification. This message informs the planner that retrieving and rendering such a large volume of historical 311 records may result in a long wait time or cause the interface to become temporarily unresponsive.
 
 The City Planner, requiring the full dataset for a comprehensive year-over-year capacity study, clicks "Proceed." The system then initiates the data retrieval process, showing a "loading" state to indicate that the request is being processed despite the size.
+
+--- 
+
+## **UC-08**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - City planner compares demand/forecast across categories -> Main happy path
+  - No historical data available -> Extension 4a
+  - Forecast data unavailable -> Extension 5a
+  - Data alignment issue -> Extension 6a
+  - Visualization rendering error -> Extension 8a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: the city planner requests too much data when comparing historical demand and forecasts, causing the request to take a long time to load. Below is the prompt used to address this:
+
+### Prompt
+> Update UC-08 by including an extension to warn the user when too much data is requested which could cause the page to crash. 
+
+### Response
+**Extension 3a: High-Volume Comparative Request Warning** 
+- 3a1: System detects that the combination of multiple categories, geographies, and the requested time range will result in an exceptionally large comparative dataset.
+- 3a2: System displays a warning message stating that aligning large volumes of historical and forecast data may lead to significant loading times.
+- 3a3: City Planner acknowledges the warning and chooses to proceed.
+- 3a4: System proceeds to Step 4 and 5.
+
+#### Alternative Scenario 3a — High-Volume Comparative Request Warning
+The City Planner selects five different service categories (e.g., Sanitation, Road Maintenance, Forestry, etc.) across all city districts for a comparison spanning the next three years.
+
+Because the system must not only pull millions of historical records but also trigger complex calculations from the Forecasting Engine for each category across every district, it identifies a high-load situation. The system then displays a warning notification that informs the planner that retrieving and rendering such a large volume of data may result in a long wait time or cause the interface to become temporarily unresponsive.
+
+The City Planner, needing the full city-wide forecast for the upcoming budget cycle, clicks the "Proceed anyway" button. The system initiates the dual-retrieval process. To keep the user informed, the system displays a persistent loading indicator that tracks the progress of both the historical data pull and the forecast generation until the comparative charts finally render.
+
+---
+
+## **UC-09**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Weather data overlayed on forecast -> Main happy path
+  - Weather data unavailable -> Extension 3a
+  - Alignment issue between weather data and forecast -> Extension 4a
+  - Visualization rendering error -> Extension 6a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-10**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Weather data overlayed on forecast -> Main happy path
+  - Weather data unavailable -> Extension 3a
+  - Alignment issue between weather data and forecast -> Extension 4a
+  - Visualization rendering error -> Extension 6a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-11**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Notify on abnormal demand -> Main happy path
+  - Surge detection error -> Extension 2a
+  - False positive filtered -> Extension 4a
+  - Notification delivery failure -> Extension 5a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-12**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Drill into alert details -> Main happy path
+  - Forecast distribution data unavailable -> Extension 3a
+  - Driver attribution data unavailable -> Extension 4a
+  - Anomaly context unavailable -> Extension 5a
+  - Visualization rendering error -> Extension 7a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
