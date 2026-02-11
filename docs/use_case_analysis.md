@@ -134,6 +134,30 @@ Satisfies Success End Condition (partial evaluation with documented limitations)
 
 ---
 
-## **UC-7**
+## **UC-07**
 
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - City planner views historical data -> Main happy path
+  - No data matches selected filters -> Extension 4a
+  - Data retrieval failure -> Extension 4b
+  - Visualization rendering error -> Extension 6a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: the city planner requests too much data, causing the request to take a long time to load. Below is the prompt used to address this:
 
+### Prompt
+> Update UC-07 by including an extension to warn the user when too much data is requested which could cause the page to crash. 
+
+### Response
+**Extension 3a: High Data Volume Warning**
+- 3a1: System detects that the selected filters will result in an exceptionally large dataset (e.g., city-wide data for a multi-year period).
+- 3a2: System displays a warning message alerting the City Planner that the request may take a significant amount of time to load or impact browser performance.
+- 3a3: City Planner acknowledges the warning and chooses to proceed.
+- 3a4: System proceeds to Step 4.
+
+#### Alternative Scenario 3a — High Data Volume Warning
+After the City Planner selects a multi-year time range covering the entire city, the system identifies that the resulting data volume exceeds the standard performance threshold.
+
+Instead of immediately running the query, the system displays a warning notification. This message informs the planner that retrieving and rendering such a large volume of historical 311 records may result in a long wait time or cause the interface to become temporarily unresponsive.
+
+The City Planner, requiring the full dataset for a comprehensive year-over-year capacity study, clicks "Proceed." The system then initiates the data retrieval process, showing a "loading" state to indicate that the request is being processed despite the size.
