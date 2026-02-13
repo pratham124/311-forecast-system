@@ -174,28 +174,6 @@
 
 ---
 
-## AT-09 — No misleading partial alerts: notifications are sent only for confirmed abnormal demand
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - confirmed surge (AT-02/AT-03/AT-04)
-  - detection error (AT-06)
-  - false positive (AT-07)
-  - delivery failure (AT-08)
-
-**Steps**
-1. Execute a confirmed surge scenario and verify a notification is sent.
-2. Execute a false positive scenario and verify no notification is sent.
-3. Execute a detection error scenario and verify no notification is sent.
-4. Execute a delivery failure scenario and verify the event is queued/marked for retry/manual review.
-
-**Expected Results**
-- Notifications are sent **only** for confirmed abnormal demand events (“storm mode”).
-- Detection/validation/delivery failures are logged for monitoring.
-- System prioritizes accuracy (avoiding excessive false alarms) while preserving traceability for missed deliveries.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-11 Flow Covered |
 |---|---|
@@ -207,4 +185,3 @@
 | AT-06 | Extension 2a |
 | AT-07 | Extension 3a; Key Behavioral Theme |
 | AT-08 | Extension 5a; Failed End Condition |
-| AT-09 | Key Behavioral Theme Across All Alternatives |

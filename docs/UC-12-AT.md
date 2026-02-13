@@ -240,32 +240,6 @@
 
 ---
 
-## AT-13 — Clarity over partial views: system shows valid context, clearly labeled omissions, or a clear error (never misleading)
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - missing distribution (AT-08)
-  - missing drivers (AT-09)
-  - missing anomaly context (AT-10)
-  - rendering failure (AT-11)
-  - retrieval failure (AT-12)
-
-**Steps**
-1. Execute AT-08 and verify distribution is omitted with clear messaging.
-2. Execute AT-09 and verify driver breakdown is omitted with clear messaging.
-3. Execute AT-10 and verify anomaly timeline is omitted with clear messaging.
-4. Execute AT-11 and verify error state on render failure.
-5. Execute AT-12 and verify error state on retrieval failure.
-
-**Expected Results**
-- When a component is missing, the UI:
-  - shows other available components
-  - clearly labels what is missing and why (when known)
-  - avoids empty or misleading placeholders
-- When a failure prevents reliable display, the UI shows a clear error state and logs the failure.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-12 Flow Covered |
 |---|---|
@@ -281,4 +255,3 @@
 | AT-10 | Extension 5a |
 | AT-11 | Extension 7a; Failed End Condition |
 | AT-12 | Failed End Condition (retrieval/display failure) |
-| AT-13 | Key Behavioral Theme Across All Alternatives |

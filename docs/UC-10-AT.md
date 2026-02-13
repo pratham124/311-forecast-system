@@ -200,30 +200,6 @@
 
 ---
 
-## AT-10 — Clarity over false positives: notifications are sent only for valid exceedance conditions and correct scope
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - missing thresholds (AT-06)
-  - no exceedance (AT-07)
-  - exceedance with successful delivery (AT-04/AT-05)
-  - exceedance with delivery failure (AT-08)
-
-**Steps**
-1. Execute AT-06 scenario.
-2. Execute AT-07 scenario.
-3. Execute AT-04/AT-05 scenario.
-4. Execute AT-08 scenario.
-5. Compare notification counts and payload scopes across runs.
-
-**Expected Results**
-- No notification is sent when thresholds are missing.
-- No notification is sent when there is no exceedance.
-- Notifications sent on exceedance include the correct scope (category; optional geography) and correct values.
-- Failures are logged and routed for retry/manual review rather than silently dropped.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-10 Flow Covered |
 |---|---|
@@ -236,4 +212,3 @@
 | AT-07 | Extension 3a |
 | AT-08 | Extension 5a; Failed End Condition |
 | AT-09 | “Configurable threshold” behavior across updates |
-| AT-10 | Key Behavioral Theme Across All Alternatives |
