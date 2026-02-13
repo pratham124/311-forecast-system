@@ -4,8 +4,14 @@
 
 ## **UC-01**
 
-- Every narrative is a valid, plausible instantiation of a documented flow and correctly supports the user story’s goal.  
-- The set of scenarios cover all flows listed in the use case.  
+- Every narrative is a valid, plausible instantiation of a documented flow and correctly supports the user story’s goal.
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case: 
+  - System successfuly initiates data refresh process at scheduled time -> Main happy path
+  - Authentication failure -> Extension 2a
+  - Data source unavailable -> Extension 4a
+  - Data validation failure -> Extension 5a
+  - Storage failure -> Extension 6a
+
 - Missing scenario: When fetching the latest 311 service request data and the returned data is empty.
 
 ### Prompt to Address
@@ -32,8 +38,13 @@ Satisfies Success End Condition (dataset verified current).
 
 ## **UC-02**
 
-- Every narrative is valid and supports the user story’s goal.  
-- Scenarios cover all flows.  
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal.   
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - System successfuly ingests new data set and logs completion-> Main happy path
+  - Schema validation failure -> Extension 2a
+  - Deduplication process failure -> Extension 4a
+  - Excessive duplicate rate detected -> Extension 5a
+  - Storage failure -> Extension 7a
 - Scenarios fully accomplish the use case.  
 - No undocumented flows present.
 
@@ -41,8 +52,13 @@ Satisfies Success End Condition (dataset verified current).
 
 ## **UC-03**
 
-- Every narrative is valid and supports the user story’s goal.  
-- Scenarios cover all flows.  
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - System successfuly provides a next 24-hour demand forecast per service category (and geography when available) -> Main happy path
+  - Required data unavailable -> Extension 2a
+  - Forecasting engine error -> Extension 4a
+  - Geographic data incomplete -> Extension 6a
+  - Storage failure -> Extension 7a
 - Missing scenario: A forecast is already current for the same 24-hour window and the manager requests again.
 
 ### Prompt to Address
@@ -70,8 +86,13 @@ Satisfies Success End Condition.
 
 ## **UC-04**
 
-- Every narrative is valid and supports the user story’s goal.  
-- Scenarios cover all flows.  
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal.   
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - System successfuly provides a next 7-day demand forecast per service category (and geography when available) -> Main happy path
+  - Required data unavailable -> Extension 2a
+  - Forecasting engine error -> Extension 4a
+  - Geographic data incomplete -> Extension 6a
+  - Storage failure -> Extension 7a
 - Missing scenario: A forecast is already current for the same 7-day window and the manager requests again.
 
 ### Prompt to Address
@@ -99,8 +120,13 @@ Satisfies Success End Condition.
 
 ## **UC-05**
 
-- Every narrative is valid and supports the user story’s goal.  
-- Scenarios cover all flows.  
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal.  
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Successfully provides forecast curves with uncertainty bands overlaid on historical data -> Main happy path
+  - Forecase data unavailable -> Extension 2a
+  - Historical data unavailable -> Extension 3a
+  - Visualization rendering error -> Extension 5a
+  - Uncertainty metrics missing -> Extension 6a
 - Use case fully accomplished.  
 - No undocumented flows present.
 
@@ -108,8 +134,13 @@ Satisfies Success End Condition.
 
 ## **UC-06**
 
-- Every narrative is valid and supports the user story’s goal.  
-- Scenarios cover all flows.  
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Successfuly evaluates the forecasting engine against baseline methods to determine whether the system provides improved predictive performance -> Main happy path
+  - Required data unavailable -> Extension 2a
+  - Baseline model failure -> Extension 3a
+  - Forecast output missing -> Extension 4a
+  - Storage failure -> Extension 7a
 - Missing scenario: Evaluation metric computation fails or produces invalid values.
 
 ### Prompt to Address

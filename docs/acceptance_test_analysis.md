@@ -4,60 +4,53 @@
 
 ## **UC-01-AT**
 
-- Yes, all flows from UC-01 are covered.  
-- AT-07 and AT-08 are edge-case tests, but they are important and should stay.
-
-**AT-07** checks a key safety rule. The system must never partially activate a dataset if something fails. This is not tied to one specific flow and applies to all failure situations. It proves the system keeps the old dataset until validation and storage both succeed, supporting the failed end condition that existing data is preserved. Without this, a partial update could reach production.
-
-**AT-08** verifies that failure notifications are recorded. This maps to the requirement that failures must be logged for monitoring. Even if it could be bundled into other failure tests, keeping it separate makes the monitoring behavior easier to trace and validate on its own.
+- All flows from UC-01 are covered in the acceptance test suite.  
+- There are two acceptance tests that do not correspond to a specific flow in the use case:
+  - **AT-07** checks a key safety rule. The system must never partially activate a dataset if something fails. This is not tied to one specific flow and applies to all failure situations. It proves the system keeps the old dataset until validation and storage both succeed, supporting the failed end condition that existing data is preserved. Without this, a partial update could reach production.
+  - **AT-08** verifies that failure notifications are recorded. This maps to the requirement that failures must be logged for monitoring. Even if it could be bundled into other failure tests, keeping it separate makes the monitoring behavior easier to trace and validate on its own.
 
 ---
 
 ## **UC-02-AT**
 
-- Yes, all flows from UC-02 are covered.  
-- AT-06 and AT-07 are valid edge cases and should be retained.
-
-**AT-06** validates the critical safety invariant preventing partial activation.  
-**AT-07** ensures deduplication policy correctness.  
-Both are essential for maintaining data integrity.
+- All flows from UC-02 are covered in the acceptance test suite.   
+- There are two acceptance tests that do not correspond to a specific flow in the use case:
+  - **AT-06** validates the critical safety invariant preventing partial activation.  
+  - **AT-07** ensures deduplication policy correctness.  
 
 ---
 
 ## **UC-03-AT**
 
-- Yes, all flows from UC-03 are covered.  
-- AT-08 is valid and should be kept.
-
-**AT-08** verifies that forecast updates are atomic and that no partial forecasts become current during failures. This is fundamental to operational reliability.
+- All flows from UC-03 are covered in the acceptance test suite.   
+- There is one acceptance tests that do not correspond to a specific flow in the use case:
+ - **AT-08** verifies that forecast updates are atomic and that no partial forecasts become current during failures. This is fundamental to operational reliability.
 
 ---
 
 ## **UC-04-AT**
 
-- Yes, all flows from UC-04 are covered.  
-- AT-08 is a critical safety invariant test and should be kept.
-
-It ensures weekly forecasts are only activated after successful storage, preventing operational decisions based on incomplete data.
+- All flows from UC-04 are covered in the acceptance test suite.   
+- There is one acceptance tests that do not correspond to a specific flow in the use case:
+ - **AT-08** It ensures weekly forecasts are only activated after successful storage, preventing operational decisions based on incomplete data.
 
 ---
 
 ## **UC-05-AT**
 
-- Yes, all flows from UC-05 are covered.
+- All flows from UC-05 are covered in the acceptance test suite. 
+- There are three acceptance tests that do not correspond to a specific flow in the use case:
+  - **AT-06** ensures the visualization remains interpretable by validating that historical data, forecast, and uncertainty bands are all visible and correctly layered. Without it, the system could technically render all components but produce a misleading or unreadable chart.
+  - **AT-07** verifies that forecast and historical data are aligned on the correct time boundary, as required by the use case. Without it, subtle timestamp misalignment errors could occur while still passing basic rendering checks. 
+  - **AT-08** ensures that each dashboard load produces a consistent and accurate outcome log entry across all success and failure scenarios. It validates observability and traceability, preventing silent failures or mismatches between UI state and logged system behavior.
 
 ---
 
 ## **UC-06-AT**
 
-- Yes, all flows from UC-06 are covered.  
-- AT-06, AT-07, and AT-08 are valid edge cases and should remain.
-
-**AT-06** checks visualization quality. Proper layer ordering and visibility prevent misleading charts where uncertainty bands hide the forecast or historical data disappears.
-
-**AT-07** ensures temporal alignment is correct. Managers rely on knowing exactly when forecasts begin, so incorrect timing would lead to poor planning decisions.
-
-**AT-08** verifies that logging works across all scenarios, which is important for monitoring, debugging, and operational transparency.
+- All flows from UC-06 are covered in the acceptance test suite.   
+- There is one acceptance tests that do not correspond to a specific flow in the use case:
+  - **AT-08** ensures that each dashboard load produces a consistent and accurate outcome log entry across all success and failure scenarios.
 
 ---
 
