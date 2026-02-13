@@ -11,11 +11,11 @@
   - Data source unavailable -> Extension 4a
   - Data validation failure -> Extension 5a
   - Storage failure -> Extension 6a
-
-- Missing scenario: When fetching the latest 311 service request data and the returned data is empty.
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: When fetching the latest 311 service request data and the returned data is empty.
 
 ### Prompt to Address
-Update UC-01 by adding an Extension for the case where the 311 API returns successfully but there are no new records since the last successful pull. Then write a fully dressed scenario narrative for that new extension, maintaining the Cockburn style and existing end conditions.
+> Update UC-01 by adding an Extension for the case where the 311 API returns successfully but there are no new records since the last successful pull. Then write a fully dressed scenario narrative for that new extension, maintaining the Cockburn style and existing end conditions.
 
 ### Response
 
@@ -32,8 +32,6 @@ The system logs that no new data was available, keeps the current dataset unchan
 
 Satisfies Success End Condition (dataset verified current).
 
-- No scenarios represent flows not documented in the use case.
-
 ---
 
 ## **UC-02**
@@ -45,8 +43,8 @@ Satisfies Success End Condition (dataset verified current).
   - Deduplication process failure -> Extension 4a
   - Excessive duplicate rate detected -> Extension 5a
   - Storage failure -> Extension 7a
-- Scenarios fully accomplish the use case.  
-- No undocumented flows present.
+- There were no scenarios that represented a flow not documented in the use case. 
+- The use case and scenarios are complete and there are no needed additions to be made.
 
 ---
 
@@ -59,10 +57,11 @@ Satisfies Success End Condition (dataset verified current).
   - Forecasting engine error -> Extension 4a
   - Geographic data incomplete -> Extension 6a
   - Storage failure -> Extension 7a
-- Missing scenario: A forecast is already current for the same 24-hour window and the manager requests again.
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: A forecast is already current for the same 24-hour window and the manager requests again.
 
 ### Prompt to Address
-Update UC-03 by adding an extension for the case where a request is made but a current forecast for the next 24 hours already exists.
+> Update UC-03 by adding an extension for the case where a request is made but a current forecast for the next 24 hours already exists.
 
 ### Response
 
@@ -80,8 +79,6 @@ The system logs that an existing current forecast was served.
 
 Satisfies Success End Condition.
 
-- No undocumented flows present.
-
 ---
 
 ## **UC-04**
@@ -93,10 +90,11 @@ Satisfies Success End Condition.
   - Forecasting engine error -> Extension 4a
   - Geographic data incomplete -> Extension 6a
   - Storage failure -> Extension 7a
-- Missing scenario: A forecast is already current for the same 7-day window and the manager requests again.
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: A forecast is already current for the same 7-day window and the manager requests again.
 
 ### Prompt to Address
-Update UC-04 by adding an extension for the case where a request is made but a current forecast for the next 7 days already exists.
+> Update UC-04 by adding an extension for the case where a request is made but a current forecast for the next 7 days already exists.
 
 ### Response
 
@@ -114,8 +112,6 @@ The system logs that an existing current weekly forecast was served.
 
 Satisfies Success End Condition.
 
-- No undocumented flows present.
-
 ---
 
 ## **UC-05**
@@ -127,8 +123,8 @@ Satisfies Success End Condition.
   - Historical data unavailable -> Extension 3a
   - Visualization rendering error -> Extension 5a
   - Uncertainty metrics missing -> Extension 6a
-- Use case fully accomplished.  
-- No undocumented flows present.
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
 
 ---
 
@@ -141,10 +137,11 @@ Satisfies Success End Condition.
   - Baseline model failure -> Extension 3a
   - Forecast output missing -> Extension 4a
   - Storage failure -> Extension 7a
-- Missing scenario: Evaluation metric computation fails or produces invalid values.
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are missing a plausible outcome: Evaluation metric computation fails or produces invalid values.
 
 ### Prompt to Address
-Update UC-06 by adding an extension for when evaluation metric computation fails or produces invalid values.
+> Update UC-06 by adding an extension for when evaluation metric computation fails or produces invalid values.
 
 ### Response
 
@@ -176,7 +173,7 @@ Satisfies Success End Condition (partial evaluation with documented limitations)
 - There were no scenarios that represented a flow not documented in the use case.
 - The use case and scenarios are missing a plausible outcome: the city planner requests too much data, causing the request to take a long time to load. Below is the prompt used to address this:
 
-### Prompt
+### Prompt to Address
 > Update UC-07 by including an extension to warn the user when too much data is requested which could cause the page to crash. 
 
 ### Response
@@ -207,7 +204,7 @@ The City Planner, requiring the full dataset for a comprehensive year-over-year 
 - There were no scenarios that represented a flow not documented in the use case.
 - The use case and scenarios are missing a plausible outcome: the city planner requests too much data when comparing historical demand and forecasts, causing the request to take a long time to load. Below is the prompt used to address this:
 
-### Prompt
+### Prompt to Address
 > Update UC-08 by including an extension to warn the user when too much data is requested which could cause the page to crash. 
 
 ### Response
@@ -278,3 +275,52 @@ The City Planner, needing the full city-wide forecast for the upcoming budget cy
 - The use case and scenarios are complete and there are no needed additions to be made.
 
 ---
+
+## **UC-16**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Indicate degraded confidence on UI -> Main happy path
+  - Confidence signals unavailable -> Extension 2a
+  - False degradation signal -> Extension 3a
+  - Visualization rendering error -> Extension 4a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-17**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Public users can see forecasts by category -> Main happy path
+  - Forecast data unavailable -> Extension 2a
+  - Data not approved for public use -> Extension 3a
+  - Visualization rendering error -> Extension 4a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-18**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - User acceses user guide -> Main happy path
+  - Documentation unavailable -> Extension 2a
+  - Display rendering error -> Extension 3a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+---
+
+## **UC-19**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - User submits feedback/bug report -> Main happy path
+  - Invalid or incomplete input in form -> Extension 5a
+  - Issue tracking service unavailable -> Extension 6a
+  - Storage failure -> Extension 7a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
