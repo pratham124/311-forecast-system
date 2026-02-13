@@ -170,28 +170,6 @@
 
 ---
 
-## AT-10 — Clarity over misleading warnings: indicator shown only when supported by reliable signals; otherwise show normal view with transparent logging
-**Covers**: Key Behavioral Theme Across All Alternatives   
-**Preconditions**
-- Test harness supports:
-  - degraded confidence (AT-03/AT-05)
-  - missing confidence signals (AT-07)
-  - false degradation dismissal (AT-08)
-  - indicator render failure (AT-09)
-
-**Steps**
-1. Execute a true degraded-confidence scenario and verify indicator is shown.
-2. Execute missing confidence scenario and verify no indicator appears (and missing is logged).
-3. Execute false degradation scenario and verify indicator is not shown (and dismissal is logged).
-4. Execute render failure scenario and verify indicator is not shown (and failure is logged).
-
-**Expected Results**
-- Degraded confidence indicators are shown only when supported by reliable signals. 
-- Missing or invalid signals do not result in misleading warnings; outcomes are logged. 
-- The Operational Manager either sees a valid caution indicator or a normal forecast view, with system transparency preserved. 
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-16 Flow Covered |
 |---|---|
@@ -204,4 +182,3 @@
 | AT-07 | Extension 2a  |
 | AT-08 | Extension 3a  |
 | AT-09 | Extension 4a  |
-| AT-10 | Key Behavioral Theme Across All Alternatives  |

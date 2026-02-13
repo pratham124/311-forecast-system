@@ -136,27 +136,6 @@
 
 ---
 
-## AT-08 — Clarity over failures: user sees the guide when available, or a clear error message; failures are logged
-**Covers**: Key Behavioral Theme Across All Alternatives   
-**Preconditions**
-- Test harness supports:
-  - normal success (AT-02/AT-03/AT-04)
-  - documentation unavailable (AT-06)
-  - rendering failure (AT-07)
-
-**Steps**
-1. Execute a successful guide access flow and verify the user can navigate the guide.
-2. Execute AT-06 and verify the user sees a clear error message.
-3. Execute AT-07 and verify the user sees an error state.
-4. Review logs for each run.
-
-**Expected Results**
-- Users either see usable instructional content or a clear error state.
-- Missing documentation and rendering failures are logged for monitoring and troubleshooting.
-- Usability and clarity are prioritized across all outcomes. 
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-18 Flow Covered |
 |---|---|
@@ -167,4 +146,3 @@
 | AT-05 | Main Success Scenario (5)  |
 | AT-06 | Extension 2a; Failed End Condition  |
 | AT-07 | Extension 3a; Failed End Condition  |
-| AT-08 | Key Behavioral Theme Across All Alternatives  |

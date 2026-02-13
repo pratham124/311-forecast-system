@@ -196,29 +196,6 @@
 
 ---
 
-## AT-12 — Clarity and traceability: system captures reports whenever possible; issues are logged; user receives clear status
-**Covers**: Key Behavioral Theme Across All Alternatives   
-**Preconditions**
-- Test harness supports:
-  - validation failure (AT-09)
-  - integration outage with local queue (AT-10)
-  - storage failure (AT-11)
-  - normal success (AT-01 to AT-08)
-
-**Steps**
-1. Execute normal success flow and verify the report is recorded and confirmed.
-2. Execute AT-09 and verify no processing occurs until user corrects input.
-3. Execute AT-10 and verify report is captured locally for retry and user is informed of delay.
-4. Execute AT-11 and verify failure is logged and user is informed.
-
-**Expected Results**
-- User feedback and bug reports are captured whenever possible. 
-- Validation, integration, and storage issues are logged. 
-- Users receive clear feedback on submission status. 
-- System reliability and traceability of reports are prioritized across scenarios. 
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-19 Flow Covered |
 |---|---|
@@ -233,4 +210,3 @@
 | AT-09 | Extension 5a  |
 | AT-10 | Extension 6a  |
 | AT-11 | Extension 7a; Failed End Condition  |
-| AT-12 | Key Behavioral Theme Across All Alternatives  |

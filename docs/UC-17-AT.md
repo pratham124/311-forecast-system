@@ -156,28 +156,6 @@
 
 ---
 
-## AT-09 — Clarity and public data safety: resident sees valid safe summaries or a clear error (never restricted or misleading content)
-**Covers**: Key Behavioral Theme Across All Alternatives   
-**Preconditions**
-- Test harness supports:
-  - forecast missing/unavailable (AT-06)
-  - public-safety filtering required (AT-07)
-  - visualization rendering failure (AT-08)
-
-**Steps**
-1. Execute AT-04 (normal success) and verify understandable public display.
-2. Execute AT-06 and verify clear error message.
-3. Execute AT-07 and verify sanitized summary with no restricted details.
-4. Execute AT-08 and verify clear error state.
-5. Review logs for each run.
-
-**Expected Results**
-- Only approved and safe information is shown to the public. 
-- Missing data and rendering issues are logged and communicated clearly. 
-- The resident either sees valid forecast summaries or a clear error message, with no misleading partials. 
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-17 Flow Covered |
 |---|---|
@@ -189,4 +167,3 @@
 | AT-06 | Extension 2a; Failed End Condition  |
 | AT-07 | Extension 3a  |
 | AT-08 | Extension 4a; Failed End Condition  |
-| AT-09 | Key Behavioral Theme Across All Alternatives  |
