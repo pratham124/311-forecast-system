@@ -7,43 +7,43 @@
 ---
 
 ## Assumptions / Test Harness Requirements
-- A test environment with an **Operational Manager** account that has access permissions. fileciteturn8file0
+- A test environment with an **Operational Manager** account that has access permissions. 
 - A controllable **Configuration Store / Data Storage System** supporting:
   - read current configuration
   - write updated configuration
   - injected storage failure (DB outage / permission error / timeout)
-  - verification that “previous configuration remains active” after failed save fileciteturn8file0
+  - verification that “previous configuration remains active” after failed save 
 - A controllable **Notification Service** / channel integration layer supporting:
-  - available supported channels (email; optional Slack/Teams) fileciteturn8file0
-  - injected “unsupported channel” condition for validation testing fileciteturn8file0
+  - available supported channels (email; optional Slack/Teams) 
+  - injected “unsupported channel” condition for validation testing 
 - A defined validation policy for thresholds (e.g., non-negative; within max bounds) and for channel support.
 - Observability:
-  - logs accessible for assertions (including success and failure logs) fileciteturn8file0
+  - logs accessible for assertions (including success and failure logs) 
   - UI states observable (loaded settings, validation error, save success, save failure)
   - ability to confirm the saved configuration is applied to future alerts (via a stubbed alert evaluation/notification test hook)
 
 ---
 
 ## AT-01 — Alert configuration settings loads and displays current values
-**Covers**: Main Success Scenario Steps 1–2 fileciteturn8file0  
+**Covers**: Main Success Scenario Steps 1–2 
 **Preconditions**
-- Operational Manager is authenticated and has access permissions. fileciteturn8file0
+- Operational Manager is authenticated and has access permissions. 
 
 **Steps**
-1. Operational Manager accesses alert configuration settings. fileciteturn8file0
+1. Operational Manager accesses alert configuration settings. 
 2. Observe the displayed settings.
 
 **Expected Results**
 - The system displays current:
-  - threshold values (by category; optional geography scope) fileciteturn8file0
-  - notification channel options (email; optional Slack/Teams) fileciteturn8file0
-  - frequency and/or deduplication preferences fileciteturn8file0
+  - threshold values (by category; optional geography scope) 
+  - notification channel options (email; optional Slack/Teams) 
+  - frequency and/or deduplication preferences 
 - No error state is shown.
 
 ---
 
 ## AT-02 — Adjust thresholds by category (and optional geography)
-**Covers**: Main Success Scenario Step 3 fileciteturn8file0  
+**Covers**: Main Success Scenario Step 3 
 **Preconditions**
 - Settings page is loaded (AT-01).
 
@@ -60,10 +60,10 @@
 ---
 
 ## AT-03 — Select supported notification channels
-**Covers**: Main Success Scenario Step 4 fileciteturn8file0  
+**Covers**: Main Success Scenario Step 4 
 **Preconditions**
 - Settings page is loaded (AT-01).
-- Supported channels are available (e.g., Email; optional Slack/Teams). fileciteturn8file0
+- Supported channels are available (e.g., Email; optional Slack/Teams). 
 
 **Steps**
 1. Select Email as a notification channel.
@@ -77,7 +77,7 @@
 ---
 
 ## AT-04 — Configure frequency/deduplication preferences
-**Covers**: Main Success Scenario Step 5 fileciteturn8file0  
+**Covers**: Main Success Scenario Step 5 
 **Preconditions**
 - Settings page is loaded (AT-01).
 
@@ -93,7 +93,7 @@
 ---
 
 ## AT-05 — Save configuration: system validates and stores updated settings
-**Covers**: Main Success Scenario Steps 6–8; Success End Condition fileciteturn8file0  
+**Covers**: Main Success Scenario Steps 6–8; Success End Condition 
 **Preconditions**
 - Draft configuration includes:
   - at least one threshold edit (AT-02)
@@ -106,16 +106,16 @@
 3. Confirm successful save.
 
 **Expected Results**
-- System validates settings. fileciteturn8file0
+- System validates settings. 
 - Validation succeeds.
-- System stores updated configuration. fileciteturn8file0
+- System stores updated configuration. 
 - UI confirms configuration saved (toast/banner/state).
-- Future alerts will follow configured rules (verified in AT-07). fileciteturn8file0
+- Future alerts will follow configured rules (verified in AT-07). 
 
 ---
 
 ## AT-06 — Successful configuration update is logged
-**Covers**: Main Success Scenario Step 9 fileciteturn8file0  
+**Covers**: Main Success Scenario Step 9 
 **Preconditions**
 - A successful save occurs (AT-05).
 
@@ -124,13 +124,13 @@
 2. Retrieve logs/events for the operation.
 
 **Expected Results**
-- Logs include a successful configuration update entry (timestamp; actor; optional correlation id). fileciteturn8file0
+- Logs include a successful configuration update entry (timestamp; actor; optional correlation id). 
 - Logs include key changed dimensions (thresholds and channels) or a config version reference (implementation-dependent).
 
 ---
 
 ## AT-07 — Saved settings are applied to subsequent alert behavior
-**Covers**: Success End Condition (“saved and applied”) fileciteturn8file0  
+**Covers**: Success End Condition (“saved and applied”) 
 **Preconditions**
 - Configuration saved successfully (AT-05).
 - Test harness can trigger an alert evaluation/notification scenario (e.g., threshold-based alert flow) and inspect resulting delivery behavior.
@@ -145,48 +145,48 @@
 - Alerts follow the configured threshold scope (category; optional geography).
 - Notifications are delivered only to the configured channel(s).
 - Frequency/dedup settings reduce duplicate/excess alerts as configured (e.g., suppression/aggregation within window).
-- System behavior is consistent with the manager’s saved preferences. fileciteturn8file0
+- System behavior is consistent with the manager’s saved preferences. 
 
 ---
 
 ## AT-08 — Invalid threshold values are rejected and configuration is not saved
-**Covers**: Extension 7a (7a1–7a2) fileciteturn8file0  
+**Covers**: Extension 7a (7a1–7a2) 
 **Preconditions**
 - Settings page is loaded (AT-01).
 
 **Steps**
-1. Enter an invalid threshold value (e.g., negative or outside allowed range) for a category or category+geo. fileciteturn8file0
+1. Enter an invalid threshold value (e.g., negative or outside allowed range) for a category or category+geo. 
 2. Click Save.
 
 **Expected Results**
-- System displays a validation error identifying invalid threshold values. fileciteturn8file0
-- Configuration is not saved. fileciteturn8file0
+- System displays a validation error identifying invalid threshold values. 
+- Configuration is not saved. 
 - Previously saved configuration remains unchanged/active.
 
 ---
 
 ## AT-09 — Unsupported notification channel selection is rejected
-**Covers**: Extension 4a (4a1–4a2) fileciteturn8file0  
+**Covers**: Extension 4a (4a1–4a2) 
 **Preconditions**
 - Settings page is loaded (AT-01).
 - Test harness can present or simulate selection of an unsupported channel.
 
 **Steps**
-1. Attempt to select an unsupported channel (or select a channel whose integration is not available). fileciteturn8file0
+1. Attempt to select an unsupported channel (or select a channel whose integration is not available). 
 2. Click Save (or observe immediate validation if inline).
 
 **Expected Results**
-- System displays an error indicating the channel is unsupported. fileciteturn8file0
+- System displays an error indicating the channel is unsupported. 
 - The unsupported channel selection is rejected (unselected/blocked).
-- Configuration cannot be saved until a supported channel is chosen. fileciteturn8file0
+- Configuration cannot be saved until a supported channel is chosen. 
 
 ---
 
 ## AT-10 — Storage failure: system logs error and retains previous configuration
-**Covers**: Extension 8a (8a1–8a2); Failed End Condition fileciteturn8file0  
+**Covers**: Extension 8a (8a1–8a2); Failed End Condition 
 **Preconditions**
 - Draft configuration changes are valid (AT-02 to AT-04).
-- Inject a storage failure (DB outage/permission issue). fileciteturn8file0
+- Inject a storage failure (DB outage/permission issue). 
 
 **Steps**
 1. Click Save.
@@ -195,15 +195,15 @@
 4. Reload the settings page.
 
 **Expected Results**
-- System logs a storage error. fileciteturn8file0
+- System logs a storage error. 
 - UI informs the manager the configuration could not be saved.
-- Previous configuration remains active. fileciteturn8file0
+- Previous configuration remains active. 
 - On reload, settings reflect the previous saved configuration (not the failed draft).
 
 ---
 
 ## AT-11 — Clarity over partial updates: only valid, supported configurations are applied; failures are logged; previous settings remain active
-**Covers**: Key Behavioral Theme Across All Alternatives fileciteturn8file0  
+**Covers**: Key Behavioral Theme Across All Alternatives 
 **Preconditions**
 - Test harness supports:
   - invalid thresholds (AT-08)
@@ -218,24 +218,24 @@
 4. Execute AT-05 and verify new settings are applied (AT-07).
 
 **Expected Results**
-- Only valid and supported configurations are applied. fileciteturn8file0
-- Errors are clearly communicated to the manager. fileciteturn8file0
-- Failures are logged for monitoring. fileciteturn8file0
-- Previous configurations remain active on failure to prevent inconsistent alert behavior. fileciteturn8file0
+- Only valid and supported configurations are applied. 
+- Errors are clearly communicated to the manager. 
+- Failures are logged for monitoring. 
+- Previous configurations remain active on failure to prevent inconsistent alert behavior. 
 
 ---
 
 ## Traceability Matrix
 | Acceptance Test | UC-13 Flow Covered |
 |---|---|
-| AT-01 | Main Success Scenario (1–2) fileciteturn8file0 |
-| AT-02 | Main Success Scenario (3) fileciteturn8file0 |
-| AT-03 | Main Success Scenario (4) fileciteturn8file0 |
-| AT-04 | Main Success Scenario (5) fileciteturn8file0 |
-| AT-05 | Main Success Scenario (6–8); Success End Condition fileciteturn8file0 |
-| AT-06 | Main Success Scenario (9) fileciteturn8file0 |
-| AT-07 | Success End Condition (saved and applied) fileciteturn8file0 |
-| AT-08 | Extension 7a fileciteturn8file0 |
-| AT-09 | Extension 4a fileciteturn8file0 |
-| AT-10 | Extension 8a; Failed End Condition fileciteturn8file0 |
-| AT-11 | Key Behavioral Theme Across All Alternatives fileciteturn8file0 |
+| AT-01 | Main Success Scenario (1–2)  |
+| AT-02 | Main Success Scenario (3)  |
+| AT-03 | Main Success Scenario (4)  |
+| AT-04 | Main Success Scenario (5)  |
+| AT-05 | Main Success Scenario (6–8); Success End Condition  |
+| AT-06 | Main Success Scenario (9)  |
+| AT-07 | Success End Condition (saved and applied)  |
+| AT-08 | Extension 7a  |
+| AT-09 | Extension 4a  |
+| AT-10 | Extension 8a; Failed End Condition  |
+| AT-11 | Key Behavioral Theme Across All Alternatives  |

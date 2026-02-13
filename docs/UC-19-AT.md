@@ -7,26 +7,26 @@
 ---
 
 ## Assumptions / Test Harness Requirements
-- A test environment where the feedback/report feature is available. fileciteturn12file0
+- A test environment where the feedback/report feature is available. 
 - A controllable **Feedback Service / Issue Tracking System** integration supporting:
-  - successful submission creation fileciteturn12file0
-  - injected integration failures (service unavailable / timeout / 5xx) fileciteturn12file0
+  - successful submission creation 
+  - injected integration failures (service unavailable / timeout / 5xx) 
   - ability to inspect created issue/ticket payload (or stubbed equivalent)
 - A controllable **Data Storage System** supporting:
-  - successful local storage of the submission record fileciteturn12file0
-  - injected storage failure (DB outage / permission error / timeout) fileciteturn12file0
+  - successful local storage of the submission record 
+  - injected storage failure (DB outage / permission error / timeout) 
 - A controllable **Retry/Queue mechanism** for integration failures:
-  - “store locally for retry” behavior observable (queue entry/status flag) fileciteturn12file0
+  - “store locally for retry” behavior observable (queue entry/status flag) 
 - Observability:
   - UI states observable (form shown, validation errors, success confirmation, failure message)
-  - logs accessible for assertions (validation, integration success/failure, storage success/failure, submission logged) fileciteturn12file0
+  - logs accessible for assertions (validation, integration success/failure, storage success/failure, submission logged) 
 
 ---
 
 ## AT-01 — User can access the feedback/bug report option
-**Covers**: Main Success Scenario Step 1 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 1   
 **Preconditions**
-- Feedback submission feature is available. fileciteturn12file0
+- Feedback submission feature is available. 
 
 **Steps**
 1. User selects the feedback/report issue option.
@@ -38,7 +38,7 @@
 ---
 
 ## AT-02 — System displays a submission form
-**Covers**: Main Success Scenario Step 2 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 2   
 **Preconditions**
 - User has selected the feedback/report issue option (AT-01).
 
@@ -47,12 +47,12 @@
 
 **Expected Results**
 - A submission form is displayed.
-- Form includes at least a description field; optional fields may include category and contact information (implementation-dependent). fileciteturn12file0
+- Form includes at least a description field; optional fields may include category and contact information (implementation-dependent). 
 
 ---
 
 ## AT-03 — User enters feedback/bug details and submits the form
-**Covers**: Main Success Scenario Steps 3–4 fileciteturn12file0  
+**Covers**: Main Success Scenario Steps 3–4   
 **Preconditions**
 - Submission form is displayed (AT-02).
 
@@ -67,7 +67,7 @@
 ---
 
 ## AT-04 — System validates input and accepts valid submissions
-**Covers**: Main Success Scenario Step 5 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 5   
 **Preconditions**
 - User submits a form with all required fields valid.
 
@@ -82,9 +82,9 @@
 ---
 
 ## AT-05 — System sends submission to feedback/issue tracking service
-**Covers**: Main Success Scenario Step 6 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 6   
 **Preconditions**
-- Issue tracking integration is operational. fileciteturn12file0
+- Issue tracking integration is operational. 
 - Submitted form is valid (AT-04).
 
 **Steps**
@@ -98,7 +98,7 @@
 ---
 
 ## AT-06 — System stores a record of the submission locally
-**Covers**: Main Success Scenario Step 7; Success End Condition fileciteturn12file0  
+**Covers**: Main Success Scenario Step 7; Success End Condition   
 **Preconditions**
 - Integration send succeeds (AT-05).
 - Data storage is operational.
@@ -109,12 +109,12 @@
 
 **Expected Results**
 - System stores a local record of the submission for tracking purposes.
-- Record is associated with the created issue/ticket id if available (implementation-dependent). fileciteturn12file0
+- Record is associated with the created issue/ticket id if available (implementation-dependent). 
 
 ---
 
 ## AT-07 — System confirms successful submission to the user
-**Covers**: Main Success Scenario Step 8; Success End Condition fileciteturn12file0  
+**Covers**: Main Success Scenario Step 8; Success End Condition   
 **Preconditions**
 - Submission is sent to tracking service and stored locally (AT-05/AT-06).
 
@@ -129,7 +129,7 @@
 ---
 
 ## AT-08 — System logs the submission
-**Covers**: Main Success Scenario Step 9 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 9   
 **Preconditions**
 - A successful submission occurs.
 
@@ -139,12 +139,12 @@
 
 **Expected Results**
 - System logs the submission event.
-- Logs include at minimum timestamp and outcome; ideally include submission id/correlation id (implementation-dependent). fileciteturn12file0
+- Logs include at minimum timestamp and outcome; ideally include submission id/correlation id (implementation-dependent). 
 
 ---
 
 ## AT-09 — Invalid or incomplete input shows validation errors and submission is not processed
-**Covers**: Extension 5a (5a1–5a2) fileciteturn12file0  
+**Covers**: Extension 5a (5a1–5a2)   
 **Preconditions**
 - Submission form is displayed (AT-02).
 
@@ -160,7 +160,7 @@
 ---
 
 ## AT-10 — Issue tracking service unavailable: system logs integration failure and stores submission locally for retry
-**Covers**: Extension 6a (6a1–6a2) fileciteturn12file0  
+**Covers**: Extension 6a (6a1–6a2)   
 **Preconditions**
 - Submitted form is valid.
 - Configure the issue tracking/feedback service to be unavailable.
@@ -172,13 +172,13 @@
 
 **Expected Results**
 - System logs the integration failure.
-- System stores the submission locally or queues it for retry. fileciteturn12file0
-- UI indicates submission was received but processing may be delayed (or equivalent), per use case narrative. fileciteturn12file0
+- System stores the submission locally or queues it for retry. 
+- UI indicates submission was received but processing may be delayed (or equivalent), per use case narrative. 
 
 ---
 
 ## AT-11 — Storage failure: system logs error and informs user of failure
-**Covers**: Extension 7a (7a1–7a2); Failed End Condition fileciteturn12file0  
+**Covers**: Extension 7a (7a1–7a2); Failed End Condition   
 **Preconditions**
 - Submitted form is valid.
 - Issue tracking integration is operational (send can succeed).
@@ -190,14 +190,14 @@
 3. Observe UI and logs.
 
 **Expected Results**
-- System logs the storage error. fileciteturn12file0
-- User is notified that submission may not have been fully recorded / submission failed (per use case). fileciteturn12file0
+- System logs the storage error. 
+- User is notified that submission may not have been fully recorded / submission failed (per use case). 
 - (If applicable) Integration send outcome is still recorded in logs, but local record is not persisted.
 
 ---
 
 ## AT-12 — Clarity and traceability: system captures reports whenever possible; issues are logged; user receives clear status
-**Covers**: Key Behavioral Theme Across All Alternatives fileciteturn12file0  
+**Covers**: Key Behavioral Theme Across All Alternatives   
 **Preconditions**
 - Test harness supports:
   - validation failure (AT-09)
@@ -212,25 +212,25 @@
 4. Execute AT-11 and verify failure is logged and user is informed.
 
 **Expected Results**
-- User feedback and bug reports are captured whenever possible. fileciteturn12file0
-- Validation, integration, and storage issues are logged. fileciteturn12file0
-- Users receive clear feedback on submission status. fileciteturn12file0
-- System reliability and traceability of reports are prioritized across scenarios. fileciteturn12file0
+- User feedback and bug reports are captured whenever possible. 
+- Validation, integration, and storage issues are logged. 
+- Users receive clear feedback on submission status. 
+- System reliability and traceability of reports are prioritized across scenarios. 
 
 ---
 
 ## Traceability Matrix
 | Acceptance Test | UC-19 Flow Covered |
 |---|---|
-| AT-01 | Main Success Scenario (1) fileciteturn12file0 |
-| AT-02 | Main Success Scenario (2) fileciteturn12file0 |
-| AT-03 | Main Success Scenario (3–4) fileciteturn12file0 |
-| AT-04 | Main Success Scenario (5) fileciteturn12file0 |
-| AT-05 | Main Success Scenario (6) fileciteturn12file0 |
-| AT-06 | Main Success Scenario (7); Success End Condition fileciteturn12file0 |
-| AT-07 | Main Success Scenario (8); Success End Condition fileciteturn12file0 |
-| AT-08 | Main Success Scenario (9) fileciteturn12file0 |
-| AT-09 | Extension 5a fileciteturn12file0 |
-| AT-10 | Extension 6a fileciteturn12file0 |
-| AT-11 | Extension 7a; Failed End Condition fileciteturn12file0 |
-| AT-12 | Key Behavioral Theme Across All Alternatives fileciteturn12file0 |
+| AT-01 | Main Success Scenario (1)  |
+| AT-02 | Main Success Scenario (2)  |
+| AT-03 | Main Success Scenario (3–4)  |
+| AT-04 | Main Success Scenario (5)  |
+| AT-05 | Main Success Scenario (6)  |
+| AT-06 | Main Success Scenario (7); Success End Condition  |
+| AT-07 | Main Success Scenario (8); Success End Condition  |
+| AT-08 | Main Success Scenario (9)  |
+| AT-09 | Extension 5a  |
+| AT-10 | Extension 6a  |
+| AT-11 | Extension 7a; Failed End Condition  |
+| AT-12 | Key Behavioral Theme Across All Alternatives  |

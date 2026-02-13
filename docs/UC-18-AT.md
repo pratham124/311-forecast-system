@@ -7,22 +7,22 @@
 ---
 
 ## Assumptions / Test Harness Requirements
-- A test environment where user guide documentation exists and is stored. fileciteturn12file0
+- A test environment where user guide documentation exists and is stored. 
 - A controllable **Documentation Service / Data Storage System** supporting:
-  - successful retrieval of guide content fileciteturn12file0
-  - “documentation unavailable” condition (missing content or service outage) fileciteturn12file0
+  - successful retrieval of guide content 
+  - “documentation unavailable” condition (missing content or service outage) 
   - injected retrieval failures (timeout / unavailable / 5xx)
 - A controllable **Display / Viewer** supporting:
-  - successful rendering of guide content in a readable format fileciteturn12file0
-  - injected rendering failure (viewer/component exception) fileciteturn12file0
+  - successful rendering of guide content in a readable format 
+  - injected rendering failure (viewer/component exception) 
 - Observability:
   - UI states observable (guide visible, navigation works, error message/state)
-  - logs accessible for assertions (successful access, missing docs, rendering failure) fileciteturn12file0
+  - logs accessible for assertions (successful access, missing docs, rendering failure) 
 
 ---
 
 ## AT-01 — User selects the user guide option from the interface
-**Covers**: Main Success Scenario Step 1 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 1   
 **Preconditions**
 - User is on a screen where help/user guide option is available.
 
@@ -36,9 +36,9 @@
 ---
 
 ## AT-02 — System retrieves user guide content successfully
-**Covers**: Main Success Scenario Step 2 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 2   
 **Preconditions**
-- User guide content exists and Documentation Service is operational. fileciteturn12file0
+- User guide content exists and Documentation Service is operational. 
 
 **Steps**
 1. Select the user guide option.
@@ -52,10 +52,10 @@
 ---
 
 ## AT-03 — System displays the guide in a readable format
-**Covers**: Main Success Scenario Step 3; Success End Condition fileciteturn12file0  
+**Covers**: Main Success Scenario Step 3; Success End Condition   
 **Preconditions**
 - Retrieval succeeds (AT-02).
-- Display/viewer is operational. fileciteturn12file0
+- Display/viewer is operational. 
 
 **Steps**
 1. Retrieve the guide (AT-02).
@@ -69,10 +69,10 @@
 ---
 
 ## AT-04 — User can navigate through the guide
-**Covers**: Main Success Scenario Step 4; Success End Condition fileciteturn12file0  
+**Covers**: Main Success Scenario Step 4; Success End Condition   
 **Preconditions**
 - Guide is displayed (AT-03).
-- Guide contains navigable structure (sections/TOC/links) or supports page navigation. fileciteturn12file0
+- Guide contains navigable structure (sections/TOC/links) or supports page navigation. 
 
 **Steps**
 1. Use navigation controls (e.g., table of contents, next/previous, section links).
@@ -87,7 +87,7 @@
 ---
 
 ## AT-05 — Successful access to documentation is logged
-**Covers**: Main Success Scenario Step 5 fileciteturn12file0  
+**Covers**: Main Success Scenario Step 5   
 **Preconditions**
 - Guide was displayed successfully (AT-03).
 
@@ -96,15 +96,15 @@
 2. Retrieve logs/events corresponding to the session.
 
 **Expected Results**
-- System logs successful user guide access. fileciteturn12file0
+- System logs successful user guide access. 
 - Log entry includes at least timestamp and outcome (and user/session identifier if applicable).
 
 ---
 
 ## AT-06 — Documentation unavailable: system logs missing content and shows error message
-**Covers**: Extension 2a (2a1–2a2); Failed End Condition fileciteturn12file0  
+**Covers**: Extension 2a (2a1–2a2); Failed End Condition   
 **Preconditions**
-- Configure documentation retrieval to fail due to missing files or service outage. fileciteturn12file0
+- Configure documentation retrieval to fail due to missing files or service outage. 
 
 **Steps**
 1. Select the user guide option.
@@ -112,17 +112,17 @@
 3. Observe UI and logs.
 
 **Expected Results**
-- System logs missing guide content. fileciteturn12file0
+- System logs missing guide content. 
 - UI displays a clear error message instead of the guide.
 - No misleading empty guide view is shown.
 
 ---
 
 ## AT-07 — Display rendering error: system logs rendering failure and shows error state
-**Covers**: Extension 3a (3a1–3a2); Failed End Condition fileciteturn12file0  
+**Covers**: Extension 3a (3a1–3a2); Failed End Condition   
 **Preconditions**
 - Documentation retrieval succeeds.
-- Force the guide viewer/rendering component to fail. fileciteturn12file0
+- Force the guide viewer/rendering component to fail. 
 
 **Steps**
 1. Select the user guide option and allow retrieval to succeed.
@@ -130,14 +130,14 @@
 3. Observe UI and logs.
 
 **Expected Results**
-- System logs rendering failure. fileciteturn12file0
+- System logs rendering failure. 
 - UI shows an error state and the guide content does not appear.
 - System does not display partially rendered or corrupted content.
 
 ---
 
 ## AT-08 — Clarity over failures: user sees the guide when available, or a clear error message; failures are logged
-**Covers**: Key Behavioral Theme Across All Alternatives fileciteturn12file0  
+**Covers**: Key Behavioral Theme Across All Alternatives   
 **Preconditions**
 - Test harness supports:
   - normal success (AT-02/AT-03/AT-04)
@@ -153,18 +153,18 @@
 **Expected Results**
 - Users either see usable instructional content or a clear error state.
 - Missing documentation and rendering failures are logged for monitoring and troubleshooting.
-- Usability and clarity are prioritized across all outcomes. fileciteturn12file0
+- Usability and clarity are prioritized across all outcomes. 
 
 ---
 
 ## Traceability Matrix
 | Acceptance Test | UC-18 Flow Covered |
 |---|---|
-| AT-01 | Main Success Scenario (1) fileciteturn12file0 |
-| AT-02 | Main Success Scenario (2) fileciteturn12file0 |
-| AT-03 | Main Success Scenario (3); Success End Condition fileciteturn12file0 |
-| AT-04 | Main Success Scenario (4); Success End Condition fileciteturn12file0 |
-| AT-05 | Main Success Scenario (5) fileciteturn12file0 |
-| AT-06 | Extension 2a; Failed End Condition fileciteturn12file0 |
-| AT-07 | Extension 3a; Failed End Condition fileciteturn12file0 |
-| AT-08 | Key Behavioral Theme Across All Alternatives fileciteturn12file0 |
+| AT-01 | Main Success Scenario (1)  |
+| AT-02 | Main Success Scenario (2)  |
+| AT-03 | Main Success Scenario (3); Success End Condition  |
+| AT-04 | Main Success Scenario (4); Success End Condition  |
+| AT-05 | Main Success Scenario (5)  |
+| AT-06 | Extension 2a; Failed End Condition  |
+| AT-07 | Extension 3a; Failed End Condition  |
+| AT-08 | Key Behavioral Theme Across All Alternatives  |

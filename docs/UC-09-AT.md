@@ -215,28 +215,6 @@
 
 ---
 
-## AT-11 — Clarity over partial overlays: system shows valid overlay, no overlay with message, or error (never misleading weather layer)
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - missing weather data (AT-06)
-  - weather service failure (AT-07)
-  - alignment failure (AT-08)
-  - rendering failure (AT-09)
-
-**Steps**
-1. Execute AT-06 and observe UI behavior.
-2. Execute AT-07 and observe UI behavior.
-3. Execute AT-08 and observe UI behavior.
-4. Execute AT-09 and observe UI behavior.
-
-**Expected Results**
-- When overlay cannot be shown, system avoids displaying misleading or misaligned weather overlays.
-- Forecast visualization remains usable in missing-data and retrieval/alignment-failure conditions.
-- Errors/limitations are clearly communicated to the user and logged for monitoring.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-09 Flow Covered |
 |---|---|
@@ -250,4 +228,3 @@
 | AT-08 | Extension 4a; Failed End Condition behavior |
 | AT-09 | Extension 6a |
 | AT-10 | Cross-cutting toggle/refresh correctness |
-| AT-11 | Key Behavioral Theme Across All Alternatives |

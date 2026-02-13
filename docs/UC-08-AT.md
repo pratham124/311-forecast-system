@@ -240,31 +240,6 @@
 
 ---
 
-## AT-11 — Clarity over partial results: system shows valid comparison, valid single-source view, or a clear error (never a misleading comparison)
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - missing historical (AT-05)
-  - missing forecast (AT-06)
-  - alignment failure (AT-08)
-  - rendering failure (AT-09)
-  - retrieval failure (AT-10)
-
-**Steps**
-1. Execute AT-05 scenario and note UI behavior.
-2. Execute AT-06 scenario and note UI behavior.
-3. Execute AT-08 scenario and note UI behavior.
-4. Execute AT-09 scenario and note UI behavior.
-5. Execute AT-10 scenario and note UI behavior.
-
-**Expected Results**
-- For missing-data scenarios (AT-05/AT-06), UI clearly labels that only one dataset is shown.
-- For error scenarios (AT-08/AT-09/AT-10), UI shows a clear error state.
-- System avoids presenting misleading comparisons in all cases.
-- Logs are written for missing/failed conditions for monitoring and investigation.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-08 Flow Covered |
 |---|---|
@@ -278,4 +253,3 @@
 | AT-08 | Extension 6a; Failed End Condition |
 | AT-09 | Extension 8a; Failed End Condition |
 | AT-10 | Failed End Condition (retrieval failure) |
-| AT-11 | Key Behavioral Theme Across All Alternatives |

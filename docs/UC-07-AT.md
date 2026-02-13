@@ -185,27 +185,6 @@
 
 ---
 
-## AT-09 — Clarity over partial results: system shows either valid data, no-data, or error (never a misleading partial)
-**Covers**: Key behavioral theme across alternatives (data integrity & clarity)  
-**Preconditions**
-- Test harness supports injecting failures at different stages:
-  - during retrieval
-  - after retrieval, during aggregation/prep
-  - during rendering
-
-**Steps**
-1. Run a query and inject a retrieval failure (as in AT-06).
-2. Run a query and inject a rendering failure (as in AT-07).
-3. If supported, inject an aggregation/prep failure between retrieval and rendering.
-4. Observe the UI in each case.
-
-**Expected Results**
-- In each failure mode, UI shows a clear **error state** (or no-data where applicable).
-- System does not display partial charts/tables that could be misinterpreted as complete.
-- Logs reflect the correct failure stage and outcome.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-07 Flow Covered |
 |---|---|
@@ -217,4 +196,3 @@
 | AT-06 | Extension 4b; Failed End Condition |
 | AT-07 | Extension 6a; Failed End Condition |
 | AT-08 | Cross-cutting correctness invariant (filters → results) |
-| AT-09 | Cross-cutting integrity/clarity theme (no misleading partials) |
