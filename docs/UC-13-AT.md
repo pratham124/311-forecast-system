@@ -202,29 +202,6 @@
 
 ---
 
-## AT-11 — Clarity over partial updates: only valid, supported configurations are applied; failures are logged; previous settings remain active
-**Covers**: Key Behavioral Theme Across All Alternatives 
-**Preconditions**
-- Test harness supports:
-  - invalid thresholds (AT-08)
-  - unsupported channel (AT-09)
-  - storage failure (AT-10)
-  - successful save (AT-05/AT-06)
-
-**Steps**
-1. Execute AT-08 and verify no save occurs.
-2. Execute AT-09 and verify no save occurs until channel is supported.
-3. Execute AT-10 and verify prior settings remain active after failed save.
-4. Execute AT-05 and verify new settings are applied (AT-07).
-
-**Expected Results**
-- Only valid and supported configurations are applied. 
-- Errors are clearly communicated to the manager. 
-- Failures are logged for monitoring. 
-- Previous configurations remain active on failure to prevent inconsistent alert behavior. 
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-13 Flow Covered |
 |---|---|
@@ -238,4 +215,3 @@
 | AT-08 | Extension 7a  |
 | AT-09 | Extension 4a  |
 | AT-10 | Extension 8a; Failed End Condition  |
-| AT-11 | Key Behavioral Theme Across All Alternatives  |

@@ -238,28 +238,6 @@
 
 ---
 
-## AT-13 — Clarity over partial storm mode: system applies storm adjustments only when supported; otherwise falls back to standard logic with transparent logging
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - external data outage (AT-09)
-  - false trigger rejection (AT-10)
-  - forecast adjustment failure (AT-11)
-  - notification failure (AT-12)
-
-**Steps**
-1. Execute AT-09 and confirm standard logic fallback.
-2. Execute AT-10 and confirm storm mode not activated.
-3. Execute AT-11 and confirm standard uncertainty is used.
-4. Execute AT-12 and confirm retry marking on delivery failure.
-
-**Expected Results**
-- Storm mode adjustments are applied only when reliable external data and successful processing support them.
-- Failures are logged and do not silently change system behavior.
-- Standard logic remains a safe fallback when storm mode cannot operate fully.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-15 Flow Covered |
 |---|---|
@@ -275,4 +253,3 @@
 | AT-10 | Extension 2a |
 | AT-11 | Extension 4a; Failed End Condition |
 | AT-12 | Extension 8a |
-| AT-13 | Key Behavioral Theme Across All Alternatives |

@@ -235,28 +235,6 @@
 
 ---
 
-## AT-13 — Clarity over partial results: system shows valid performance insights, clearly labeled limitations, or a clear error (never misleading)
-**Covers**: Key Behavioral Theme Across All Alternatives  
-**Preconditions**
-- Test harness supports:
-  - missing forecasts (AT-09)
-  - missing actuals (AT-10)
-  - missing metrics (AT-11)
-  - rendering failure (AT-12)
-
-**Steps**
-1. Execute AT-09 and verify error state with clear messaging.
-2. Execute AT-10 and verify error state with clear messaging.
-3. Execute AT-11 and verify comparisons without metrics are clearly labeled (or error state if not possible).
-4. Execute AT-12 and verify error state on render failure.
-
-**Expected Results**
-- Users either see valid, trustworthy performance information, or a clear limitation/error message.
-- The system avoids presenting incomplete or misleading performance insights.
-- Missing data and failures are consistently logged.
-
----
-
 ## Traceability Matrix
 | Acceptance Test | UC-14 Flow Covered |
 |---|---|
@@ -272,4 +250,3 @@
 | AT-10 | Extension 3a; Failed End Condition |
 | AT-11 | Extension 4a |
 | AT-12 | Extension 7a; Failed End Condition |
-| AT-13 | Key Behavioral Theme Across All Alternatives |
