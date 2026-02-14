@@ -109,6 +109,30 @@
 
 ---
 
+## **UC-13-AT**
+
+- All flows from UC-13 are covered in the acceptance test suite.
+- There is one acceptance test that does not directly correspond to a specific flow in the use case:
+  - **AT-11** should not be kept as it's redundant. It doesn't test anything new, it's just re-running AT-08, AT-09, AT-10, and AT-05. If those individual tests pass, the "key behavioral theme" is already verified.
+
+---
+
+## **UC-14-AT**
+
+- All flows from UC-14 are covered in the acceptance test suite.
+- There is one acceptance test that does not directly correspond to a specific flow in the use case:
+  - **AT-13** should not be kept as it's redundant. It doesn't test anything new, its just re-running AT-09, AT-10, AT-11, and AT-12. If those individual tests pass, the "key behavioral theme" is already verified.
+
+---
+
+## **UC-15-AT**
+
+- All flows from UC-15 are covered in the acceptance test suite.
+- There is one acceptance test that does not directly correspond to a specific flow in the use case:
+  - **AT-13** should not be kept as it's redundant. It doesn't test anything new, its just re-running AT-09, AT-10, AT-11, and AT-12. If those individual tests pass, the "key behavioral theme" is already verified.
+
+---
+
 ## **UC-16-AT**
 
 - All flows from UC-16 are covered in the acceptance test suite.

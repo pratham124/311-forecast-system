@@ -276,6 +276,41 @@ The City Planner, needing the full city-wide forecast for the upcoming budget cy
 
 ---
 
+## **UC-13**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Save and apply thresholds and notification preferences -> Main happy path
+  - Invalid threshold values -> Extension 7a
+  - Unsupported notification channel selected -> Extension 4a
+  - Storage failure -> Extension 8a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+## **UC-14**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - Forecast accuracy metrics and comparions between past predictions and actual outcomes are displayed -> Main happy path
+  - Historical data unavailable -> Extension 2a
+  - Actual demand data unavailable -> Extension 3a
+  - Evaluation metrics missing -> Extension 4a
+  - Visualization rendering error -> Extnesion 7a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
+## **UC-15**
+
+- Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
+- The set of scenarios cover all flows listed in the use case. Below is the mapping from each scenario to the corresponding flow in the use case:
+  - System accounts for weather conditions and major events when calculating forecast uncertainty and generating alerts -> Main happy path
+  - Weather/Event data unavailable -> Extension 1a
+  - Event falsely detected -> Extension 2a
+  - Forecast adjustment failure -> Extension 4a
+  - Notification failure -> Extension 8a
+- There were no scenarios that represented a flow not documented in the use case.
+- The use case and scenarios are complete and there are no needed additions to be made.
+
 ## **UC-16**
 
 - Every narrative is a valid, plausible instantiation of a documented flow from the use case and correctly supports the user story’s goal. 
