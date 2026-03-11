@@ -3,53 +3,35 @@
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. Use it to
-prove constitution compliance before implementation starts.
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-[Summarize the feature, governing use cases, forecast horizon or workflow impact,
-and the planned technical approach.]
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Use Cases**: [UC-XX, UC-YY]
-**Language/Version**: Python [version] backend, TypeScript [version] frontend
-**Primary Dependencies**: FastAPI, PostgreSQL, Pydantic, React, Tailwind CSS,
-[other required libraries]
-**Data Sources**: Edmonton 311 Socrata API, archived yearly Edmonton 311 data
-(if needed), GeoMet climate data, Nager.Date holidays
-**Storage**: PostgreSQL system of record, plus versioned last-known-good
-artifacts if applicable
-**Testing**: [pytest, frontend test runner, contract tests, integration tests]
-**Target Platform**: Web application with backend API and React frontend
-**Project Type**: Full-stack forecasting and dashboard system
-**Performance Goals**: [fill with feature-specific goals]
-**Constraints**: Time-safe evaluation only; thin routes; typed API contracts;
-no silent failure; no partial activation
-**Scale/Scope**: Daily next-7-day category forecasts by default; citywide or
-geographic views only where data quality supports them
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
+
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] `UC-XX.md` and `UC-XX-AT.md` traceability is identified and complete.
-- [ ] Edmonton 311 is the canonical demand source; any history extension uses
-      archived Edmonton 311 datasets only as approved by the constitution.
-- [ ] Required external integrations are isolated in client or ingestion
-      modules; no third-party contract leaks past backend normalization layers.
-- [ ] Backend design preserves thin FastAPI routes, service modules,
-      repositories/data-access modules, dedicated pipeline modules, and core
-      shared modules.
-- [ ] Forecasting design uses chronological splits, prevents leakage, includes a
-      baseline comparison, and emits quantiles required by the feature.
-- [ ] Frontend design uses typed API clients/hooks, modular feature structure,
-      and no direct database or third-party API access.
-- [ ] Authentication, authorization, schema validation, logging, and
-      last-known-good activation behavior are covered where relevant.
-- [ ] Any constitution deviation is recorded in Complexity Tracking with explicit
-      approval path.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
@@ -57,46 +39,60 @@ geographic views only where data quality supports them
 
 ```text
 specs/[###-feature]/
-├── plan.md
-├── research.md
-├── data-model.md
-├── quickstart.md
-├── contracts/
-└── tasks.md
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
+
+tests/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
-├── app/
-│   ├── api/
-│   ├── schemas/
+├── src/
+│   ├── models/
 │   ├── services/
-│   ├── repositories/
-│   ├── clients/
-│   ├── pipelines/
-│   └── core/
+│   └── api/
 └── tests/
-    ├── contract/
-    ├── integration/
-    └── unit/
 
 frontend/
 ├── src/
-│   ├── pages/
 │   ├── components/
-│   ├── features/
-│   ├── api/
-│   ├── hooks/
-│   ├── types/
-│   └── utils/
+│   ├── pages/
+│   └── services/
 └── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Default to the full-stack structure above unless the
-feature is explicitly backend-only or frontend-only. Any deviation must preserve
-the constitutional layering and modular boundaries.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
@@ -104,5 +100,5 @@ the constitutional layering and modular boundaries.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., non-default geography view] | [current need] | [data quality or product reason] |
-| [e.g., temporary dual-write] | [migration need] | [why standard activation flow is insufficient] |
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
