@@ -5,7 +5,7 @@ Below is a report of the clarifications that Codex requested after running the /
 Below is a template of how we should write the clarify report based on how it was done in lab2.
 Copy the question and the recommended option if codex gives you one and write the response + a justification for that. Sometimes codex asks frivolous questions though so ignore any questions that you think have already been answered in the spec.
 
-## Use Case 1 (TEMPLATE)
+## Use Case X (TEMPLATE)
 
 ### Question 1 (TEMPLATE)
 Question 1 (Announcements Ordering)
@@ -36,3 +36,7 @@ This affects UX flow and acceptance checks: how should a guest get to the announ
 | Short | Provide a different short answer (<=5 words) |
 
 Response: Chose option A since this simple design would be easy for users to understand. The annoucement might also be somewhat large so a modal overlay (option C) or doing it inline (option B) probably would not work very well.
+
+## Use Case 1
+
+No critical ambiguities detected worth formal clarification.
