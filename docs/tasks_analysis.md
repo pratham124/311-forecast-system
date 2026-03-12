@@ -13,3 +13,7 @@ The task sequence for UC-02 makes sense and there are no blocking dependencies i
 
 ## Use Case 1
 The task sequence for UC-01 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement ingestion core (pull + validate + store) -> implement current-dataset activation + queries -> implement failure handling + monitoring record -> implement no-new-records path -> implement acceptance tests. However, should add some dependency notes T041 depends on T030 and T046 depends on T026. 
+
+## Use Case 2
+
+The task sequence for UC-02 has blocking dependencies. The main blocker is that validation-run status route implementation is delayed until US3, but US1 and US2 already depend on it. The general sequence of the tasks are: Setup backend -> implement shared validation/dedup foundation -> implement clean-dataset approval flow (validate + deduplicate + store) -> implement current approved-dataset status/query surfaces -> implement rejection handling for invalid datasets -> implement review-needed / failed-run handling + operator visibility -> implement acceptance tests.
