@@ -1,0 +1,188 @@
+openapi: 3.1.0
+info:
+  title: UC-02 Validation and Deduplication Observability Contract
+  version: 0.1.0
+  description: >
+    Minimal backend contract required to observe and test the UC-02 validation
+    and deduplication workflow for ingested Edmonton 311 datasets.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/validation-runs/{validationRunId}:
+    get:
+      summary: Retrieve the status and outcome of a validation and deduplication run
+      operationId: getValidationRun
+      parameters:
+        - in: path
+          name: validationRunId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Validation run found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationRunStatus'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Validation run not found
+        '422':
+          description: Invalid path or query parameter
+  /api/v1/datasets/approved/current:
+    get:
+      summary: Retrieve the dataset version currently approved for downstream use
+      operationId: getApprovedDataset
+      responses:
+        '200':
+          description: Approved dataset marker found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovedDataset'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No approved dataset found
+  /api/v1/datasets/review-needed:
+    get:
+      summary: List datasets blocked with a review-needed outcome
+      operationId: listReviewNeededDatasets
+      parameters:
+        - in: query
+          name: validationRunId
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Review-needed records
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReviewNeededRecord'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid query parameter
+components:
+  schemas:
+    ValidationRunStatus:
+      type: object
+      required:
+        - validationRunId
+        - ingestionRunId
+        - sourceDatasetVersionId
+        - status
+        - startedAt
+      properties:
+        validationRunId:
+          type: string
+        ingestionRunId:
+          type: string
+        sourceDatasetVersionId:
+          type: string
+        approvedDatasetVersionId:
+          type: string
+        status:
+          type: string
+          description: >
+            Backend enum normalization of the requirements-level outcomes
+            `approved`, `rejected`, `failed`, and `review-needed`. The API
+            uses `review_needed` as the normalized form of `review-needed`.
+          enum: [running, approved, rejected, failed, review_needed]
+        failureStage:
+          type: string
+          enum: [schema_validation, duplicate_analysis, storage]
+        visibilityState:
+          type: string
+          description: >
+            Distinguishes whether the candidate dataset is still processing,
+            blocked from approval, or is the active approved dataset.
+          enum: [in_progress, blocked, approved_active]
+        duplicatePercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        reviewReason:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads.
+    ApprovedDataset:
+      type: object
+      required:
+        - datasetVersionId
+        - sourceDatasetVersionId
+        - approvedAt
+        - approvedByValidationRunId
+        - cleanedRecordCount
+      properties:
+        datasetVersionId:
+          type: string
+        sourceDatasetVersionId:
+          type: string
+        approvedAt:
+          type: string
+          format: date-time
+        approvedByValidationRunId:
+          type: string
+        cleanedRecordCount:
+          type: integer
+          minimum: 0
+        duplicateGroupCount:
+          type: integer
+          minimum: 0
+        summary:
+          type: string
+          description: Operationally necessary summary of approval state.
+    ReviewNeededRecord:
+      type: object
+      required:
+        - reviewRecordId
+        - validationRunId
+        - duplicatePercentage
+        - thresholdPercentage
+        - recordedAt
+        - reason
+      properties:
+        reviewRecordId:
+          type: string
+        validationRunId:
+          type: string
+        duplicatePercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        thresholdPercentage:
+          type: number
+          minimum: 0
+          maximum: 100
+        recordedAt:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads.

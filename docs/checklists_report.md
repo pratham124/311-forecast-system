@@ -40,3 +40,16 @@ security-data.md:
 - [ ] CHK031 Do any requirements conflict between minimizing persisted invalid data and preserving enough failed-run evidence for monitoring and diagnosis? [Conflict, Spec §FR-007, Spec §FR-010, Spec §FR-011, Spec §Edge Cases]
 
 These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 2
+Almost all checklist items were complete and validated in UC-02; I prompted Codex to generate the API, data, security, performance checklists as one file. The following items were not satisfied:
+
+- [ ] CHK006 Is "non-conflicting values" defined clearly enough to determine when duplicate consolidation is allowed versus blocked? [Ambiguity, Spec §FR-005a]
+- [ ] CHK007 Is the distinction between "rejected," "failed," and "review-needed" outcomes defined with clear decision boundaries? [Clarity, Spec §FR-003, Spec §FR-009, Spec §FR-014]
+- [ ] CHK009 Do the duplicate-threshold requirements align consistently between the general threshold statement and the percentage-based clarification? [Consistency, Spec §FR-010, Spec §FR-011]
+- [ ] CHK010 Are status terms used consistently across the spec, plan, data model, and contract (`approved`, `rejected`, `failed`, `review_needed`)? [Consistency, Spec §FR-009, plan.md, data-model.md, contracts/validation-api.yaml]
+- [ ] CHK011 Are approval-marker requirements consistent between the spec and the reused UC-01 data lineage described in the plan and data model? [Consistency, Spec §FR-006, Spec §FR-008, data-model.md]
+- [ ] CHK021 Are API contract quality requirements defined for missing-resource, unauthorized, and invalid-query scenarios on operational status surfaces? [API, Gap]
+- [ ] CHK024 Are externally configured validation rules, duplicate-identification rules, and threshold assumptions defined with enough precision to know what must exist before UC-02 can work? [Assumption, Spec §Assumptions]
+
+These are necessary, so I prompted to add this to the specification and plan.

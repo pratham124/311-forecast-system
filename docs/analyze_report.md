@@ -43,3 +43,27 @@ current” or “never switch.” That is mild scope-language drift. | Normalize
 the executable task path. |
 
 For this analysis, there were inconsistencies present. For C1, I prompted Codex again to ensure authentication was added to the spec/plan/tasks. For G1, I prompted Codex to add tasks for scheduler scheduler setup, configured job registration, and scheduler-driven invocation of the ingestion pipeline. For I1, I prompted Codex to declare US2/US3 as dependent increments and adjust the “independently testable” framing accordingly. For U1, I prompted Codex to add foundational tasks for migration tooling and initial schema creation for all persisted UC-01 entities. For A1, it is fine as it is. For I2, I prompted Codex to update the story language to focus on the backend features. For E1, I prompted Codex to link it to operation onboarding/traceability.
+
+## Use Case 2
+### Specification Analysis Report
+
+  | ID | Category | Severity | Location(s) | Summary | Recommendation |
+  |----|----------|----------|-------------|---------|----------------|
+  | C1 | Constitution Alignment | CRITICAL | constitution.md:19, tasks.md:1 | The constitution requires specs, plans, tasks, and implementation changes to reference governing UC-XX identifiers. tasks.md names the feature but does
+  not explicitly reference UC-02. | Add explicit UC-02 references in the task title, phase headers, or task descriptions. |
+  | G1 | Coverage Gap | HIGH | spec.md:118, tasks.md:57 | SC-003 sets a 15-minute completion target, but no task explicitly implements or validates timing/performance measurement for that outcome. | Add a task for timing
+  instrumentation and/or an integration/assertion task covering the 15-minute requirement. |
+  | G2 | Coverage Gap | HIGH | spec.md:119, tasks.md:125 | SC-004 sets a 2-minute operator visibility target, but tasks cover visibility functionally, not the measurable timing requirement. | Add a task to validate or instrument
+  operator visibility timing against the success criterion. |
+  | I1 | Inconsistency | HIGH | plan.md:53, tasks.md:38 | plan.md project structure does not include backend/app/models/, but tasks.md creates and uses backend/app/models/validation_models.py. | Either add models/ to the plan
+  structure or move the task to a plan-defined location. |
+  | I2 | Inconsistency | HIGH | tasks.md:68, tasks.md:89, tasks.md:114, tasks.md:216 | The implementation strategy says stories can be worked on in parallel, but US1, US2, and US3 all modify backend/app/pipelines/ingestion/
+  validation_pipeline.py, and US1/US3 both modify backend/app/api/routes/validation_status.py. | Mark cross-story file contention explicitly and adjust the parallel strategy or break those tasks into non-conflicting components. |
+  | I3 | Inconsistency | MEDIUM | spec.md:84, spec.md:92, plan.md:19 | The spec still uses “flagged for review” in requirements prose after standardizing the canonical outcome term as review-needed. Plan/tasks use review-needed
+  consistently. | Normalize spec prose to the canonical status term, optionally mentioning “flagged for review” once as plain-language phrasing. |
+  | U1 | Underspecification | MEDIUM | spec.md:104, plan.md:97, tasks.md:57 | The spec requires recording and exposing processing outcomes, but it does not name the processing-run entity that the plan/tasks center on
+  (ValidationRun). | Add a concise spec-level key entity or definition for the processing run to improve traceability. |
+  | A1 | Ambiguity | MEDIUM | spec.md:118 | SC-003 uses “normal operating conditions,” which is not objectively bounded in the spec. | Define the intended operating context or remove the phrase to keep the criterion objectively
+  testable. |
+
+  For this analysis, there were inconsistencies present. For C1, I prompted Codex to reference UC-02 in the tasks. For G1, I prompted Codex to add a task for 15-minute completion target. For G2, I prompted Codex similar to G1 to add task for timing requirement. For I1, I prompted codex that models should be in backend/app/repositories/models.py. For I2, I prompted to codex to break those tasks into non-conflicting components. For I3, I prompted codex to normalize spec prose to the canonical status term, optionally mentioning “flagged for review” once as plain-language phrasing. For U1, I prompted Codex to add a concise spec-level key entity. For A1, I prompted Codex to remove the phrase.
