@@ -39,4 +39,4 @@ Response: Chose option A since this simple design would be easy for users to und
 
 ## Use Case 1
 
-No critical ambiguities detected worth formal clarification.
+After running /speckit.clarify for UC-01, Codex output that there were no ambiguities needed clarifying: "No critical ambiguities detected worth formal clarification."

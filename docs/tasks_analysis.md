@@ -1,6 +1,6 @@
 # Tasks Validation
 
-Below is our validation for each task.md for each use case that was generated via /speckit.tasks. Overall, speckit/Codex did an excellent job generating the tasks for each use case based on the plan and specifications. The main validation being done here is if there are any blocking dependencies within the task sequenece.
+Below is our validation for each task.md for each use case that was generated via /speckit.tasks. Overall, speckit/Codex did an excellent job generating the tasks for each use case based on the plan and specifications. The main validation being done here is if there are any blocking dependencies within the task sequence.
 
 Below is a template of how we should write the tasks validation based on how it was done in lab2.
 Main thing to check here is that there are no blocking dependencies in the task sequence. You should explain the general sequence of the tasks like I did in UC-02
@@ -12,4 +12,4 @@ The task sequence for UC-01 makes sense and there are no blocking dependencies i
 The task sequence for UC-02 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: UI setup -> implement model for user account -> implement view for registration form -> implement controller for submitting the form and completing registration -> implement acceptance test. So we can validate that the tasks for this use case are correct. 
 
 ## Use Case 1
-The task sequence for UC-01 makes sense and there are no blocking dependencies in the implementation of this task. However, should add some depency notes T041 depends on T030 and T046 depends on T026. 
+The task sequence for UC-01 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement ingestion core (pull + validate + store) -> implement current-dataset activation + queries -> implement failure handling + monitoring record -> implement no-new-records path -> implement acceptance tests. However, should add some dependency notes T041 depends on T030 and T046 depends on T026. 

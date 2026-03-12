@@ -11,6 +11,10 @@
 
 - Q: What UC-01 clarifications must be made explicit without changing `docs/UC-01.md` or `docs/UC-01-AT.md`? → A: Define outcome-based dataset creation and activation rules, the last-successful-pull cursor strategy including first-run behavior, the minimum queryable current-dataset fields, candidate versus stored versus current dataset states, the minimum failure-notification record contents and location, and UC-01 scope boundaries in `docs/architecture/assumptions.md`.
 
+### Session 2026-03-12
+
+- Q: Which UC-01 security and privacy clarifications should be reflected in the feature spec without changing acceptance behavior? → A: Make endpoint protection concrete with JWT authentication and explicit Operational Manager versus City Planner permissions, and constrain failure summaries and logs to exclude secrets and raw source payloads while allowing only summaries, counts, error codes, and at most a small redacted example that never includes full rows.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Refresh Current 311 Dataset (Priority: P1)
@@ -79,17 +83,17 @@ As an operational manager, I need the system to recognize when there are no new 
 - **FR-007**: The system MUST reject invalid, incomplete, malformed, or partially processed data from becoming the current dataset.
 - **FR-008**: The system MUST treat a successful source response with no new records as a successful run, create no candidate dataset for activation, create no new stored dataset version, and keep the current dataset unchanged.
 - **FR-009**: The system MUST record the run status for every scheduled ingestion attempt as success or failure.
-- **FR-010**: The system MUST log enough run detail to distinguish success, no-new-records, authentication failure, source timeout or unavailability, validation failure, and storage failure.
-- **FR-011**: The system MUST record a failure notification for monitoring on every failed ingestion run in a queryable monitoring record store, including at minimum the failed run identifier or run timestamp, failure reason category, failed status, recorded-at timestamp, and a human-readable failure summary.
+- **FR-010**: The system MUST log enough run detail to distinguish success, no-new-records, authentication failure, source timeout or unavailability, validation failure, and storage failure, but those logs MUST exclude secrets, credentials, tokens, raw source payloads, and full source records; logs may include only summaries, counts, and error codes, plus at most a small redacted example describing malformed fields or invalid types without including full row contents.
+- **FR-011**: The system MUST record a failure notification for monitoring on every failed ingestion run in a queryable monitoring record store, including at minimum the failed run identifier or run timestamp, failure reason category, failed status, recorded-at timestamp, and a human-readable failure summary; failure summaries MUST exclude secrets, credentials, tokens, raw source payloads, and full source records, and may include only summaries, counts, error codes, and at most a small redacted example describing malformed fields or invalid types without including full row contents.
 - **FR-012**: The system MUST make the current dataset state queryable with at minimum the source identifier, current dataset version identifier, activation timestamp, activating run identifier, and record count.
-- **FR-013**: The system MUST protect backend ingestion trigger and query endpoints with authenticated access and at least basic role-based authorization appropriate for operational users and automated backend processes.
+- **FR-013**: The system MUST protect backend ingestion trigger and query endpoints with JWT-authenticated access. The trigger-run surface MUST be accessible only to Operational Managers; the run-status, current-dataset, and failure-notification query surfaces MUST be accessible to Operational Managers and City Planners; and no separate developer-only or backdoor trigger surface is in scope for UC-01.
 
 ### Assumptions & Dependencies
 
 - Governing contract: [`docs/UC-01.md`](/root/311-forecast-system/docs/UC-01.md) and [`docs/UC-01-AT.md`](/root/311-forecast-system/docs/UC-01-AT.md), with acceptance tests treated as the source of truth for required behavior and edge cases.
 - Required external integration: the canonical Edmonton 311 data source defined by the constitution.
 - Required supporting systems: a scheduling service that can fire the ingestion run, a storage system that can persist dataset versions, and operational monitoring that can persist failure notifications.
-- Detailed default assumptions that were not fixed by the UC text, including cursor semantics, dataset-state terminology, failure-notification contents, and UC-01 scope boundaries, are documented in [`docs/architecture/assumptions.md`](/root/311-forecast-system/docs/architecture/assumptions.md).
+- Detailed default assumptions that were not fixed by the UC text, including cursor semantics, dataset-state terminology, failure-notification contents, security/privacy constraints on logs and monitoring records, and UC-01 scope boundaries, are documented in [`docs/architecture/assumptions.md`](/root/311-forecast-system/docs/architecture/assumptions.md).
 - UC-01 scope is limited to scheduled ingestion, validation, storage, current-dataset activation, and failure monitoring records; it does not add forecasting behavior, dashboard UI behavior, or email alert delivery.
 
 ### Key Entities *(include if feature involves data)*

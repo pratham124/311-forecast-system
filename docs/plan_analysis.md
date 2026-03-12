@@ -11,6 +11,6 @@ The architectural decisions made in plan.md for UC-01 match the intent set forth
 Furthermore, data_model.md contains the model for the Announcement entity. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
 
 ## Use Case 1
-The architectural decisions made in plan.md for UC-01 match the intent set forth in the constitution: FastAPI with PostgreSQL intergration for the backend.
+The architectural decisions made in plan.md for UC-01 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
 
 Furthermore, data_model.md contains the model for the IngestionRun entity. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.

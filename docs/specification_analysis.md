@@ -18,7 +18,7 @@ Overall, the generated spec.md repeats all flows from the use case. The only cha
 Additionally, the functional requirements are congruent to the use case.
 
 ## Use Case 1
-Overall, the generated spec.md repeats all flows from the use case. There were also no calrification required when I ran speckit.calrify command. Each acceptance test and edge case maps to a flow in the use case as follows:
+Overall, the generated spec.md repeats all flows from the use case. There were also no clarification required when I ran speckit.clarify command. Each acceptance test and edge case maps to a flow in the use case as follows:
 
 1. Acceptance Scenario 1 (Scheduled trigger runs ingestion successfully and activates new dataset) -> Main Success Scenario Steps 1–8
 
