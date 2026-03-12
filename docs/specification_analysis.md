@@ -44,3 +44,19 @@ Overall, the generated spec.md repeats all flows from the use case. There were a
 7. Acceptance Scenario 7 (Resolvable duplicates are handled according to policy) -> Main Success Scenario Step 5
 
 Additionally, the functional requirements are congruent to the use case. However, FR-10 is listed twice so I prompted codex to address this issue.
+
+## Use Case 3
+
+Overall, the generated spec.md repeats all flows from the use case. There were also no clarification required when I ran speckit.clarify command. Each acceptance test and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario 1 (on-demand request generates a new current daily forecast) -> Main Success Scenario Steps 1–9
+2. Acceptance Scenario 2 (forecast includes geography when data supports it) -> Main Success Scenario Step 6
+3. Acceptance Scenario 3 (stored forecast becomes current) -> Main Success Scenario Steps 7–8
+4. Acceptance Scenario 4 (existing current forecast is served without rerunning) -> Extension 1a
+5. Acceptance Scenario 5 (missing required data causes failure and preserves prior forecast) -> Extension 2a
+6. Acceptance Scenario 6 (category-only forecast when geography is incomplete) -> Extension 6a
+7. Acceptance Scenario 7 (storage failure prevents activation and preserves prior forecast) -> Extension 7a
+
+Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 4

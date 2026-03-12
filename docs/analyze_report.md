@@ -67,3 +67,28 @@ For this analysis, there were inconsistencies present. For C1, I prompted Codex 
   testable. |
 
   For this analysis, there were inconsistencies present. For C1, I prompted Codex to reference UC-02 in the tasks. For G1, I prompted Codex to add a task for 15-minute completion target. For G2, I prompted Codex similar to G1 to add task for timing requirement. For I1, I prompted codex that models should be in backend/app/repositories/models.py. For I2, I prompted to codex to break those tasks into non-conflicting components. For I3, I prompted codex to normalize spec prose to the canonical status term, optionally mentioning “flagged for review” once as plain-language phrasing. For U1, I prompted Codex to add a concise spec-level key entity. For A1, I prompted Codex to remove the phrase.
+
+## Use Case 3
+### Specification Analysis Report
+
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | constitution.md:96, spec.md:74 | The spec does not explicitly identify the constitution-mandated required data sources, external integrations, or uncertainty outputs. plan.md adds
+Edmonton 311 lineage, MSC GeoMet, Nager.Date, baseline, and P10/P50/P90, but spec.md does not. | Amend spec.md to name the governing UC-03 data sources/integrations and uncertainty outputs explicitly so the plan is not carrying
+requirements the spec omits. |
+| E1 | Coverage Gap | HIGH | spec.md:80, tasks.md:92 | FR-003 requires a forecast-run status surface, but there is no explicit task to implement GET /api/v1/forecast-runs/{forecastRunId} end-to-end. T030 only mentions response
+shaping for reused-current outcomes. | Add a task for full run-status endpoint implementation, including status lookup, 404/422 handling, and normal success responses. |
+| E2 | Coverage Gap | MEDIUM | spec.md:133, plan.md:18, tasks.md:128 | The measurable latency targets in SC-001 and SC-003 appear only as prose. No task explicitly adds timing assertions, instrumentation, or acceptance checks
+for the 2-minute and 30-second thresholds. | Add explicit performance-verification tasks or acceptance assertions tied to the published thresholds. |
+| I1 | Inconsistency | MEDIUM | plan.md:53, tasks.md:40 | plan.md’s source tree omits backend/app/models/, but T005 creates backend/app/models/forecast.py. | Either add models/ to the planned backend structure or move model
+definitions to the planned location. |
+| A1 | Ambiguity | MEDIUM | spec.md:89, spec.md:100, plan.md:143 | forecast-processing failure and cannot complete successfully are broad and underspecified in the spec, while the plan/tasks split failures into missing input,
+enrichment, model, and storage categories. | Align spec.md with the failure taxonomy actually planned, or narrow plan/tasks to the spec’s published categories. |
+| D1 | Duplication | LOW | spec.md:43, spec.md:66, spec.md:87 | Current-forecast reuse is stated in User Story 2, the edge cases, and FR-010 with near-identical behavior. | Keep one canonical wording for reuse behavior and let
+the other sections reference it more tersely. |
+| I2 | Inconsistency | LOW | spec.md:1, spec.md:16, plan.md:8 | Terminology drifts between “daily forecast”, “1-day demand forecast”, and “24-hour hourly operational forecast”. The intent is inferable, but the naming is not
+perfectly consistent. | Standardize on one product name across all three artifacts, then use “24-hour hourly” as the clarifying subtitle. |
+| U1 | Underspecification | LOW | tasks.md:134 | T042 records verification results back into tasks.md, which makes the task list double as an execution log. That behavior is not specified in spec.md or plan.md. | Record
+verification results in a dedicated artifact or leave tasks.md as a plan-only checklist. |
+
+For this analysis, there were inconsistencies present. For C1, I prompted Codex to amend spec.md to name the governing UC-03 data sources/integrations and uncertainty outputs explicitly so the plan is not carrying requirements the spec omits. For E1, I prompted Codex to add a task for full run-status endpoint implementation, including status lookup, 404/422 handling, and normal success responses. For E2, I prompted Codex to add explicit performance-verification tasks. For I1, I prompted Codex to move model definitions to the planned location repositories/models.py. For A1, I prompted Codex to align spec.md with the failure taxonomy actually planned. For D1, I prompted Codex to keep one canonical wording for reuse behavior and let the other sections reference it more tersely.For I2, it is fine as it is. FOr U1, I prompted codex to leave tasks.md as a plan-only checklist.

@@ -43,36 +43,55 @@ After running /speckit.clarify for UC-01, Codex output that there were no ambigu
 
 ## Use Case 2
 
- Question 1: Review Handling Scope
- What does "flagged for review" actually mean in scope?
+### Question 1
+Question 1: Review Handling Scope
+What does "flagged for review" actually mean in scope?
 
-  |--------|-------------|
-  | A | Manual review only blocks the dataset; approval or reprocessing happens outside this feature. |
-  | B | Manual reviewers can approve a flagged dataset directly within this feature. |
-  | C | Manual reviewers can trigger dataset reprocessing within this feature, but not approve directly. |
-  | D | Manual reviewers can both approve and reprocess within this feature. |
-  | Short | Provide a different short answer (<=5 words). |
+|--------|-------------|
+| A | Manual review only blocks the dataset; approval or reprocessing happens outside this feature. |
+| B | Manual reviewers can approve a flagged dataset directly within this feature. |
+| C | Manual reviewers can trigger dataset reprocessing within this feature, but not approve directly. |
+| D | Manual reviewers can both approve and reprocess within this feature. |
+| Short | Provide a different short answer (<=5 words). |
 
-  Response: Choose option A as it keeps this feature bounded around automated validation and safe blocking behavior, which matches the current spec and reduces downstream implementation and test ambiguity.
+Response: Choose option A as it keeps this feature bounded around automated validation and safe blocking behavior, which matches the current spec and reduces downstream implementation and test ambiguity.
 
-  Question 2: Duplicate Threshold Basis
-  How should the system decide that the duplicate rate is excessive?
+### Question 2
+Question 2: Duplicate Threshold Basis
+How should the system decide that the duplicate rate is excessive?
 
-  |--------|-------------|
-  | A | Use a fixed duplicate count. |
-  | B | Use a percentage of total records. |
-  | C | Use both count and percentage. |
-  | Short | Your own answer in <=5 words. |
+|--------|-------------|
+| A | Use a fixed duplicate count. |
+| B | Use a percentage of total records. |
+| C | Use both count and percentage. |
+| Short | Your own answer in <=5 words. |
 
-  Response: Choose Option B as a percentage-based threshold scales with dataset size and makes acceptance behavior consistent across small and large ingests.
+Response: Choose Option B as a percentage-based threshold scales with dataset size and makes acceptance behavior consistent across small and large ingests.
 
-  Question 3: Duplicate Resolution Output
-  What should the clean dataset contain when duplicates are found?
+### Question 3
+Question 3: Duplicate Resolution Output
+What should the clean dataset contain when duplicates are found?
 
-  |--------|-------------|
-  | A | Keep one existing record from each duplicate group. |
-  | B | Create one cleaned record per duplicate group, allowing non-conflicting field consolidation. |
-  | C | Remove the whole duplicate group and require review. |
-  | Short | Your own answer in <=5 words. |
+|--------|-------------|
+| A | Keep one existing record from each duplicate group. |
+| B | Create one cleaned record per duplicate group, allowing non-conflicting field consolidation. |
+| C | Remove the whole duplicate group and require review. |
+| Short | Your own answer in <=5 words. |
 
-  Response: Choose Option B since using a single cleaned record per duplicate group keeps downstream datasets predictable and aligns with the current approval model of one clean dataset version.
+Response: Choose Option B since using a single cleaned record per duplicate group keeps downstream datasets predictable and aligns with the current approval model of one clean dataset version.
+
+## Use Case 3
+
+### Question 1
+Question 1: Time Granularity
+What time granularity should the 1-day forecast use?
+
+|--------|-------------|
+| A | Forecast demand in hourly buckets for the next 24 hours |
+| B | Forecast one total demand value for the full next 24-hour window |
+| C | Forecast in larger fixed buckets such as 4-hour or shift-level periods |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option A as hourly buckets across the next 24 hours are the strongest default for staffing and dispatch planning because they preserve within-day demand patterns without expanding scope beyond the stated 1-day forecast.
+
+## Use Case 4
