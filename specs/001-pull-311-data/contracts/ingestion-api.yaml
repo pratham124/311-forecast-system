@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: UC-01 Ingestion Observability Contract
+  version: 0.1.0
+  description: >
+    Minimal backend contract required to observe and test the UC-01 scheduled
+    Edmonton 311 ingestion workflow. This contract is intended for scheduler
+    test harnesses, backend observability, and acceptance verification.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/ingestion-runs/311/trigger:
+    post:
+      summary: Trigger the UC-01 ingestion flow through the scheduler-equivalent path
+      description: >
+        Available for test and controlled operational contexts. It must execute
+        the same orchestration path used by the scheduled trigger.
+      operationId: triggerEdmonton311Ingestion
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                triggerType:
+                  type: string
+                  enum: [test_trigger]
+      responses:
+        '202':
+          description: Run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionRunAccepted'
+  /api/v1/ingestion-runs/{runId}:
+    get:
+      summary: Retrieve the status and outcome of an ingestion run
+      operationId: getIngestionRun
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionRunStatus'
+        '404':
+          description: Run not found
+  /api/v1/datasets/current:
+    get:
+      summary: Retrieve the currently active dataset version for the Edmonton 311 source
+      operationId: getCurrentDataset
+      responses:
+        '200':
+          description: Current dataset marker found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentDataset'
+  /api/v1/monitoring/failure-notifications:
+    get:
+      summary: List failure notifications for failed ingestion runs
+      operationId: listFailureNotifications
+      parameters:
+        - in: query
+          name: runId
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Failure notification records
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FailureNotification'
+components:
+  schemas:
+    IngestionRunAccepted:
+      type: object
+      required: [runId, status]
+      properties:
+        runId:
+          type: string
+        status:
+          type: string
+          enum: [running]
+    IngestionRunStatus:
+      type: object
+      required:
+        - runId
+        - status
+        - resultType
+        - startedAt
+        - cursorAdvanced
+      properties:
+        runId:
+          type: string
+        status:
+          type: string
+          enum: [running, success, failed]
+        resultType:
+          type: string
+          enum:
+            - new_data
+            - no_new_records
+            - auth_failure
+            - source_unavailable
+            - validation_failure
+            - storage_failure
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        cursorUsed:
+          type: string
+        cursorAdvanced:
+          type: boolean
+        candidateDatasetId:
+          type: string
+        datasetVersionId:
+          type: string
+        recordsReceived:
+          type: integer
+          minimum: 0
+        failureReason:
+          type: string
+    CurrentDataset:
+      type: object
+      required:
+        - sourceName
+        - datasetVersionId
+        - updatedAt
+        - updatedByRunId
+        - recordCount
+      properties:
+        sourceName:
+          type: string
+          enum: [edmonton_311]
+        datasetVersionId:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByRunId:
+          type: string
+        recordCount:
+          type: integer
+          minimum: 0
+    FailureNotification:
+      type: object
+      required:
+        - notificationId
+        - runId
+        - failureCategory
+        - runStatus
+        - recordedAt
+        - message
+      properties:
+        notificationId:
+          type: string
+        runId:
+          type: string
+        failureCategory:
+          type: string
+          enum:
+            - auth_failure
+            - source_unavailable
+            - validation_failure
+            - storage_failure
+        runStatus:
+          type: string
+          enum: [failed]
+        recordedAt:
+          type: string
+          format: date-time
+        message:
+          type: string

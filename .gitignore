@@ -1,0 +1,12 @@
+log/
+.personality_migration
+auth.json
+config.toml
+models_cache.json
+*.sqlite*
+version.json
+skills/
+tmp/
+shell_snapshots/
+history.jsonl
+sessions/
