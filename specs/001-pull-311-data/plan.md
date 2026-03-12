@@ -17,7 +17,7 @@ Implement the UC-01 backend-only scheduled ingestion flow for the canonical Edmo
 **Project Type**: backend web service with scheduled ingestion pipeline  
 **Performance Goals**: Complete each scheduled pull in one unattended run, return run status and current-dataset query results immediately after run completion, and leave enough durable evidence for acceptance assertions after success, no-new-records success, and each failure category  
 **Constraints**: Use the canonical Edmonton 311 Socrata source, keep business logic out of FastAPI routes, load Edmonton 311 credentials from environment or secret-backed configuration only, never log or persist secrets, persist the last-successful-pull cursor only after a successful validated store, create no new stored dataset version for no-new-records or failed runs, never partially activate data, persist failed-run evidence only as summaries and metadata rather than raw source payloads, and keep the feature limited to backend ingestion and observability without forecasting, dashboard UI, or email delivery work  
-**Scale/Scope**: One Edmonton 311 ingestion workflow, one current dataset marker, one cursor stream keyed to the source, versioned dataset storage for successful runs with new records, authenticated backend trigger/query surfaces for operational roles and internal services, and acceptance coverage for the eight UC-01 scenarios
+**Scale/Scope**: One Edmonton 311 ingestion workflow, one current dataset marker, one cursor stream keyed to the source, versioned dataset storage for successful runs with new records, authenticated backend trigger/query surfaces for Operational Managers and City Planners, and acceptance coverage for the eight UC-01 scenarios
 
 ## Constitution Check
 
@@ -119,7 +119,7 @@ frontend/
    - Protect all ingestion trigger and query surfaces with JWT-authenticated backend access and reject unauthenticated requests before business logic runs.
    - Restrict the trigger-run surface to the `Operational Manager` role only.
    - Allow the run-status, current-dataset, and failure-notification query surfaces to `Operational Manager` and `City Planner` roles.
-   - Support automated internal services through the same JWT-protected access model and do not introduce developer-only or backdoor endpoints outside the role model.
+   - Keep access limited to the `Operational Manager` and `City Planner` roles defined by UC-01 and do not introduce developer-only or backdoor endpoints outside that role model.
 
 4. **No-new-records success path**
    - On a successful source response with no records newer than the stored cursor, mark the run `success` with `result_type = no_new_records`.
@@ -146,7 +146,7 @@ frontend/
    - Expose a backend read surface that returns at minimum the source identifier, current dataset version identifier, activation timestamp, activating run identifier, and record count.
    - Ensure this surface resolves against the current dataset marker and never returns candidate-only data.
    - Keep this surface backend-only and acceptance-oriented; no dashboard UI work is included in UC-01.
-   - Keep the surface available to both operational humans and automated internal processes through the same JWT-protected access model.
+   - Keep the surface available only through the JWT-protected `Operational Manager` and `City Planner` access model defined for UC-01.
 
 9. **Failure notification persistence**
    - Persist a `FailureNotificationRecord` for every failed run in a queryable monitoring record store.

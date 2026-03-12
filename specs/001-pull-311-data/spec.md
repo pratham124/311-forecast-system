@@ -95,6 +95,7 @@ As an operational manager, I need the system to recognize when there are no new 
 - Required supporting systems: a scheduling service that can fire the ingestion run, a storage system that can persist dataset versions, and operational monitoring that can persist failure notifications.
 - Detailed default assumptions that were not fixed by the UC text, including cursor semantics, dataset-state terminology, failure-notification contents, security/privacy constraints on logs and monitoring records, and UC-01 scope boundaries, are documented in [`docs/architecture/assumptions.md`](/root/311-forecast-system/docs/architecture/assumptions.md).
 - UC-01 scope is limited to scheduled ingestion, validation, storage, current-dataset activation, and failure monitoring records; it does not add forecasting behavior, dashboard UI behavior, or email alert delivery.
+- UC-01 does not define forecast horizon or uncertainty outputs; those behaviors are deferred to later forecasting use cases and are out of scope for this ingestion-only feature.
 
 ### Key Entities *(include if feature involves data)*
 
