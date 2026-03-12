@@ -42,7 +42,7 @@ security-data.md:
 These are necessary, so I prompted to add this to the specification and plan.
 
 ## Use Case 2
-Almost all checklist items were complete and validated in UC-02. The following items were not satisfied:
+Almost all checklist items were complete and validated in UC-02; I prompted Codex to generate the API, data, security, performance checklists as one file. The following items were not satisfied:
 
 - [ ] CHK006 Is "non-conflicting values" defined clearly enough to determine when duplicate consolidation is allowed versus blocked? [Ambiguity, Spec §FR-005a]
 - [ ] CHK007 Is the distinction between "rejected," "failed," and "review-needed" outcomes defined with clear decision boundaries? [Clarity, Spec §FR-003, Spec §FR-009, Spec §FR-014]
