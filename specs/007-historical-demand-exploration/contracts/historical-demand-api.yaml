@@ -1,0 +1,158 @@
+openapi: 3.1.0
+info:
+  title: UC-07 Historical Demand Exploration Contract
+  version: 0.1.0
+  description: >
+    Typed backend contract for UC-07 historical demand exploration that supports
+    filtered retrieval, high-volume warnings, and explicit no-data or error outcomes.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/historical-demand/context:
+    get:
+      summary: Retrieve available filter context for UC-07 historical demand exploration
+      operationId: getHistoricalDemandContext
+      responses:
+        '200':
+          description: Available filter metadata returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalDemandContext'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /api/v1/historical-demand/queries:
+    post:
+      summary: Submit a UC-07 historical demand analysis request
+      operationId: createHistoricalDemandQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoricalDemandQueryRequest'
+      responses:
+        '200':
+          description: Historical demand analysis completed with a terminal outcome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalDemandResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+components:
+  schemas:
+    HistoricalDemandContext:
+      type: object
+      required: [serviceCategories, supportedGeographyLevels]
+      properties:
+        serviceCategories:
+          type: array
+          items:
+            type: string
+        supportedGeographyLevels:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    HistoricalDemandQueryRequest:
+      type: object
+      required: [timeRangeStart, timeRangeEnd]
+      properties:
+        serviceCategory:
+          type: string
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        geographyLevel:
+          type: string
+        geographyValue:
+          type: string
+        proceedAfterWarning:
+          type: boolean
+          default: false
+    HistoricalDemandResponse:
+      type: object
+      required:
+        - analysisRequestId
+        - filters
+        - outcomeStatus
+      properties:
+        analysisRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedFilters'
+        warning:
+          $ref: '#/components/schemas/HighVolumeWarning'
+        aggregationGranularity:
+          type: string
+          enum: [daily, weekly, monthly]
+        resultMode:
+          type: string
+          enum: [chart, table, chart_and_table]
+        summaryPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoricalDemandSummaryPoint'
+        outcomeStatus:
+          type: string
+          enum: [success, no_data, retrieval_failed, render_failed]
+        message:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    SelectedFilters:
+      type: object
+      required: [timeRangeStart, timeRangeEnd]
+      properties:
+        serviceCategory:
+          type: string
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        geographyLevel:
+          type: string
+        geographyValue:
+          type: string
+    HighVolumeWarning:
+      type: object
+      required: [shown, acknowledged]
+      properties:
+        shown:
+          type: boolean
+        acknowledged:
+          type: boolean
+        message:
+          type: string
+    HistoricalDemandSummaryPoint:
+      type: object
+      required: [bucketStart, bucketEnd, serviceCategory, demandCount]
+      properties:
+        bucketStart:
+          type: string
+          format: date-time
+        bucketEnd:
+          type: string
+          format: date-time
+        serviceCategory:
+          type: string
+        geographyKey:
+          type: string
+        demandCount:
+          type: integer
+          minimum: 0

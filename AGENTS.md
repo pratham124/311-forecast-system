@@ -19,6 +19,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-11
 - PostgreSQL for reused UC-01 through UC-04 lineage plus visualization load records, fallback visualization snapshots, and migration-managed schema history (005-uc-05-visualize)
 - Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, pandas-compatible evaluation utilities, LightGBM-produced forecast lineage from UC-03 and UC-04, and dedicated baseline-evaluation service modules (006-evaluate-forecast-baselines)
 - PostgreSQL for reused UC-01 through UC-04 lineage plus evaluation runs, retained evaluation results, segmented metric records, current evaluation markers, and migration-managed schema history (006-evaluate-forecast-baselines)
+- Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and a reusable historical-data visualization layer for charts and tables (007-historical-demand-exploration)
+- PostgreSQL for reused UC-01 and UC-02 lineage plus historical analysis outcome records, saved filter context, and migration-managed schema history (007-historical-demand-exploration)
 
 - Python 3.11 + FastAPI, Pydantic, SQLAlchemy or SQLModel-compatible PostgreSQL access layer, HTTP client for Socrata ingestion, APScheduler-compatible scheduling, structured logging (001-pull-311-data)
 
@@ -39,9 +41,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11: Follow standard conventions
 
 ## Recent Changes
+- 007-historical-demand-exploration: Added Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and a reusable historical-data visualization layer for charts and tables
 - 006-evaluate-forecast-baselines: Added Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, pandas-compatible evaluation utilities, LightGBM-produced forecast lineage from UC-03 and UC-04, and dedicated baseline-evaluation service modules
 - 005-uc-05-visualize: Added Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and a reusable chart-rendering layer for forecast curves and bands
-- 004-weekly-demand-forecast: Added Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, pandas-compatible feature preparation utilities, LightGBM, dedicated Government of Canada MSC GeoMet client or ingestion modules, dedicated Nager.Date Canada API client or ingestion modules
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -150,4 +150,25 @@ whether the engine outperformed baselines, but tasks only guarantee metric expos
 comparative summary or decision aid. | Either add a task/contract field for comparative summary, or relax SC-
 006 to match the current design. |
 
-In this analysis, some critical issues were brought up. C1 addresses a constitution violation related to forecast data sources. The recommended actions make sense here so we prompted Codex to perform the stated fixes. D1 notes a duplicate FR in our spec, so we got Codex to remove this as well. I1 and E1 also bring up valid consistencies, so we performed the recommended fixes here as well. 
+In this analysis, some critical issues were brought up. C1 addresses a constitution violation related to forecast data sources. The recommended actions make sense here so we prompted Codex to perform the stated fixes. D1 notes a duplicate FR in our spec, so we got Codex to remove this as well. I1 and E1 also bring up valid inconsistencies and coverage gaps, so we performed the recommended fixes here as well. 
+
+## Use Case 7
+### Specification Analysis Report
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | spec.md:8, plan.md:22, tasks.md:134 | UC-07 artifacts trace to
+docs/UC-07.md, but not to the paired acceptance contract docs/UC-07-AT.md, which exists and is required by the
+constitution. | Add explicit UC-07-AT.md references in the spec, plan, and acceptance-alignment task text. |
+| I1 | Inconsistency | HIGH | spec.md:77, plan.md:103, tasks.md:45 | Authenticated access is part of the plan
+and tasks, but the spec never states that historical-demand views or queries require authenticated or
+authorized access. | Add an explicit access-control requirement and, if desired, an acceptance scenario or
+edge case for unauthorized access. |
+| A1 | Ambiguity | MEDIUM | spec.md:49, spec.md:88, tasks.md:88 | The warning flow says the planner may
+“proceed or revise,” but the decline/revise path is not defined. Tasks only cover acknowledgement and
+execution. | Define what happens when the planner declines the warning, then add matching frontend/backend
+tasks if needed. |
+| I2 | Inconsistency | MEDIUM | spec.md:11, plan.md:8, tasks.md:44 | The plan and tasks explicitly depend on
+UC-02 approved cleaned-dataset lineage, but the spec only says “approved historical 311 demand data already
+stored.” | Make the UC-02 lineage dependency explicit in the spec’s governing dependencies or assumptions. |
+
+In this analysis, C1 presents a critical constitution violation that we fixed via prompting. There are also two inconsistencies I1 and I2 related to authentication and approved data storage between our use case and spec/plan. We prompted Codex to update the spec/plan to fix these inconsistencies. For A1, this is a valid abmiguity when the planner decides to ignore the warning. This should be explicitly defined, so we prompted to fix this as well.
