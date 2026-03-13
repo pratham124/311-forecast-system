@@ -158,3 +158,18 @@ Overall, the generated spec.md mostly repeats the flows from the use case. Most 
 7. Acceptance Scenario 7 (delivery failure is recorded and marked for retry/manual review) -> Extension 5a
 
 Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 11
+
+Overall, the generated spec.md repeats the flows from the use case. The acceptance tests and specification map cleanly to UC-11 as follows:
+
+1. AT-01 (incoming demand is monitored and potential surge events are evaluated) -> Main Success Scenario Steps 1-2
+2. AT-02 (surge condition is confirmed before alert creation) -> Main Success Scenario Step 3
+3. AT-03 (confirmed surge creates a notification event with required details) -> Main Success Scenario Step 4
+4. AT-04 (notification is delivered to the operational manager) -> Main Success Scenario Step 5 and Success End Condition
+5. AT-05 (successful surge delivery is logged) -> Main Success Scenario Step 6 and Success End Condition
+6. AT-06 (surge detection module error is logged and no notification is sent) -> Extension 2a
+7. AT-07 (false positive is filtered and no notification is sent) -> Extension 3a
+8. AT-08 (delivery failure is logged and marked for retry or manual review) -> Extension 5a and Failed End Condition
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-007 cover ingestion-triggered evaluation, residual-based candidate detection, dual-threshold confirmation, and the rule that no notification is created before confirmation. FR-008 through FR-011 cover surge event contents, notification delivery, and logging. FR-012 through FR-018 cover detector failures, filtered outcomes, delivery-failure handling, surge-specific persistence, traceability, and optional geography handling. FR-019 through FR-021 cover duplicate suppression and re-arming behavior for repeated surges on the same scope.
