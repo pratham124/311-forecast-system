@@ -71,3 +71,18 @@ Overall, the generated spec.md repeats all flows from the use case. The only cha
 6. Acceptance Scenario 6 (Cannot save forecast) -> Extension 7a
  
 Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 5
+
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario AT-01 (Dashboard displays forecast + uncertainty bands over historical data) -> Main Success Scenario Steps 1–8
+2. Acceptance Scenario AT-02 (Forecast data unavailable shows error or last available visualization) -> Extension 2a
+3. Acceptance Scenario AT-03 (Historical data unavailable shows forecast with uncertainty, no history overlay) -> Extension 3a
+4. Acceptance Scenario AT-04 (Uncertainty metrics missing shows forecast curve without bands) -> Extension 6a
+5. Acceptance Scenario AT-05 (Rendering error shows error state and logs failure) -> Extension 5a
+6. Acceptance Scenario AT-06 (Correct overlay order and transparency: history + forecast + bands all visible) -> Main Success Scenario Steps 5–7
+7. Acceptance Scenario AT-07 (Data alignment is consistent: forecast timestamps line up with displayed time axis) -> Main Success Scenario Step 4
+8. Acceptance Scenario AT-08 (Logging completeness: each dashboard load records outcome category) -> Main Success Scenario Step 8 and Failed End Condition
+
+Additionally, the functional requirements are congruent to the use case.
