@@ -174,3 +174,17 @@ Question 1: How should UC-06 define the evaluation scope across forecast product
 | Short | Provide a different short answer (<=5 words) |
 
 Response: Chose Option C since daily and weekly forecasts represent different horizons, so they should be evaluated separately.
+
+### Use Case 7
+### Question 1
+Question 1: How should UC-07 define the geographic filtering scope for historical demand exploration?
+
+| Option | Description |
+|--------|-------------|
+| A | Citywide only |
+| B | Only stored reliable geography levels |
+| C | Require neighbourhood-level geography |
+| D | Require ward-level geography |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option B as we should support the geography levels that are available and consistent in our data source.

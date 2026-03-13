@@ -102,3 +102,19 @@ Overall, the generated spec.md repeats all flows from the use case. The only cha
 9. Acceptance Scenario 9 (Storage failure) -> Extension 7a
 
 Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 7
+
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario 1 (Open historical demand analysis) -> Main Success Scenario Steps 1-2
+2. Acceptance Scenario 2 (Submit valid filters) -> Main Success Scenario Steps 3-6
+3. Acceptance Scenario 3 (Review filtered historical demand results) -> Main Success Scenario Steps 6-8
+4. Acceptance Scenario 4 (Aggregate selected historical data) -> Main Success Scenario Step 5
+5. Acceptance Scenario 5 (Displayed historical patterns update) -> Main Success Scenario Steps 3-6
+6. Acceptance Scenario 6 (High-volume request warning before retrieval) -> Extension 3a
+7. Acceptance Scenario 7 (No matching historical data shows a clear no-data message) -> Extension 4a
+8. Acceptance Scenario 8 (Historical data retrieval failure) -> Extension 4b
+9. Acceptance Scenario 9 (Visualization rendering failure) -> Extension 6a
+
+Additionally, the functional requirements are congruent to the use case.

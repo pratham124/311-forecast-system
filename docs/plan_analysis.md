@@ -11,17 +11,17 @@ The architectural decisions made in plan.md for UC-01 match the intent set forth
 Furthermore, data_model.md contains the model for the Announcement entity. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
 
 ## Use Case 1
-The architectural decisions made in plan.md for UC-01 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
+The architectural decisions made in plan.md for UC-01 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md contains the model for the IngestionRun entity. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
 
 ## Use Case 2
-The architectural decisions made in plan.md for UC-02 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
+The architectural decisions made in plan.md for UC-02 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md contains the model for the IngestionRun entity aligning with UC-01. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
 
 ## Use Case 3
-The architectural decisions made in plan.md for UC-03 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
+The architectural decisions made in plan.md for UC-03 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md contains the model for the IngestionRun entity aligning with previous use cases. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
 
@@ -39,3 +39,8 @@ Furthermore, data_model.md reuses all shared entities from UC-01 through UC-04 w
 The architectural decisions made in plan.md for UC-06 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md reuses all shared entities from UC-01 through UC-05 without redefining them, and introduces four new UC-06-specific entities for running evaluations of forecasts: EvaluationRun, EvaluationSegment, MetricComparisonValue, CurrentEvaluationMarker. This matches the interface in ./contracts/forecast-visualization-api.yaml and is congruent with the functional requirements in this use case.
+
+## Use Case 7
+The architectural decisions made in plan.md for UC-07 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses all shared entities from UC-01 through UC-05 without redefining them, and introduces four new UC-07-specific entities for grabbing historical demand data: HistoricalDemandAnalysisRequest, HistoricalDemandAnalysisResult, HistoricalDemandSummaryPoint, HistoricalAnalysisOutcomeRecord. This matches the interface in ./contracts/forecast-visualization-api.yaml and is congruent with the functional requirements in this use case.

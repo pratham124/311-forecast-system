@@ -33,3 +33,7 @@ The task sequence for UC-05 makes sense and there are no blocking dependencies i
 ## Use Case 6
 
 The task sequence for UC-06 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement baseline comparison -> implement comparison between forecast and baseline -> implement evaluation API -> implement storage of evaluation. So we can validate that the tasks for this use case are correct.
+
+## Use Case 7
+
+The task sequence for UC-07 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement historical data fetching -> implement filters across category, geography -> implement API for historical data -> implement error/sanity checks. So we can validate that the tasks for this use case are correct.
