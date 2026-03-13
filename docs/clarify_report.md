@@ -211,3 +211,32 @@ Question 2: If some of the selected historical and forecast data cannot be align
   | Short | Provide a different short answer (<=5 words). |
 
 Response: Choose Option A as we should fail the comparison when selected data cannot be aligned to the same category or geographic definitions. That avoids presenting partial matches that could look valid but distort planning decisions.
+
+## Use Case 9
+### Question 1
+Question 1: Should we limit number of weather measure?
+
+|--------|-------------|
+| A | Show all supported weather measures together whenever the overlay is enabled |
+| B | Let the manager choose a single weather measure to display at a time |
+| C | Show a fixed default measure only, with no user choice |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Choose Option B as we should let managers choose one weather measure at a time keeps the overlay readable and reduces ambiguity in the interaction model, acceptance tests, and data presentation.
+
+### Question 2
+Question 2: What should the system do when the manager’s selected geography does not have a valid weather-data match under the alignment rules?
+
+|--------|-------------|
+| A | Use the nearest available weather geography automatically when an exact match is unavailable |
+| B | Aggregate or broaden to a larger covering geography automatically |
+| C | Do not show the overlay unless the selected geography can be matched under approved rules |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Choose Option C as we should only show the overlay when the selected geography can be matched under approved alignment rules is the safest choice because it avoids misleading correlations and keeps acceptance tests unambiguous.
+
+## Use Case 10
+### Question 1
+Question 1:
+
+Response: Choose Option 

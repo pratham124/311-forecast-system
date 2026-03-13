@@ -1,0 +1,280 @@
+openapi: 3.1.0
+info:
+  title: UC-09 Weather Overlay Contract
+  version: 0.1.0
+  description: >
+    Typed backend contract for the optional UC-09 weather overlay on the forecast
+    explorer. The contract supports one selected weather measure at a time,
+    explicit non-visible states, and final render observability while preserving
+    the base forecast explorer.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-explorer/weather-overlay:
+    get:
+      summary: Retrieve the stable weather overlay state for the current forecast explorer selection
+      operationId: getWeatherOverlay
+      parameters:
+        - in: query
+          name: geographyId
+          required: true
+          schema:
+            type: string
+          description: Forecast-explorer geography identifier.
+        - in: query
+          name: timeRangeStart
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: timeRangeEnd
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: weatherMeasure
+          required: false
+          schema:
+            type: string
+            enum: [temperature, snowfall]
+          description: >
+            Required when the overlay is enabled. Omitted when the client is
+            reading the explicit disabled state for the current explorer view.
+      responses:
+        '200':
+          description: Current overlay state assembled successfully, including explicit visible and non-visible states
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherOverlayResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/forecast-explorer/weather-overlay/{overlayRequestId}/render-events:
+    post:
+      summary: Record the final client render outcome for a weather overlay request
+      operationId: recordWeatherOverlayRenderEvent
+      parameters:
+        - in: path
+          name: overlayRequestId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeatherOverlayRenderEvent'
+      responses:
+        '202':
+          description: Render outcome accepted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Overlay request not found
+        '422':
+          description: Invalid request
+components:
+  schemas:
+    WeatherOverlayResponse:
+      type: object
+      description: >
+        Stable overlay read model for the current forecast-explorer selection.
+        `visible` is the only state in which a weather layer is present. All
+        other states are explicit non-visible outcomes and MUST preserve the
+        base forecast explorer without a weather layer. `disabled` is returned
+        by GET as the user-visible off state. `failed-to-render` is returned by
+        GET after a render-event failure has been recorded.
+      required:
+        - overlayRequestId
+        - geographyId
+        - timeRangeStart
+        - timeRangeEnd
+        - overlayStatus
+        - baseForecastPreserved
+        - userVisible
+      properties:
+        overlayRequestId:
+          type: string
+        geographyId:
+          type: string
+        matchedGeographyId:
+          type: string
+          nullable: true
+          description: >
+            Present only when approved geography alignment succeeds for the
+            current selection.
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        weatherMeasure:
+          type: string
+          nullable: true
+          enum: [temperature, snowfall]
+          description: Null only when overlayStatus is disabled.
+        measurementUnit:
+          type: string
+        overlayStatus:
+          type: string
+          description: >
+            Canonical overlay state. `visible` means aligned weather data is
+            present on the explorer. `disabled`, `loading`, `unavailable`,
+            `retrieval-failed`, `misaligned`, `superseded`, and
+            `failed-to-render` are explicit non-visible states.
+          enum:
+            - disabled
+            - loading
+            - visible
+            - unavailable
+            - retrieval-failed
+            - misaligned
+            - superseded
+            - failed-to-render
+        statusMessage:
+          type: string
+        baseForecastPreserved:
+          type: boolean
+          const: true
+        userVisible:
+          type: boolean
+          const: true
+        observationGranularity:
+          type: string
+          enum: [hourly, daily]
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherObservationPoint'
+        source:
+          $ref: '#/components/schemas/WeatherOverlaySource'
+        failureCategory:
+          type: string
+          enum:
+            - weather-missing
+            - retrieval-failed
+            - misaligned
+            - failed-to-render
+            - superseded
+        stateSource:
+          type: string
+          enum: [selection-read-model, overlay-assembly, render-event]
+      allOf:
+        - if:
+            properties:
+              overlayStatus:
+                const: visible
+          then:
+            required: [weatherMeasure, observations, source, stateSource]
+            properties:
+              stateSource:
+                enum: [overlay-assembly, render-event]
+        - if:
+            properties:
+              overlayStatus:
+                const: disabled
+          then:
+            properties:
+              weatherMeasure:
+                type: 'null'
+              stateSource:
+                const: selection-read-model
+        - if:
+            properties:
+              overlayStatus:
+                const: unavailable
+          then:
+            required: [statusMessage, failureCategory]
+            properties:
+              failureCategory:
+                const: weather-missing
+        - if:
+            properties:
+              overlayStatus:
+                const: retrieval-failed
+          then:
+            required: [statusMessage, failureCategory]
+            properties:
+              failureCategory:
+                const: retrieval-failed
+        - if:
+            properties:
+              overlayStatus:
+                const: misaligned
+          then:
+            required: [statusMessage, failureCategory]
+            properties:
+              failureCategory:
+                const: misaligned
+        - if:
+            properties:
+              overlayStatus:
+                const: superseded
+          then:
+            required: [statusMessage, failureCategory]
+            properties:
+              failureCategory:
+                const: superseded
+        - if:
+            properties:
+              overlayStatus:
+                const: failed-to-render
+          then:
+            required: [statusMessage, failureCategory, stateSource]
+            properties:
+              failureCategory:
+                const: failed-to-render
+              stateSource:
+                const: render-event
+    WeatherObservationPoint:
+      type: object
+      required: [timestamp, value]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+    WeatherOverlaySource:
+      type: object
+      description: >
+        Approved weather-source metadata for the overlay selection. A station is
+        populated only when approved geography-alignment rules map the
+        forecast-explorer geography directly to an approved Edmonton-area
+        station selection and the demand-view time buckets.
+      required: [provider, alignmentStatus]
+      properties:
+        provider:
+          type: string
+          enum: [msc_geomet]
+        stationId:
+          type: string
+          description: >
+            Approved Edmonton-area station selected by the geography-alignment
+            rules. Absent when alignment fails or the overlay is disabled.
+        alignmentStatus:
+          type: string
+          enum: [aligned, misaligned, not-applicable]
+    WeatherOverlayRenderEvent:
+      type: object
+      required: [renderStatus, reportedAt]
+      properties:
+        renderStatus:
+          type: string
+          enum: [rendered, failed-to-render]
+        reportedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+          description: Required when renderStatus is failed-to-render.

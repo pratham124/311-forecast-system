@@ -106,3 +106,25 @@ I prompted Codex to combine into one checklist. Majority of checklist items were
 - [] CHK044 Are API-facing response expectations measurable and complete enough that acceptance behavior can be verified without inferring missing rules about terminal states, partial-result semantics, or warning-required semantics? [Measurability, Contract §schemas; Plan §Verify acceptance behavior; Spec §FR-007-FR-014]
 - [] CHK051 Is the non-high-volume performance target defined with clear start and stop timing boundaries, so “within 10 seconds” can be measured objectively for results, partial-result states, and explicit error outcomes? [Clarity, Spec §SC-002; Plan §Performance Goals]
 - [] CHK052 Is the “system-defined large-request threshold” specified clearly enough to support objective validation of when a high-volume warning must be shown before retrieval begins? [Ambiguity, Spec §FR-007; Spec §Assumptions; Spec §SC-003]
+
+These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 9
+
+I prompted Codex to combine all the checklists into one. Majority of checklist items were complete and validated in UC-09; the following item was not satisfied:
+
+- [] CHK005 Does the contract documentation specify all non-visible terminal states needed by the requirements, including whether `disabled` and `render_failed` are intentionally represented outside the `GET` response? [Gap, Spec §FR-008-FR-013, Data Model §OverlayDisplayState, Contract GET /api/v1/forecast-explorer/weather-overlay]
+- [] CHK007 Is "supported geography" defined precisely enough to distinguish accepted matches from rejected geography requests under the approved alignment rules? [Clarity, Spec §User Story 1, Spec §FR-003, Spec §Assumptions]
+- [] CHK008 Is "supported selection" in the 5-second performance target bounded clearly enough to exclude invalid, unavailable, or superseded requests? [Clarity, Spec §SC-001, Plan §Performance Goals]
+- [] CHK011 Are the overlay state definitions consistent between the spec, data model, and API contract, with no missing or conflicting statuses across documents? [Consistency, Spec §FR-007-FR-013, Data Model §OverlayDisplayState, Contract §WeatherOverlayResponse]
+- [] CHK023 Are requirements defined for empty but successful weather-provider responses versus explicit retrieval failures, so reviewers can distinguish missing-data behavior from service-error behavior? [Coverage, Spec §User Story 2, Data Model §WeatherObservationSet]
+- [] CHK027 Are API requirements complete for validation errors, status-code intent, and stable response shapes across success and explicit non-visible states? [Non-Functional, Contract responses, Contract §WeatherOverlayResponse]
+- [] CHK028 Are the assumptions about approved geography-alignment rules and Edmonton-area station selection documented precisely enough to avoid hidden planning decisions? [Assumption, Spec §Assumptions, Plan §Implementation Steps 2-3]
+- [] CHK031 Does the current documentation resolve the duplicate `Overlay Display State` definition in the spec, or is a canonical single definition still needed? [Conflict, Spec §Key Entities]
+- [] CHK032 Is it unambiguous whether the contract should expose a `disabled` state, given that the data model includes it but the `GET` contract omits it? [Ambiguity, Data Model §OverlayDisplayState, Contract §WeatherOverlayResponse]
+
+These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 10
+
+I prompted Codex to combine all the checklists into one. Majority of checklist items were complete and validated in UC-10; the following item was not satisfied:
