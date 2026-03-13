@@ -33,7 +33,7 @@ Additionally, the functional requirements are congruent to the use case.
 
 ## Use Case 2
 
-Overall, the generated spec.md repeats all flows from the use case. There were also no clarification required when I ran speckit.clarify command. Each acceptance test and edge case maps to a flow in the use case as follows:
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
 
 1. Acceptance Scenario 1 (Approve a clean dataset) -> Main Success Scenario Steps 1–9
 2. Acceptance Scenario 2 (Schema validation failure rejects dataset and preserves previous approved dataset) -> Extension 2a
@@ -47,7 +47,7 @@ Additionally, the functional requirements are congruent to the use case. However
 
 ## Use Case 3
 
-Overall, the generated spec.md repeats all flows from the use case. There were also no clarification required when I ran speckit.clarify command. Each acceptance test and edge case maps to a flow in the use case as follows:
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
 
 1. Acceptance Scenario 1 (on-demand request generates a new current daily forecast) -> Main Success Scenario Steps 1–9
 2. Acceptance Scenario 2 (forecast includes geography when data supports it) -> Main Success Scenario Step 6
@@ -60,3 +60,14 @@ Overall, the generated spec.md repeats all flows from the use case. There were a
 Additionally, the functional requirements are congruent to the use case.
 
 ## Use Case 4
+
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario 1 (Generate forecast for 7 days) -> Main Success Scenario Steps 1-3
+2. Acceptance Scenario 2 (Forecast even triggers) -> Main Success Scenario Steps 4-9
+3. Acceptance Scenario 3 (Reuse current forecast) -> Extension 1a
+4. Acceptance Scenario 4 (Required data is missing) -> Extension 2a
+5. Acceptance Scenario 5 (Execution error) -> Extension 4a/6a
+6. Acceptance Scenario 6 (Cannot save forecast) -> Extension 7a
+ 
+Additionally, the functional requirements are congruent to the use case.

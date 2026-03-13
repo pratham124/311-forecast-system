@@ -92,3 +92,30 @@ perfectly consistent. | Standardize on one product name across all three artifac
 verification results in a dedicated artifact or leave tasks.md as a plan-only checklist. |
 
 For this analysis, there were inconsistencies present. For C1, I prompted Codex to amend spec.md to name the governing UC-03 data sources/integrations and uncertainty outputs explicitly so the plan is not carrying requirements the spec omits. For E1, I prompted Codex to add a task for full run-status endpoint implementation, including status lookup, 404/422 handling, and normal success responses. For E2, I prompted Codex to add explicit performance-verification tasks. For I1, I prompted Codex to move model definitions to the planned location repositories/models.py. For A1, I prompted Codex to align spec.md with the failure taxonomy actually planned. For D1, I prompted Codex to keep one canonical wording for reuse behavior and let the other sections reference it more tersely.For I2, it is fine as it is. FOr U1, I prompted codex to leave tasks.md as a plan-only checklist.
+
+## Use Case 4
+### Specification Analysis Report
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | constitution.md:96-98, spec.md:67-110 | Spec does not explicitly
+identify required external integrations/data sources (Socrata, GeoMet, Nager.Date), which is mandated by
+constitution workflow gates. | Add explicit spec requirements/assumptions for canonical data source + required
+external integrations. |
+| C2 | Constitution Alignment | CRITICAL | constitution.md:34-37, plan.md:127-130, tasks.md:68-75 |
+Constitution requires quantiles (P10/P50/P90) and baseline retention; UC-04 artifacts do not specify or task
+these outputs. | Add requirements + plan/task coverage for quantile generation/persistence and baseline
+comparator retention. |
+| C3 | Constitution Alignment | CRITICAL | constitution.md:70-72, spec.md:72, plan.md:17-20 | Constitution
+states forecast regeneration MUST occur daily; UC-04 specifies scheduled weekly generation as primary cadence.
+| Reconcile by either adding daily regeneration requirement for this feature or explicitly amending
+constitution in a separate process. |
+| U1 | Underspecification | HIGH | spec.md:63, tasks.md:139-170 | Concurrency edge case is stated (“multiple
+requests while run in progress”) but no explicit functional requirement or dedicated implementation task
+exists for lock/idempotency behavior. | Add a concrete FR + task(s) for concurrency policy (dedupe, queue,
+reject, or coalesce). |
+| U2 | Underspecification | HIGH | spec.md:106, plan.md:107-110 | Spec only says “Operational Manager is
+authorized”; role boundaries for read endpoints are not explicit in requirements, while plan/tasks assume
+role-specific access. | Add explicit authz FRs for trigger and read operations to keep spec→plan→tasks
+aligned. |
+
+In this analysis, some critical issues were brought up. C1-C3 all address constitution violations related to forecast data sources, quantiles, and the regeneration schedule. The recommended actions make sense here so we prompted Codex to perform the stated fixes. U1 brings up a good point on the idempotency behavior being unspecified, so we prompted to make this explicit in the spec/plan. U2 also shows that we are not explicit in the role boundaries, so we also acted on this.

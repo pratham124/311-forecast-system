@@ -1,0 +1,200 @@
+openapi: 3.1.0
+info:
+  title: UC-04 Weekly Forecast Contract
+  version: 0.1.0
+  description: >
+    Minimal backend contract to trigger, observe, and retrieve the UC-04
+    7-day weekly demand forecast.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-runs/7-day/trigger:
+    post:
+      summary: Trigger UC-04 weekly forecast generation
+      operationId: triggerWeeklyForecast
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                triggerType:
+                  type: string
+                  enum: [on_demand]
+      responses:
+        '202':
+          description: Forecast run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyForecastRunAccepted'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/forecast-runs/{weeklyForecastRunId}:
+    get:
+      summary: Retrieve UC-04 weekly forecast run status
+      operationId: getWeeklyForecastRun
+      parameters:
+        - in: path
+          name: weeklyForecastRunId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyForecastRunStatus'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Forecast run not found
+        '422':
+          description: Invalid path parameter
+  /api/v1/forecasts/current-weekly:
+    get:
+      summary: Retrieve current UC-04 weekly forecast
+      operationId: getCurrentWeeklyForecast
+      responses:
+        '200':
+          description: Current weekly forecast found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentWeeklyForecast'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No current weekly forecast found
+components:
+  schemas:
+    WeeklyForecastRunAccepted:
+      type: object
+      required: [weeklyForecastRunId, status]
+      properties:
+        weeklyForecastRunId:
+          type: string
+        status:
+          type: string
+          enum: [running]
+    WeeklyForecastRunStatus:
+      type: object
+      required:
+        - weeklyForecastRunId
+        - triggerType
+        - weekStartLocal
+        - weekEndLocal
+        - status
+        - startedAt
+      properties:
+        weeklyForecastRunId:
+          type: string
+        triggerType:
+          type: string
+          enum: [scheduled, on_demand]
+        sourceCleanedDatasetVersionId:
+          type: string
+        weekStartLocal:
+          type: string
+          format: date-time
+          description: Monday 00:00 in local operational timezone.
+        weekEndLocal:
+          type: string
+          format: date-time
+          description: Sunday 23:59 in local operational timezone.
+        status:
+          type: string
+          enum: [running, success, failed]
+        resultType:
+          type: string
+          enum:
+            - generated_new
+            - served_current
+            - missing_input_data
+            - engine_failure
+            - storage_failure
+        generatedForecastVersionId:
+          type: string
+        servedForecastVersionId:
+          type: string
+        geographyScope:
+          type: string
+          enum: [category_and_geography, category_only]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+    CurrentWeeklyForecast:
+      type: object
+      required:
+        - weeklyForecastVersionId
+        - sourceCleanedDatasetVersionId
+        - weekStartLocal
+        - weekEndLocal
+        - bucketGranularity
+        - bucketCountDays
+        - geographyScope
+        - updatedAt
+        - updatedByRunId
+        - buckets
+      properties:
+        weeklyForecastVersionId:
+          type: string
+        sourceCleanedDatasetVersionId:
+          type: string
+        weekStartLocal:
+          type: string
+          format: date-time
+        weekEndLocal:
+          type: string
+          format: date-time
+        bucketGranularity:
+          type: string
+          enum: [daily]
+        bucketCountDays:
+          type: integer
+          enum: [7]
+        geographyScope:
+          type: string
+          enum: [category_and_geography, category_only]
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByRunId:
+          type: string
+        buckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeeklyForecastBucket'
+    WeeklyForecastBucket:
+      type: object
+      required:
+        - forecastDateLocal
+        - serviceCategory
+        - pointForecast
+      properties:
+        forecastDateLocal:
+          type: string
+          format: date
+        serviceCategory:
+          type: string
+        geographyKey:
+          type: string
+        pointForecast:
+          type: number
+          minimum: 0
