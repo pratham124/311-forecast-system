@@ -1,0 +1,294 @@
+openapi: 3.1.0
+info:
+  title: UC-06 Evaluation Contract
+  version: 0.1.0
+  description: >
+    Minimal backend contract to trigger, observe, and retrieve UC-06 evaluation
+    results that compare forecasting-engine outputs against baseline methods.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/evaluation-runs/trigger:
+    post:
+      summary: Trigger an on-demand UC-06 evaluation run for one forecast product
+      operationId: triggerEvaluationRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationRunTrigger'
+      responses:
+        '202':
+          description: Evaluation run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationRunAccepted'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/evaluation-runs/{evaluationRunId}:
+    get:
+      summary: Retrieve UC-06 evaluation run status
+      operationId: getEvaluationRun
+      parameters:
+        - in: path
+          name: evaluationRunId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evaluation run found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationRunStatus'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Evaluation run not found
+        '422':
+          description: Invalid path parameter
+  /api/v1/evaluations/current:
+    get:
+      summary: Retrieve the current official UC-06 evaluation result for one forecast product
+      operationId: getCurrentEvaluation
+      parameters:
+        - in: query
+          name: forecastProduct
+          required: true
+          schema:
+            type: string
+            enum: [daily_1_day, weekly_7_day]
+      responses:
+        '200':
+          description: Current evaluation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentEvaluation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No current evaluation found
+        '422':
+          description: Invalid request
+components:
+  schemas:
+    EvaluationRunTrigger:
+      type: object
+      required: [forecastProduct]
+      properties:
+        forecastProduct:
+          type: string
+          enum: [daily_1_day, weekly_7_day]
+        triggerType:
+          type: string
+          enum: [on_demand]
+    EvaluationRunAccepted:
+      type: object
+      required: [evaluationRunId, status]
+      properties:
+        evaluationRunId:
+          type: string
+        status:
+          type: string
+          enum: [running]
+    EvaluationRunStatus:
+      type: object
+      required:
+        - evaluationRunId
+        - triggerType
+        - forecastProduct
+        - evaluationWindowStart
+        - evaluationWindowEnd
+        - status
+        - startedAt
+      properties:
+        evaluationRunId:
+          type: string
+        triggerType:
+          type: string
+          enum: [scheduled, on_demand]
+        forecastProduct:
+          type: string
+          enum: [daily_1_day, weekly_7_day]
+        sourceCleanedDatasetVersionId:
+          type: string
+        sourceForecastVersionId:
+          type: string
+        sourceWeeklyForecastVersionId:
+          type: string
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [running, success, failed]
+        resultType:
+          type: string
+          enum:
+            - stored_complete
+            - stored_partial
+            - missing_input_data
+            - missing_forecast_output
+            - baseline_failure
+            - storage_failure
+        evaluationResultId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    CurrentEvaluation:
+      type: object
+      required:
+        - evaluationResultId
+        - forecastProduct
+        - evaluationWindowStart
+        - evaluationWindowEnd
+        - comparisonStatus
+        - baselineMethods
+        - metricSet
+        - segments
+        - updatedAt
+        - updatedByRunId
+      properties:
+        evaluationResultId:
+          type: string
+        forecastProduct:
+          type: string
+          enum: [daily_1_day, weekly_7_day]
+        sourceCleanedDatasetVersionId:
+          type: string
+        sourceForecastVersionId:
+          type: string
+        sourceWeeklyForecastVersionId:
+          type: string
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        comparisonStatus:
+          type: string
+          enum: [complete, partial]
+        baselineMethods:
+          type: array
+          items:
+            type: string
+        metricSet:
+          type: array
+          items:
+            type: string
+            enum: [mae, rmse, mape]
+        fairComparison:
+          $ref: '#/components/schemas/FairComparisonMetadata'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByRunId:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+        comparisonSummary:
+          type: string
+          description: Plain-language statement of whether the forecasting engine outperformed, matched, or underperformed the included baselines for the evaluated scope.
+        segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationSegment'
+    FairComparisonMetadata:
+      type: object
+      required:
+        - evaluationWindowStart
+        - evaluationWindowEnd
+        - productScope
+        - segmentCoverage
+      properties:
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        productScope:
+          type: string
+          enum: [daily_1_day, weekly_7_day]
+        segmentCoverage:
+          type: array
+          items:
+            type: string
+    EvaluationSegment:
+      type: object
+      required:
+        - segmentType
+        - segmentKey
+        - segmentStatus
+        - comparisonRowCount
+        - methodMetrics
+      properties:
+        segmentType:
+          type: string
+          enum: [overall, service_category, time_period]
+        segmentKey:
+          type: string
+        segmentStatus:
+          type: string
+          enum: [complete, partial]
+        comparisonRowCount:
+          type: integer
+          minimum: 1
+        excludedMetricCount:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+        methodMetrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/MethodMetricSummary'
+    MethodMetricSummary:
+      type: object
+      required: [methodName, metrics]
+      properties:
+        methodName:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricValue'
+    MetricValue:
+      type: object
+      required: [metricName, isExcluded]
+      properties:
+        metricName:
+          type: string
+          enum: [mae, rmse, mape]
+        metricValue:
+          type: number
+        isExcluded:
+          type: boolean
+        exclusionReason:
+          type: string

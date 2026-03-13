@@ -34,3 +34,8 @@ Furthermore, data_model.md contains the model for the IngestionRun entity aligni
 The architectural decisions made in plan.md for UC-05 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md reuses all shared entities from UC-01 through UC-04 without redefining them, and introduces two new UC-05-specific entities: VisualizationLoadRecord and VisualizationSnapshot. This matches the interface in ./contracts/forecast-visualization-api.yaml and is congruent with the functional requirements in this use case.
+
+## Use Case 6
+The architectural decisions made in plan.md for UC-06 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses all shared entities from UC-01 through UC-05 without redefining them, and introduces four new UC-06-specific entities for running evaluations of forecasts: EvaluationRun, EvaluationSegment, MetricComparisonValue, CurrentEvaluationMarker. This matches the interface in ./contracts/forecast-visualization-api.yaml and is congruent with the functional requirements in this use case.

@@ -29,3 +29,7 @@ The task sequence for UC-04 makes sense and there are no blocking dependencies i
 ## Use Case 5
 
 The task sequence for UC-05 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend + frontend scaffolding -> implement shared visualization persistence, normalization, auth, typed contracts, and route/page wiring (Foundational) -> implement current-visualization assembly with 7-day history and P10/P50/P90 bands + dashboard rendering + render-event recording (US1) -> implement degraded behavior for missing history and missing uncertainty (US2) -> implement fallback snapshot lifecycle, unavailable state, and render-failure reporting (US3) -> traceability, performance assertions, and contract documentation (Polish). US2 and US3 can run in parallel after US1 is complete, so we can validate that the tasks for this use case are correct.
+
+## Use Case 6
+
+The task sequence for UC-06 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement baseline comparison -> implement comparison between forecast and baseline -> implement evaluation API -> implement storage of evaluation. So we can validate that the tasks for this use case are correct.
