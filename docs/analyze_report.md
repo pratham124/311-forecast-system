@@ -131,3 +131,23 @@ In this analysis, some critical issues were brought up. C1-C3 all address consti
 | G1 | Coverage Gap | HIGH | spec.md:131, tasks.md:135 | SC-007 requires usability validation that 90% of managers can identify the boundary and uncertainty on first review, but tasks cover component/integration testing only. | Add a task for usability validation or replace SC-007 with an objectively automatable criterion. |
 
 In this analysis, some critical issues were brought up. For C1, we prompted Codex to add explicit FR and assumption coverage for UC-02 cleaned dataset lineage and UC-03/UC-04 forecast product scope. For C2, we added FRs and acceptance scenarios for category filtering, alerts/status visibility, pipeline/data status, and last-updated metadata. For C3, we added auth/authz FRs plus 401/403 acceptance and edge-case coverage. For I1, we made product selection explicit by specifying `daily_1_day` and `weekly_7_day` as the selectable forecast products in the spec. For G1, we replaced SC-007 with an automatable interpretability criterion based on explicit boundary markers, distinct series, and canonical quantile labels in the visualization payload.
+
+## Use Case 6
+### Specification Analysis Report
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | spec.md:8 | The spec does not identify required data sources or
+external lineage/integrations, even though the constitution says every spec must identify governing data
+sources and integrations. | Add a brief governing dependencies section to the spec referencing UC-02 actuals
+lineage and UC-03/UC-04 forecast lineage. |
+| D1 | Duplication | HIGH | spec.md:84 | FR-006 appears twice with identical wording. | Remove the duplicate
+and keep one FR-006. |
+| I1 | Inconsistency | HIGH | spec.md:79, plan.md:30, tasks.md:45 | Auth/authorization is present in the plan
+and tasks, but not stated in the spec requirements or scenarios. | Add explicit security/access requirements
+to the spec, or remove unsupported auth work from plan/tasks. |
+| E1 | Coverage Gap | MEDIUM | spec.md:129, tasks.md | SC-006 says planners should be able to determine
+whether the engine outperformed baselines, but tasks only guarantee metric exposure, not an explicit
+comparative summary or decision aid. | Either add a task/contract field for comparative summary, or relax SC-
+006 to match the current design. |
+
+In this analysis, some critical issues were brought up. C1 addresses a constitution violation related to forecast data sources. The recommended actions make sense here so we prompted Codex to perform the stated fixes. D1 notes a duplicate FR in our spec, so we got Codex to remove this as well. I1 and E1 also bring up valid consistencies, so we performed the recommended fixes here as well. 

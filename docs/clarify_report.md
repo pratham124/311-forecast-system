@@ -126,8 +126,6 @@ Which week boundary should define the operational calendar week for the “curre
 Question 1: Standard Uncertainty Bands
 Which uncertainty bands should UC-05 standardize on for the dashboard view?
 
-Recommended: Option A — P10, P50, and P90. This matches the earlier forecasting specs, gives clear low/central/high planning views, and removes ambiguity from both rendering and acceptance testing.
-
 | Option | Description |
 |--------|-------------|
 | A | Display P10, P50, and P90 as the standard uncertainty range set |
@@ -140,8 +138,6 @@ Response: Chose Option A since P10, P50, and P90 are already the standard quanti
 ### Question 2
 Question 2: Historical Context Window
 How much historical demand should the dashboard show alongside the forecast?
-
-Recommended: Option B — Previous 7 days. That gives enough recent context to judge trend and variability without making the chart crowded, and it keeps the dashboard aligned with short-horizon operational planning.
 
 | Option | Description |
 |--------|-------------|
@@ -156,8 +152,6 @@ Response: Chose Option B as 7 days of historical context provides enough trend v
 Question 3: Fallback Staleness Limit
 How old can a fallback visualization be before it should no longer be shown?
 
-Recommended: Option B — Up to 24 hours old. This keeps fallback visuals useful during short-lived failures without letting clearly stale forecasts appear current for too long.
-
 | Option | Description |
 |--------|-------------|
 | A | Show a fallback visualization only if it is from the same forecast cycle |
@@ -166,3 +160,17 @@ Recommended: Option B — Up to 24 hours old. This keeps fallback visuals useful
 | Short | Provide a different short answer (<=5 words) |
 
 Response: Chose Option B as a 24-hour staleness limit keeps fallback visualizations useful during short outages while preventing stale or misleading forecasts from being shown as if they were current.
+
+## Use Case 6
+### Question 1
+Question 1: How should UC-06 define the evaluation scope across forecast products?
+
+| Option | Description |
+|--------|-------------|
+| A | Evaluate only the daily forecast product |
+| B | Evaluate only the weekly forecast product |
+| C | Evaluate daily and weekly forecast products separately |
+| D | Combine daily and weekly products into one shared evaluation |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option C since daily and weekly forecasts represent different horizons, so they should be evaluated separately.
