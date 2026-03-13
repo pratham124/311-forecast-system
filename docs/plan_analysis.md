@@ -19,3 +19,8 @@ Furthermore, data_model.md contains the model for the IngestionRun entity. This 
 The architectural decisions made in plan.md for UC-02 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
 
 Furthermore, data_model.md contains the model for the IngestionRun entity aligning with UC-01. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.
+
+## Use Case 3
+The architectural decisions made in plan.md for UC-03 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend.
+
+Furthermore, data_model.md contains the model for the IngestionRun entity aligning with previous use cases. This matches the interface in ./contracts/ and is congruent with the functional requirements in this use case.

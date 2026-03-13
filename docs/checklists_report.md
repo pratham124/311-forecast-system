@@ -53,3 +53,19 @@ Almost all checklist items were complete and validated in UC-02; I prompted Code
 - [ ] CHK024 Are externally configured validation rules, duplicate-identification rules, and threshold assumptions defined with enough precision to know what must exist before UC-02 can work? [Assumption, Spec §Assumptions]
 
 These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 3
+Almost all checklist items were complete and validated in UC-03; I prompted Codex to generate the API, data, security, performance checklists as one file. The following items were not satisfied:
+
+- [ ] CHK003 Are response expectations defined for all relevant API failure classes, including unauthorized, forbidden, not found, invalid request, missing input data, engine failure, and storage failure? [Gap, Spec §FR-011-FR-015; Contract §Paths]
+- [ ] CHK004 Is the reuse-versus-regenerate decision specified clearly enough that an API consumer can tell when a request should return the current forecast instead of producing a new one? [Clarity, Spec §FR-002-FR-004; Spec §User Story 2; Contract §ForecastRunStatus]
+- [ ] CHK005 Are the forecast data entities and lineage relationships defined clearly enough to distinguish the active approved dataset marker from the active forecast marker? [Consistency, Spec §Key Entities; Data Model §Reused Entities; Data Model §CurrentForecastMarker]
+- [ ] CHK007 Are the hourly bucket requirements specific enough to remove ambiguity about interval boundaries, 24-bucket coverage, service-category segmentation, and optional geography omission? [Clarity, Spec §Clarifications; Spec §FR-004-FR-007; Data Model §ForecastBucket]
+- [ ] CHK010 Are data protection requirements specified clearly enough to prohibit raw source payloads, feature matrices, and secrets from appearing in API responses, logs, or operational summaries? [Completeness, Plan §Constraints; Plan §Implementation Step 9; Contract §summary]
+- [ ] CHK011 Is the boundary between authentication/authorization requirements and general operational failure handling explicit enough to avoid ambiguity in the term "failed" across security and non-security cases? [Ambiguity, Spec §FR-011-FR-015; Data Model §ForecastRun; Contract §ForecastRunStatus]
+- [ ] CHK012 Are unauthorized, forbidden, and missing-resource expectations consistent between the written requirements and the forecast API contract? [Consistency, Contract §Paths; Spec §FR-015; Gap]
+- [ ] CHK016 Are concurrency, scheduling overlap, or load assumptions for scheduled and on-demand forecast requests documented or intentionally excluded? [Gap, Spec §FR-001-FR-004; Plan §Scale/Scope]
+
+These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 4

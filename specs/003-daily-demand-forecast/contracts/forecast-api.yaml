@@ -1,0 +1,238 @@
+openapi: 3.1.0
+info:
+  title: UC-03 Forecast Observability Contract
+  version: 0.1.0
+  description: >
+    Minimal backend contract required to observe and test the UC-03 1-day
+    demand forecasting workflow for approved Edmonton 311 operational data.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-runs/1-day/trigger:
+    post:
+      summary: Trigger the UC-03 forecast workflow through the scheduler-equivalent path
+      description: >
+        Accepts a forecast-generation request only. This surface does not
+        return forecast-run status details or the current forecast contents.
+      operationId: triggerDailyDemandForecast
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                triggerType:
+                  type: string
+                  enum: [on_demand]
+      responses:
+        '202':
+          description: Forecast run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastRunAccepted'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/forecast-runs/{forecastRunId}:
+    get:
+      summary: Retrieve the status and outcome of a 1-day forecast run
+      description: >
+        Returns only the recorded state and outcome of a forecast run. Access
+        denials and invalid requests are not represented as forecast-run
+        outcomes.
+      operationId: getForecastRun
+      parameters:
+        - in: path
+          name: forecastRunId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Forecast run found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastRunStatus'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Forecast run not found
+        '422':
+          description: Invalid path parameter
+  /api/v1/forecasts/current:
+    get:
+      summary: Retrieve the currently active 1-day hourly forecast
+      description: >
+        Returns only the forecast currently designated for operational planning.
+        It does not trigger generation and does not return forecast-run status.
+      operationId: getCurrentForecast
+      responses:
+        '200':
+          description: Current forecast found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentForecast'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No current forecast found
+components:
+  schemas:
+    ForecastRunAccepted:
+      type: object
+      required: [forecastRunId, status]
+      properties:
+        forecastRunId:
+          type: string
+        status:
+          type: string
+          enum: [running]
+    ForecastRunStatus:
+      type: object
+      required:
+        - forecastRunId
+        - triggerType
+        - requestedHorizonStart
+        - requestedHorizonEnd
+        - status
+        - startedAt
+      properties:
+        forecastRunId:
+          type: string
+        triggerType:
+          type: string
+          enum: [scheduled, on_demand]
+        sourceCleanedDatasetVersionId:
+          type: string
+        requestedHorizonStart:
+          type: string
+          format: date-time
+        requestedHorizonEnd:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [running, success, failed]
+        resultType:
+          type: string
+          description: >
+            Business outcome for an accepted forecast-generation attempt only.
+            Access denials, missing-resource responses, and invalid requests are
+            reported outside this outcome field.
+          enum:
+            - generated_new
+            - served_current
+            - missing_input_data
+            - engine_failure
+            - storage_failure
+        forecastVersionId:
+          type: string
+        servedForecastVersionId:
+          type: string
+        geographyScope:
+          type: string
+          enum: [category_and_geography, category_only]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    CurrentForecast:
+      type: object
+      required:
+        - forecastVersionId
+        - sourceCleanedDatasetVersionId
+        - horizonStart
+        - horizonEnd
+        - bucketGranularity
+        - bucketCount
+        - geographyScope
+        - updatedAt
+        - updatedByRunId
+        - buckets
+      properties:
+        forecastVersionId:
+          type: string
+        sourceCleanedDatasetVersionId:
+          type: string
+        horizonStart:
+          type: string
+          format: date-time
+        horizonEnd:
+          type: string
+          format: date-time
+        bucketGranularity:
+          type: string
+          enum: [hourly]
+        bucketCount:
+          type: integer
+          enum: [24]
+        geographyScope:
+          type: string
+          enum: [category_and_geography, category_only]
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByRunId:
+          type: string
+        buckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastBucket'
+    ForecastBucket:
+      type: object
+      required:
+        - bucketStart
+        - bucketEnd
+        - serviceCategory
+        - pointForecast
+        - quantileP10
+        - quantileP50
+        - quantileP90
+        - baselineValue
+      properties:
+        bucketStart:
+          type: string
+          format: date-time
+        bucketEnd:
+          type: string
+          format: date-time
+        serviceCategory:
+          type: string
+        geographyKey:
+          type: string
+        pointForecast:
+          type: number
+          minimum: 0
+        quantileP10:
+          type: number
+          minimum: 0
+        quantileP50:
+          type: number
+          minimum: 0
+        quantileP90:
+          type: number
+          minimum: 0
+        baselineValue:
+          type: number
+          minimum: 0
