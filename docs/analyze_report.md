@@ -223,5 +223,20 @@ For this analysis, there were inconsistencies present. For C1, I prompted Codex 
 ## Use Case 10
 ### Specification Analysis Report
 
+  | ID | Category | Severity | Location(s) | Summary | Recommendation |
+  |----|----------|----------|-------------|---------|----------------|
+  | C1 | Constitution Alignment | CRITICAL | plan.md, tasks.md, constitution.md | The constitution says alert generation MUST live in dedicated pipeline modules, but the plan and tasks place the core orchestration in backend/src/
+  services/threshold_alert_service.py with no pipeline module defined. | Add a dedicated alert-evaluation pipeline module to the plan and tasks, or explicitly restructure the service tasking so pipeline logic is isolated from route/
+  service wrappers. |
+  | I1 | Inconsistency | HIGH | spec.md, plan.md, data-model.md | Delivery success semantics conflict. The spec says an alert is “successfully delivered if at least one channel succeeds” (FR-007a), while the plan/data model define
+  delivered as all channels succeeded and partial_delivery as mixed success/failure. | Align the spec to the canonical status vocabulary or relax the plan/data-model semantics. One meaning per status is needed before implementation. |
+  | U1 | Coverage Gap | HIGH | spec.md, tasks.md | FR-003a requires distinct daily vs weekly forecast-product evaluation rules, but no task explicitly implements or tests weekly-product handling. Current tasks are generic forecast-scope
+  tasks only. | Add explicit implementation and test tasks for daily-vs-weekly evaluation semantics and forecast-window-type handling. |
+  | U2 | Coverage Gap | MEDIUM | spec.md, tasks.md | FR-011b requires threshold changes between consecutive evaluations to affect suppression/re-arm behavior. There is a unit test task for state transitions, but no explicit
+  implementation task updates threshold selection/state records when active threshold settings change. | Add a concrete implementation task for threshold-change reconciliation in evaluation/state logic, not just tests. |
+  | U3 | Coverage Gap | MEDIUM | spec.md, tasks.md | FR-012a requires review records to expose specific fields including failed channel outcomes. Tasks cover review endpoints/UI broadly, but no task explicitly ensures those exact review
+  fields are returned and validated. | Add a contract or integration task that asserts the review payload contains all FR-012a fields. |
+  | I2 | Inconsistency | MEDIUM | plan.md, tasks.md | The plan says trigger endpoints are for scheduled jobs or internal operational actions, but T017 adds frontend evaluation-trigger handling in frontend/src/api/forecast_alerts.ts.
+  That introduces a client-facing trigger path not clearly required by the spec. | Clarify whether frontend-trigger capability is in scope. If not, remove or reword T017 to backend-only/internal client support. |
 
-For this analysis, there were inconsistencies present.
+For this analysis, there were inconsistencies present. For C1, I prompted Codex to add a dedicated alert-evaluation pipeline module to the plan and tasks. For I1, I prompted Codex to align the spec to the canonical status vocabulary and that one meaning per status is needed before implementation. For U1, I prompted Codex to add explicit implementation and test tasks for daily-vs-weekly evaluation semantics and forecast-window-type handling. For U2, I prompted Codex to add a concrete implementation task for threshold-change reconciliation in evaluation/state logic, not just tests. For U3, I prompted Codex to add an integration task that asserts the review payload contains all FR-012a fields. For I2, I prompted Codex to remove or reword T017 to backend-only/internal client support.

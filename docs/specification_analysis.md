@@ -136,7 +136,7 @@ Additionally, the functional requirements are mostly congruent to the use case, 
 
 ## Use Case 9
 
-Overall, the generated spec.md mostly repeats the flows from the use case. The main added behavior is the clarification about partial comparison results when only some selected category/geography combinations are missing forecast data. Most acceptance scenarios map cleanly to the use case as follows:
+Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
 
 1. Acceptance Scenario 1 (enable overlay and show one selected weather measure aligned with the current demand view) -> Main Success Scenario Steps 1–7
 2. Acceptance Scenario 2 (weather layer remains distinguishable and readable with the base view) -> Main Success Scenario Steps 5–7
@@ -146,3 +146,15 @@ Overall, the generated spec.md mostly repeats the flows from the use case. The m
 Additionally, the functional requirements are congruent to the use case.
 
 ## Use Case 10
+
+Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
+
+1. Acceptance Scenario 1 (category threshold exceedance creates and sends an alert with alert details) -> Main Success Scenario Steps 2–5
+2. Acceptance Scenario 2 (category-only threshold does not require geography in the notification) -> Main Success Scenario Steps 2–5, using the UC’s “optional geography” scope
+3. Acceptance Scenario 3 (suppress duplicate alerts while the same scope remains above threshold) -> clarified behavior beyond the explicit UC-10 flows
+4. Acceptance Scenario 4 (geography-specific threshold alerts only for the exceeding region) -> Main Success Scenario Steps 2–5 with optional geography
+5. Acceptance Scenario 5 (geography-scoped notification includes the affected region and forecast window) -> Main Success Scenario Steps 4–5
+6. Acceptance Scenario 6 (missing threshold records a configuration issue and sends no alert) -> Extension 2a
+7. Acceptance Scenario 7 (delivery failure is recorded and marked for retry/manual review) -> Extension 5a
+
+Additionally, the functional requirements are congruent to the use case.

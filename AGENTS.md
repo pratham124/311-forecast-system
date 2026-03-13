@@ -27,6 +27,9 @@ Auto-generated from all feature plans. Last updated: 2026-03-11
 - PostgreSQL for reused approved Edmonton 311 lineage and forecast explorer source state; structured operational logs for overlay retrieval, alignment, supersession, and render outcomes; no separate weather-overlay activation store required (009-add-weather-overlay)
 - Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, Government of Canada MSC GeoMet client modules (009-add-weather-overlay)
 - PostgreSQL for forecast explorer lineage reuse and structured overlay operational logs; no separate overlay activation store (009-add-weather-overlay)
+- Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies (010-demand-threshold-alerts)
+- PostgreSQL for threshold configuration, evaluation runs, per-scope evaluation outcomes, notification events, channel delivery attempts, and active threshold-state tracking (010-demand-threshold-alerts)
+- PostgreSQL for threshold configuration, evaluation runs, per-scope evaluation outcomes, threshold state, notification events, and channel-attempt records (010-demand-threshold-alerts)
 
 - Python 3.11 + FastAPI, Pydantic, SQLAlchemy or SQLModel-compatible PostgreSQL access layer, HTTP client for Socrata ingestion, APScheduler-compatible scheduling, structured logging (001-pull-311-data)
 
@@ -47,9 +50,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11: Follow standard conventions
 
 ## Recent Changes
+- 010-demand-threshold-alerts: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies
+- 010-demand-threshold-alerts: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies
 - 009-add-weather-overlay: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, Government of Canada MSC GeoMet client modules
-- 009-add-weather-overlay: Added Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, dedicated Government of Canada MSC GeoMet client or ingestion modules, and a reusable chart-overlay rendering layer
-- 008-compare-demand-forecasts: Added Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and reusable comparison-chart and tabular visualization modules
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -56,3 +56,6 @@ The architectural decisions made in plan.md for UC-09 match the intent set forth
 Furthermore, data_model.md reuses all shared entities from UC-01 through UC-08 without redefining them, and introduces three new UC-09-specific entities:  WeatherOverlaySelection, WeatherObservationSet, OverlayDisplayState. This matches the interface in ./contracts/weather-overlay-api.yaml and is congruent with the functional requirements in this use case.
 
 ## Use Case 10
+The architectural decisions made in plan.md for UC-10 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses all shared entities from UC-01 through UC-09 without redefining them, and introduces six new UC-10-specific entities:  ThresholdConfiguration, ThresholdEvaluationRun, ThresholdScopeEvaluation, ThresholdState, NotificationEvent, NotificationChannelAttempt. This matches the interface in ./contracts/threshold-alerts-api.yaml and is congruent with the functional requirements in this use case.

@@ -128,3 +128,17 @@ These are necessary, so I prompted to add this to the specification and plan.
 ## Use Case 10
 
 I prompted Codex to combine all the checklists into one. Majority of checklist items were complete and validated in UC-10; the following item was not satisfied:
+
+- [ ] CHK001 Are the operator-facing alert review needs defined beyond notification receipt, including what information must be visible for successful, partial, and failed deliveries? [Completeness, Spec §User Story 3, Plan §API Contract Direction]
+- [ ] CHK002 Are requirements defined for how forecast window types map to threshold evaluation scope across daily and weekly forecast products? [Completeness, Spec §FR-003, Plan §Technical Context]
+- [ ] CHK007 Is “relevant forecast value” unambiguous about which bucket, aggregation level, and time-window identity must be compared to a threshold? [Clarity, Spec §FR-003]
+- [ ] CHK010 Is the distinction between `delivered` and `partial_delivery` requirement language clear enough to avoid conflicting interpretations during implementation and review? [Clarity, Plan §Data Model Direction, Plan §Implementation Notes]
+- [ ] CHK012 Are delivery-success rules consistent between the spec’s “successfully delivered if at least one channel succeeds” wording and the plan’s separate `delivered` and `partial_delivery` statuses? [Consistency, Spec §FR-007a, Spec §FR-007b, Plan §Data Model Direction]
+- [ ] CHK014 Are category-only and category-plus-geography threshold requirements consistent with the plan’s precedence rule for more specific configurations? [Consistency, Spec §FR-002, Plan §Implementation Notes]
+- [ ] CHK018 Are primary UX scenarios defined for both passive receipt of alerts and later operational review of alert history and channel failures? [Coverage, Spec §User Stories, Plan §API Contract Direction]
+- [ ] CHK019 Are alternate data scenarios specified for cases where both category-level and geography-level thresholds could apply to the same forecast scope? [Coverage, Gap, Spec §FR-002, Plan §Implementation Notes]
+- [ ] CHK022 Are boundary-case requirements defined for threshold changes that occur between consecutive forecast evaluations for the same scope? [Edge Case, Gap, Spec §FR-011]
+- [ ] CHK034 Is there any conflict between the spec’s feature-level wording “alert record for each exceeded scope” and the plan’s introduction of a suppressed state where no new alert is created for a still-exceeded scope? [Conflict, Spec §SC-001, Spec §FR-013, Plan §Data Model Direction]
+- [ ] CHK036 Are the terms “forecast window,” “forecast window type,” and “forecast window key” used consistently enough across spec and plan to support one canonical data and API vocabulary? [Consistency, Spec §FR-003, Plan §Data Model Direction, Data Model §ThresholdState]
+
+These are necessary, so I prompted to add this to the specification and plan.
