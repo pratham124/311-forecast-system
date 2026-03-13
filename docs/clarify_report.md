@@ -237,6 +237,23 @@ Response: Choose Option C as we should only show the overlay when the selected g
 
 ## Use Case 10
 ### Question 1
-Question 1:
+Question 1: When repeated forecast updates stay above the same threshold for the same category/region/window, what alert behavior should the feature require?
 
-Response: Choose Option 
+|--------|-------------|
+| A | Send a notification on every forecast update that remains above the threshold. |
+| B | Send a notification only on threshold crossing, then send another only after the forecast returns to or below threshold and later exceeds again. |
+| C | Send one notification per forecast window per day, even if repeated updates stay above threshold. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option B as we should send one alert when a scope first crosses the threshold, then suppress repeats until the forecast falls back to or below the threshold and exceeds again. This avoids alert fatigue and gives a clear reset rule for testing and operations.
+
+### Question 2
+Question 2: If an operational manager has multiple configured notification channels for the same alert, what delivery rule should apply?
+
+ |--------|-------------|
+| A | Attempt all configured channels; overall delivery succeeds if at least one channel succeeds. |
+| B | Attempt channels in priority order and stop after the first successful delivery. |
+| C | Require every configured channel to succeed for the alert to count as delivered. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option A as we should evaluate all configured channels for the operational manager and treat delivery as successful if at least one channel succeeds, while recording any channel-specific failures. This gives the best operational resilience without requiring every channel to be perfectly available.

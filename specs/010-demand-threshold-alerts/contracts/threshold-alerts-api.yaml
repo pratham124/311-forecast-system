@@ -1,0 +1,318 @@
+openapi: 3.1.0
+info:
+  title: Threshold Alerts API
+  version: 0.1.0
+  description: >
+    Typed operational contracts for UC-10 demand-threshold alert evaluation and
+    alert-event retrieval.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-alerts/evaluations:
+    post:
+      summary: Trigger threshold evaluation for a published forecast
+      operationId: triggerThresholdEvaluation
+      tags:
+        - ForecastAlerts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThresholdEvaluationTriggerRequest'
+      responses:
+        '202':
+          description: Evaluation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThresholdEvaluationTriggerResponse'
+        '400':
+          description: Invalid evaluation trigger request
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to trigger evaluations
+  /api/v1/forecast-alerts/events:
+    get:
+      summary: List threshold alert events for operational review
+      operationId: listThresholdAlertEvents
+      tags:
+        - ForecastAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: serviceCategory
+          schema:
+            type: string
+        - in: query
+          name: geographyValue
+          schema:
+            type: string
+        - in: query
+          name: overallDeliveryStatus
+          schema:
+            $ref: '#/components/schemas/OverallDeliveryStatus'
+        - in: query
+          name: forecastWindowType
+          schema:
+            $ref: '#/components/schemas/ForecastWindowType'
+        - in: query
+          name: forecastWindowStart
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: forecastWindowEnd
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Alert events returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThresholdAlertEventListResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view alert events
+  /api/v1/forecast-alerts/events/{notificationEventId}:
+    get:
+      summary: Get one threshold alert event with channel-attempt details
+      operationId: getThresholdAlertEvent
+      tags:
+        - ForecastAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: notificationEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alert event returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThresholdAlertEvent'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view this alert event
+        '404':
+          description: Alert event not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ThresholdEvaluationTriggerRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - forecastReferenceId
+        - forecastProduct
+        - triggerSource
+      properties:
+        forecastReferenceId:
+          type: string
+          format: uuid
+        forecastProduct:
+          type: string
+          enum:
+            - daily
+            - weekly
+        triggerSource:
+          type: string
+          enum:
+            - forecast_publish
+            - forecast_refresh
+            - scheduled_recheck
+            - manual_replay
+    ThresholdEvaluationTriggerResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - thresholdEvaluationRunId
+        - status
+      properties:
+        thresholdEvaluationRunId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - accepted
+        acceptedAt:
+          type: string
+          format: date-time
+    ThresholdAlertEventListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThresholdAlertEventSummary'
+    ThresholdAlertEventSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - notificationEventId
+        - serviceCategory
+        - forecastWindowType
+        - forecastWindowStart
+        - forecastWindowEnd
+        - forecastValue
+        - thresholdValue
+        - overallDeliveryStatus
+        - createdAt
+      properties:
+        notificationEventId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastWindowType:
+          $ref: '#/components/schemas/ForecastWindowType'
+        forecastWindowStart:
+          type: string
+          format: date-time
+        forecastWindowEnd:
+          type: string
+          format: date-time
+        forecastValue:
+          type: number
+        thresholdValue:
+          type: number
+        overallDeliveryStatus:
+          $ref: '#/components/schemas/OverallDeliveryStatus'
+        createdAt:
+          type: string
+          format: date-time
+    ThresholdAlertEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - notificationEventId
+        - thresholdEvaluationRunId
+        - serviceCategory
+        - forecastWindowType
+        - forecastWindowStart
+        - forecastWindowEnd
+        - forecastValue
+        - thresholdValue
+        - overallDeliveryStatus
+        - channelAttempts
+        - createdAt
+      properties:
+        notificationEventId:
+          type: string
+          format: uuid
+        thresholdEvaluationRunId:
+          type: string
+          format: uuid
+        thresholdConfigurationId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastWindowType:
+          $ref: '#/components/schemas/ForecastWindowType'
+        forecastWindowStart:
+          type: string
+          format: date-time
+        forecastWindowEnd:
+          type: string
+          format: date-time
+        forecastValue:
+          type: number
+        thresholdValue:
+          type: number
+        overallDeliveryStatus:
+          $ref: '#/components/schemas/OverallDeliveryStatus'
+        followUpReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        failedChannelCount:
+          type: integer
+          minimum: 0
+        channelAttempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationChannelAttempt'
+    NotificationChannelAttempt:
+      type: object
+      additionalProperties: false
+      required:
+        - channelType
+        - attemptNumber
+        - attemptedAt
+        - status
+      properties:
+        channelType:
+          type: string
+          enum:
+            - email
+            - sms
+            - dashboard
+        attemptNumber:
+          type: integer
+          minimum: 1
+        attemptedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - succeeded
+            - failed
+        failureReason:
+          type: string
+          nullable: true
+        providerReference:
+          type: string
+          nullable: true
+    OverallDeliveryStatus:
+      type: string
+      enum:
+        - delivered
+        - partial_delivery
+        - retry_pending
+        - manual_review_required
+    ForecastWindowType:
+      type: string
+      enum:
+        - hourly
+        - daily
