@@ -133,3 +133,16 @@ Overall, the generated spec.md mostly repeats the flows from the use case. The m
 8. Acceptance Scenario 8 (partial comparison results with missing forecast combinations identified) -> clarified behavior reflected in spec.md, but not explicitly present as its own extension flow in UC-08.md
 
 Additionally, the functional requirements are mostly congruent to the use case, but there are a few issues: FR-011a reflects the clarification, but it is not explicitly represented as a standalone extension in the use case, FR-013 is too narrow because it mentions error states for alignment or display failures, while the use case and acceptance tests also imply an error state for retrieval failure, and FR-014 and FR-015 are somewhat stronger than the use case wording because they introduce an auditable activity record and a requirement to preserve approved classifications, which go beyond the UC’s explicit flow language.
+
+## Use Case 9
+
+Overall, the generated spec.md mostly repeats the flows from the use case. The main added behavior is the clarification about partial comparison results when only some selected category/geography combinations are missing forecast data. Most acceptance scenarios map cleanly to the use case as follows:
+
+1. Acceptance Scenario 1 (enable overlay and show one selected weather measure aligned with the current demand view) -> Main Success Scenario Steps 1–7
+2. Acceptance Scenario 2 (weather layer remains distinguishable and readable with the base view) -> Main Success Scenario Steps 5–7
+3. Acceptance Scenario 3 (weather unavailable keeps forecast explorer visible without overlay) -> Extension 3a
+4. Acceptance Scenario 4 (weather cannot be safely aligned or displayed, so overlay is suppressed and failure recorded) -> Extension 4a and Extension 6a, plus Failed End Condition behavior
+
+Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 10

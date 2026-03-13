@@ -41,3 +41,11 @@ The task sequence for UC-07 makes sense and there are no blocking dependencies i
 ## Use Case 8
 
 The task sequence for UC-08 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup -> foundational shared models/repos/auth/router -> core comparison flow -> warning gate -> partial/failure/render handling -> polish/verification.
+
+## Use Case 9
+
+The task sequence for UC-08 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: Setup -> foundational models/client/auth/service skeleton -> Visible overlay flow -> Non-visible/failure flow -> Disable/supersession flow -> Polish
+
+## Use Case 10
+
+The task sequence for UC-10 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are:

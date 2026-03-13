@@ -196,3 +196,32 @@ with feature-local pages, or move the page task to the planned top-level path. |
 failure, or explicitly cross-reference FR-012 to avoid overlap. |
 
 For this analysis, there were inconsistencies present. For C1, I prompted Codex to add an explicit backend observability tasks and tests for request lifecycle, warning, missing-data, retrieval-failure, alignment-failure, and render-failure logging. For E1, I prompted Codex to add a task for usability validation. For E2, I prompted Codex to Add tasks for timing instrumentation and an integration/performance check for the normal-threshold request path. For I1, I prompted Codex to require the context endpoint. FOr I2, I prompted Codex to align the tasks frontend structure with the plan. D1 can be left as it is.
+
+## Use Case 9
+### Specification Analysis Report
+
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | plan.md#L22, tasks.md#L32 | The plan claims constitution compliance, but the task list contains no explicit auth/authz work for the new weather-overlay API routes. The constitution requires auth coverage where relevant, and this feature adds new backend endpoint
+s. | Add explicit tasks to enforce and test authenticated/authorized access on GET /weather-overlay and POST /render-events. |
+| C2 | Constitution Alignment | CRITICAL | constitution.md#L93, plan.md#L13, tasks.md#L32 | The constitution requires schema validation work in every task list, but tasks.md has no task for backend request/response schema implementation or validation tests for the OpenAPI/Pydantic boundary. | Add tasks f
+or backend request/response schema models and validation-focused contract tests for invalid query/body inputs. |
+| I1 | Inconsistency | HIGH | spec.md#L85, plan.md#L35, tasks.md#L78 | The spec distinguishes geography matching failed from alignment failed, but the plan and tasks collapse the taxonomy into misaligned. That weakens traceability for FR-009 status reasons. | Either merge those reasons in the spec or add
+explicit plan/task coverage for both geography-match failure and post-match alignment failure. |
+| E1 | Coverage Gap | HIGH | plan.md#L98, tasks.md#L53, tasks.md#L86 | The design treats POST /render-events as a first-class contract, but there is no explicit contract test for that endpoint and no task that verifies successful render-event observability for AT-05/FR-012. | Add contract and integration
+tests for POST /render-events covering both rendered and failed-to-render, including persisted/logged outcome context. |
+| E2 | Coverage Gap | MEDIUM | spec.md#L113, spec.md#L114, tasks.md#L121 | SC-001 (5-second target) and SC-002 (90% usability target) have no direct task coverage. Current tasks implement functionality but do not measure latency or plan usability verification. | Add a performance-validation task for supp
+orted-selection latency and a validation/usability task or explicit acceptance verification step for SC-002. |
+| U1 | Underspecification | MEDIUM | tasks.md#L20, tasks.md#L39, tasks.md#L61 | Setup creates only high-level feature directories, but later tasks target deeper paths not mentioned in setup such as frontend/src/features/weather-overlay/components/, hooks/, and state/. | Expand setup scaffolding or make e
+ach implementation task explicitly create its subdirectory so task execution is less ambiguous. |
+| D1 | Duplication | LOW | spec.md#L86, spec.md#L90, tasks.md#L107 | FR-010 and FR-014 both govern “latest selection wins” behavior. They are not contradictory, but they split one behavioral theme across two requirements and then across multiple tasks. | Keep both if you want separate traceability, but t
+ighten wording or annotate tasks so stale-layer removal and supersession cancellation are clearly differentiated. |
+
+
+For this analysis, there were inconsistencies present. For C1, I prompted Codex to add explicit tasks to enforce and test authenticated/authorized access on GET /weather-overlay and POST /render-events. For C2, I prompted Codex to add tasks for backend request/response schema models and validation-focused contract tests for invalid query/body inputs. For I1, I Prompted codex to add explicit plan/task coverage for both geography-match failure and post-match alignment failure. For I2, I prompted Codex to add a performance-validation task for supported-selection latency and a validation/usability task or explicit acceptance verification step for SC-002. For E1, I prompted Codex to add contract and integration tests for POST /render-events covering both rendered and failed-to-render, including persisted/logged outcome context. For E2, I prompted Codex to add a performance-validation task for supported-selection latency and a validation/usability task or explicit acceptance verification step for SC-002. For U1, I prompted Codex to make each implementation task explicitly create its subdirectory so task execution is less ambiguous. D1 is fine as it is.
+
+## Use Case 10
+### Specification Analysis Report
+
+
+For this analysis, there were inconsistencies present.
