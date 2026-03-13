@@ -204,7 +204,8 @@ generate_branch_name() {
         if ! echo "$word" | grep -qiE "$stop_words"; then
             if [ ${#word} -ge 3 ]; then
                 meaningful_words+=("$word")
-            elif echo "$description" | grep -q "\b${word^^}\b"; then
+            elif upper_word=$(printf '%s' "$word" | tr '[:lower:]' '[:upper:]') \
+                && echo "$description" | grep -qE "[[:<:]]${upper_word}[[:>:]]"; then
                 # Keep short words if they appear as uppercase in original (likely acronyms)
                 meaningful_words+=("$word")
             fi
@@ -282,8 +283,13 @@ if [ "$HAS_GIT" = true ]; then
     if ! git checkout -b "$BRANCH_NAME" 2>/dev/null; then
         # Check if branch already exists
         if git branch --list "$BRANCH_NAME" | grep -q .; then
-            >&2 echo "Error: Branch '$BRANCH_NAME' already exists. Please use a different feature name or specify a different number with --number."
-            exit 1
+            # If it exists, try to switch to it and continue
+            if git checkout "$BRANCH_NAME" 2>/dev/null; then
+                >&2 echo "[specify] Note: Branch '$BRANCH_NAME' already exists; checked it out."
+            else
+                >&2 echo "Error: Branch '$BRANCH_NAME' already exists but could not be checked out."
+                exit 1
+            fi
         else
             >&2 echo "Error: Failed to create git branch '$BRANCH_NAME'. Please check your git configuration and try again."
             exit 1

@@ -119,3 +119,50 @@ Which week boundary should define the operational calendar week for the “curre
 | B | Week starts Sunday 00:00 in local operational timezone. |
 | C | Week starts at scheduled run timestamp each week. |
 | Short | Provide a different short answer (<=5 words). |
+
+## Use Case 5
+
+### Question 1
+Question 1: Standard Uncertainty Bands
+Which uncertainty bands should UC-05 standardize on for the dashboard view?
+
+Recommended: Option A — P10, P50, and P90. This matches the earlier forecasting specs, gives clear low/central/high planning views, and removes ambiguity from both rendering and acceptance testing.
+
+| Option | Description |
+|--------|-------------|
+| A | Display P10, P50, and P90 as the standard uncertainty range set |
+| B | Display only P50 and P90 |
+| C | Allow the dashboard to choose any available quantiles without a fixed standard |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option A since P10, P50, and P90 are already the standard quantiles used in UC-03 and UC-04, so standardizing on them here keeps the visualization consistent with the rest of the forecasting pipeline.
+
+### Question 2
+Question 2: Historical Context Window
+How much historical demand should the dashboard show alongside the forecast?
+
+Recommended: Option B — Previous 7 days. That gives enough recent context to judge trend and variability without making the chart crowded, and it keeps the dashboard aligned with short-horizon operational planning.
+
+| Option | Description |
+|--------|-------------|
+| A | Show only the immediately preceding period matching the forecast horizon |
+| B | Show the previous 7 days of historical demand |
+| C | Show the previous 30 days of historical demand |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option B as 7 days of historical context provides enough trend visibility for operational planning without overcrowding the chart, and it aligns naturally with the weekly forecast horizon from UC-04.
+
+### Question 3
+Question 3: Fallback Staleness Limit
+How old can a fallback visualization be before it should no longer be shown?
+
+Recommended: Option B — Up to 24 hours old. This keeps fallback visuals useful during short-lived failures without letting clearly stale forecasts appear current for too long.
+
+| Option | Description |
+|--------|-------------|
+| A | Show a fallback visualization only if it is from the same forecast cycle |
+| B | Show a fallback visualization if it is no more than 24 hours old |
+| C | Show the most recent fallback visualization regardless of age, as long as it is labeled |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Chose Option B as a 24-hour staleness limit keeps fallback visualizations useful during short outages while preventing stale or misleading forecasts from being shown as if they were current.

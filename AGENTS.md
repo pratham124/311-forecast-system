@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-11
 - PostgreSQL for reused UC-01 and UC-02 lineage state plus forecast runs, retained forecast versions, hourly forecast buckets, current forecast marker state, and migration-managed schema history (003-daily-demand-forecast)
 - Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, pandas-compatible feature preparation utilities, LightGBM, dedicated Government of Canada MSC GeoMet client or ingestion modules, dedicated Nager.Date Canada API client or ingestion modules (004-weekly-demand-forecast)
 - PostgreSQL for reused UC-01 and UC-02 lineage plus weekly forecast runs, weekly forecast versions, daily forecast buckets, current weekly forecast marker, and migration-managed schema history (004-weekly-demand-forecast)
+- Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and a reusable chart-rendering layer for forecast curves and bands (005-uc-05-visualize)
+- PostgreSQL for reused UC-01 through UC-04 lineage plus visualization load records, fallback visualization snapshots, and migration-managed schema history (005-uc-05-visualize)
 
 - Python 3.11 + FastAPI, Pydantic, SQLAlchemy or SQLModel-compatible PostgreSQL access layer, HTTP client for Socrata ingestion, APScheduler-compatible scheduling, structured logging (001-pull-311-data)
 
@@ -35,9 +37,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11: Follow standard conventions
 
 ## Recent Changes
+- 005-uc-05-visualize: Added Python 3.11 for backend services and TypeScript for the React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, and a reusable chart-rendering layer for forecast curves and bands
 - 004-weekly-demand-forecast: Added Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, pandas-compatible feature preparation utilities, LightGBM, dedicated Government of Canada MSC GeoMet client or ingestion modules, dedicated Nager.Date Canada API client or ingestion modules
 - 003-daily-demand-forecast: Added Python 3.11 + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, JWT authentication support, role-based authorization dependencies, structured logging, pandas-compatible feature preparation utilities, LightGBM, dedicated Government of Canada MSC GeoMet client or ingestion modules, dedicated Nager.Date Canada API client or ingestion modules
-- 003-daily-demand-forecast: Added Python 3.11 + FastAPI, Pydantic, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, JWT authentication support, role-based authorization dependencies, structured logging, pandas-compatible feature preparation utilities, LightGBM for the primary forecast model
 
 
 <!-- MANUAL ADDITIONS START -->

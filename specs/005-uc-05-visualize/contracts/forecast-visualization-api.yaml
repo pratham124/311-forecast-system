@@ -1,0 +1,230 @@
+openapi: 3.1.0
+info:
+  title: UC-05 Forecast Visualization Contract
+  version: 0.1.0
+  description: >
+    Typed backend contract for the UC-05 dashboard that visualizes current
+    forecast curves with uncertainty bands over historical demand, while
+    preserving bounded fallback and render observability.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-visualizations/current:
+    get:
+      summary: Retrieve the current UC-05 forecast visualization payload
+      operationId: getCurrentForecastVisualization
+      parameters:
+        - in: query
+          name: forecastProduct
+          required: true
+          schema:
+            type: string
+            enum: [daily_1_day, weekly_7_day]
+        - in: query
+          name: serviceCategory
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Visualization payload assembled successfully or with an explicit degraded/fallback state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastVisualization'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/forecast-visualizations/{visualizationLoadId}/render-events:
+    post:
+      summary: Record the final client render outcome for a UC-05 visualization load
+      operationId: recordVisualizationRenderEvent
+      parameters:
+        - in: path
+          name: visualizationLoadId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisualizationRenderEvent'
+      responses:
+        '202':
+          description: Render outcome accepted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Visualization load not found
+        '422':
+          description: Invalid request
+components:
+  schemas:
+    ForecastVisualization:
+      type: object
+      required:
+        - visualizationLoadId
+        - forecastProduct
+        - forecastGranularity
+        - historyWindowStart
+        - historyWindowEnd
+        - categoryFilter
+        - alerts
+        - pipelineStatus
+        - viewStatus
+      properties:
+        visualizationLoadId:
+          type: string
+        forecastProduct:
+          type: string
+          enum: [daily_1_day, weekly_7_day]
+        forecastGranularity:
+          type: string
+          enum: [hourly, daily]
+        categoryFilter:
+          type: object
+          required: [selectedCategory]
+          properties:
+            selectedCategory:
+              type: string
+              nullable: true
+        historyWindowStart:
+          type: string
+          format: date-time
+        historyWindowEnd:
+          type: string
+          format: date-time
+        forecastWindowStart:
+          type: string
+          format: date-time
+        forecastWindowEnd:
+          type: string
+          format: date-time
+        forecastBoundary:
+          type: string
+          format: date-time
+        lastUpdatedAt:
+          type: string
+          format: date-time
+        sourceCleanedDatasetVersionId:
+          type: string
+        sourceForecastVersionId:
+          type: string
+        sourceWeeklyForecastVersionId:
+          type: string
+        historicalSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisualizationPoint'
+        forecastSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/VisualizationForecastPoint'
+        uncertaintyBands:
+          type: object
+          required: [labels, points]
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+                enum: [P10, P50, P90]
+            points:
+              type: array
+              items:
+                $ref: '#/components/schemas/UncertaintyPoint'
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusMessage'
+        pipelineStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusMessage'
+        fallback:
+          $ref: '#/components/schemas/FallbackMetadata'
+        viewStatus:
+          type: string
+          enum: [success, degraded, fallback_shown, unavailable]
+        degradationType:
+          type: string
+          enum: [history_missing, uncertainty_missing]
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    VisualizationPoint:
+      type: object
+      required: [timestamp, value]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+          minimum: 0
+    VisualizationForecastPoint:
+      type: object
+      required: [timestamp, pointForecast]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        pointForecast:
+          type: number
+          minimum: 0
+    UncertaintyPoint:
+      type: object
+      required: [timestamp, p10, p50, p90]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        p10:
+          type: number
+          minimum: 0
+        p50:
+          type: number
+          minimum: 0
+        p90:
+          type: number
+          minimum: 0
+    StatusMessage:
+      type: object
+      required: [code, level, message]
+      properties:
+        code:
+          type: string
+        level:
+          type: string
+          enum: [info, warning, error]
+        message:
+          type: string
+    FallbackMetadata:
+      type: object
+      required: [snapshotId, createdAt, expiresAt]
+      properties:
+        snapshotId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    VisualizationRenderEvent:
+      type: object
+      required: [renderStatus]
+      properties:
+        renderStatus:
+          type: string
+          enum: [rendered, render_failed]
+        failureReason:
+          type: string
+          description: Required when renderStatus is render_failed.
