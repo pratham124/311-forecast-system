@@ -95,3 +95,27 @@ What time granularity should the 1-day forecast use?
 Response: Chose Option A as hourly buckets across the next 24 hours are the strongest default for staffing and dispatch planning because they preserve within-day demand patterns without expanding scope beyond the stated 1-day forecast.
 
 ## Use Case 4
+### Question 1
+Question 1: "Current" forecast meaning.
+What does "current" forecast mean in the context of FR-008?
+
+
+| Option | Description |
+|--------|-------------|
+| A | Rolling horizon: “current” means any forecast covering the next 7 days from request time. |
+| B | Calendar week: “current” means one forecast per operational week (e.g., Monday-Sunday). |
+| C | Daily anchor: “current” means one forecast per day, each covering the next 7 days. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Chose Option B as anchoring on the calendar week makes it more deterministic to determine the current weekly forecast, and it will help simplify acceptance tests later on.
+
+### Question 2
+Question 2: Weekly Forecast Boundary
+Which week boundary should define the operational calendar week for the “current forecast” rule?
+
+| Option | Description |
+|--------|-------------|
+| A | Week starts Monday 00:00 in local operational timezone. |
+| B | Week starts Sunday 00:00 in local operational timezone. |
+| C | Week starts at scheduled run timestamp each week. |
+| Short | Provide a different short answer (<=5 words). |
