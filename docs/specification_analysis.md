@@ -118,3 +118,18 @@ Overall, the generated spec.md repeats all flows from the use case. The only cha
 9. Acceptance Scenario 9 (Visualization rendering failure) -> Extension 6a
 
 Additionally, the functional requirements are congruent to the use case.
+
+## Use Case 8
+
+Overall, the generated spec.md mostly repeats the flows from the use case. The main added behavior is the clarification about partial comparison results when only some selected category/geography combinations are missing forecast data. Most acceptance scenarios map cleanly to the use case as follows:
+
+1. Acceptance Scenario 1 (display comparative view for selected scope) -> Main Success Scenario Steps 1–8
+2. Acceptance Scenario 2 (distinguish differences across categories, regions, and time periods) -> Main Success Scenario Steps 7–9
+3. Acceptance Scenario 3 (warn before very large comparison request) -> Extension 3a1–3a2
+4. Acceptance Scenario 4 (planner chooses to continue after warning) -> Extension 3a3–3a4
+5. Acceptance Scenario 5 (forecast-only results when historical data is unavailable) -> Extension 4a
+6. Acceptance Scenario 6 (historical-only results when forecast data is unavailable) -> Extension 5a
+7. Acceptance Scenario 7 (alignment failure blocks comparison and shows error state) -> Extension 6a
+8. Acceptance Scenario 8 (partial comparison results with missing forecast combinations identified) -> clarified behavior reflected in spec.md, but not explicitly present as its own extension flow in UC-08.md
+
+Additionally, the functional requirements are mostly congruent to the use case, but there are a few issues: FR-011a reflects the clarification, but it is not explicitly represented as a standalone extension in the use case, FR-013 is too narrow because it mentions error states for alignment or display failures, while the use case and acceptance tests also imply an error state for retrieval failure, and FR-014 and FR-015 are somewhat stronger than the use case wording because they introduce an auditable activity record and a requirement to preserve approved classifications, which go beyond the UC’s explicit flow language.

@@ -1,0 +1,409 @@
+openapi: 3.1.0
+info:
+  title: UC-08 Demand Comparison Contract
+  version: 0.1.0
+  description: >
+    Typed backend contract for UC-08 demand comparisons across categories and
+    geographies, including high-volume warnings, partial-result states, and
+    explicit retrieval, alignment, and render failures.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/demand-comparisons/context:
+    get:
+      summary: Retrieve available filter context for UC-08 demand comparisons
+      operationId: getDemandComparisonContext
+      responses:
+        '200':
+          description: Available comparison filter metadata returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandComparisonContext'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /api/v1/demand-comparisons/queries:
+    post:
+      summary: Submit a UC-08 demand comparison request
+      operationId: createDemandComparisonQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandComparisonQueryRequest'
+      responses:
+        '200':
+          description: Comparison request completed with either a warning-required response, a terminal comparison-data response, or a terminal comparison-failure response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandComparisonResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Invalid request
+  /api/v1/demand-comparisons/{comparisonRequestId}/render-events:
+    post:
+      summary: Record the final client render outcome for a UC-08 demand comparison
+      operationId: recordDemandComparisonRenderEvent
+      parameters:
+        - in: path
+          name: comparisonRequestId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandComparisonRenderEvent'
+      responses:
+        '202':
+          description: Render outcome accepted and mapped to the comparison request outcome history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandComparisonRenderEventResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden, including when the authenticated caller does not own the comparison request and is not an authorized backend actor
+        '404':
+          description: Comparison request not found
+        '422':
+          description: Invalid request
+components:
+  schemas:
+    DemandComparisonContext:
+      type: object
+      required: [serviceCategories, geographyLevels]
+      properties:
+        serviceCategories:
+          type: array
+          items:
+            type: string
+        geographyLevels:
+          type: array
+          items:
+            type: string
+        geographyOptions:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    DemandComparisonQueryRequest:
+      type: object
+      required: [serviceCategories, timeRangeStart, timeRangeEnd]
+      properties:
+        serviceCategories:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        geographyLevel:
+          type: string
+        geographyValues:
+          type: array
+          items:
+            type: string
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        proceedAfterWarning:
+          type: boolean
+          default: false
+    DemandComparisonResponse:
+      oneOf:
+        - $ref: '#/components/schemas/DemandComparisonWarningResponse'
+        - $ref: '#/components/schemas/DemandComparisonDataResponse'
+        - $ref: '#/components/schemas/DemandComparisonFailureResponse'
+    DemandComparisonWarningResponse:
+      type: object
+      required: [comparisonRequestId, filters, outcomeStatus, warning, message]
+      properties:
+        comparisonRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedComparisonFilters'
+        outcomeStatus:
+          type: string
+          enum: [warning_required]
+        warning:
+          $ref: '#/components/schemas/HighVolumeWarning'
+        message:
+          type: string
+          description: Explains that retrieval has not started and that the selected scope exceeded the large-request threshold.
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    DemandComparisonDataResponse:
+      oneOf:
+        - $ref: '#/components/schemas/HistoricalOnlyComparisonResponse'
+        - $ref: '#/components/schemas/DailyForecastBackedComparisonResponse'
+        - $ref: '#/components/schemas/WeeklyForecastBackedComparisonResponse'
+    HistoricalOnlyComparisonResponse:
+      type: object
+      required:
+        - comparisonRequestId
+        - filters
+        - outcomeStatus
+        - message
+        - resultMode
+        - comparisonGranularity
+        - series
+        - sourceCleanedDatasetVersionId
+      properties:
+        comparisonRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedComparisonFilters'
+        outcomeStatus:
+          type: string
+          enum: [historical_only]
+        comparisonGranularity:
+          type: string
+          enum: [daily, weekly]
+          description: Historical-only comparisons omit forecast metadata and use the granularity that matches the historical aggregation shown.
+        sourceCleanedDatasetVersionId:
+          type: string
+        resultMode:
+          type: string
+          enum: [chart, table, chart_and_table]
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemandComparisonSeries'
+        message:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    DailyForecastBackedComparisonResponse:
+      type: object
+      required:
+        - comparisonRequestId
+        - filters
+        - outcomeStatus
+        - forecastProduct
+        - forecastGranularity
+        - sourceForecastVersionId
+        - message
+        - resultMode
+        - comparisonGranularity
+        - series
+      properties:
+        comparisonRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedComparisonFilters'
+        outcomeStatus:
+          type: string
+          enum: [success, forecast_only, partial_forecast_missing]
+        forecastProduct:
+          type: string
+          enum: [daily_1_day]
+          description: Returned only when the selected range is fully covered by the active UC-03 forecast product; takes precedence over weekly when both products could satisfy the range.
+        forecastGranularity:
+          type: string
+          enum: [hourly]
+        comparisonGranularity:
+          type: string
+          enum: [hourly, daily]
+          description: `hourly` is allowed only for `daily_1_day`; `daily` is allowed only when historical data can align to calendar-day buckets for the same selected range.
+        sourceCleanedDatasetVersionId:
+          type: string
+          description: Required when outcomeStatus is success or partial_forecast_missing; omitted when outcomeStatus is forecast_only.
+        sourceForecastVersionId:
+          type: string
+        resultMode:
+          type: string
+          enum: [chart, table, chart_and_table]
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemandComparisonSeries'
+        missingCombinations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissingCombination'
+        message:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    WeeklyForecastBackedComparisonResponse:
+      type: object
+      required:
+        - comparisonRequestId
+        - filters
+        - outcomeStatus
+        - forecastProduct
+        - forecastGranularity
+        - sourceWeeklyForecastVersionId
+        - message
+        - resultMode
+        - comparisonGranularity
+        - series
+      properties:
+        comparisonRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedComparisonFilters'
+        outcomeStatus:
+          type: string
+          enum: [success, forecast_only, partial_forecast_missing]
+        forecastProduct:
+          type: string
+          enum: [weekly_7_day]
+          description: Returned only when the selected range is fully covered by the active UC-04 forecast product and the active UC-03 forecast product cannot satisfy the same selected range.
+        forecastGranularity:
+          type: string
+          enum: [daily]
+        comparisonGranularity:
+          type: string
+          enum: [daily, weekly]
+          description: `weekly` is allowed only for `weekly_7_day`; `daily` is allowed only when historical data can align to calendar-day buckets for the same selected range.
+        sourceCleanedDatasetVersionId:
+          type: string
+          description: Required when outcomeStatus is success or partial_forecast_missing; omitted when outcomeStatus is forecast_only.
+        sourceWeeklyForecastVersionId:
+          type: string
+        resultMode:
+          type: string
+          enum: [chart, table, chart_and_table]
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemandComparisonSeries'
+        missingCombinations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissingCombination'
+        message:
+          type: string
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    DemandComparisonFailureResponse:
+      type: object
+      required: [comparisonRequestId, filters, outcomeStatus, message]
+      properties:
+        comparisonRequestId:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SelectedComparisonFilters'
+        outcomeStatus:
+          type: string
+          enum: [historical_retrieval_failed, forecast_retrieval_failed, alignment_failed]
+        message:
+          type: string
+          description: Identifies the explicit comparison-execution failure class without requiring inference from logs.
+        summary:
+          type: string
+          description: Operationally necessary summary only; never raw source payloads, feature matrices, secrets, or model internals.
+    SelectedComparisonFilters:
+      type: object
+      required: [serviceCategories, timeRangeStart, timeRangeEnd]
+      properties:
+        serviceCategories:
+          type: array
+          items:
+            type: string
+        geographyLevel:
+          type: string
+        geographyValues:
+          type: array
+          items:
+            type: string
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+    HighVolumeWarning:
+      type: object
+      required: [shown, acknowledged]
+      properties:
+        shown:
+          type: boolean
+        acknowledged:
+          type: boolean
+        message:
+          type: string
+    DemandComparisonSeries:
+      type: object
+      required: [seriesType, serviceCategory, points]
+      properties:
+        seriesType:
+          type: string
+          enum: [historical, forecast]
+        serviceCategory:
+          type: string
+        geographyKey:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/DemandComparisonPoint'
+    DemandComparisonPoint:
+      type: object
+      required: [bucketStart, bucketEnd, value]
+      properties:
+        bucketStart:
+          type: string
+          format: date-time
+        bucketEnd:
+          type: string
+          format: date-time
+        value:
+          type: number
+          minimum: 0
+    MissingCombination:
+      type: object
+      required: [serviceCategory, missingSource, message]
+      properties:
+        serviceCategory:
+          type: string
+        geographyKey:
+          type: string
+        missingSource:
+          type: string
+          enum: [forecast]
+        message:
+          type: string
+    DemandComparisonRenderEvent:
+      type: object
+      required: [renderStatus]
+      properties:
+        renderStatus:
+          type: string
+          enum: [rendered, render_failed]
+        failureReason:
+          type: string
+          description: Required when renderStatus is render_failed.
+    DemandComparisonRenderEventResponse:
+      type: object
+      required: [comparisonRequestId, recordedOutcomeStatus]
+      properties:
+        comparisonRequestId:
+          type: string
+        recordedOutcomeStatus:
+          type: string
+          enum: [rendered, render_failed]
+        message:
+          type: string
+          description: Optional summary of the accepted render outcome for the authenticated comparison request owner or authorized backend actor.

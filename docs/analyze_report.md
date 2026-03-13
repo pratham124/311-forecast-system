@@ -95,6 +95,7 @@ For this analysis, there were inconsistencies present. For C1, I prompted Codex 
 
 ## Use Case 4
 ### Specification Analysis Report
+
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|
 | C1 | Constitution Alignment | CRITICAL | constitution.md:96-98, spec.md:67-110 | Spec does not explicitly
@@ -122,6 +123,7 @@ In this analysis, some critical issues were brought up. C1-C3 all address consti
 
 ## Use Case 5
 ### Specification Analysis Report
+
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|
 | C1 | Constitution Alignment | CRITICAL | constitution.md:96, spec.md:77, plan.md:8 | The constitution requires every spec to identify required data sources, external integrations, forecast horizon, and uncertainty outputs. UC-05's spec names the uncertainty set but does not explicitly publish the upstream Edmonton 311 lineage, UC-02 cleaned dataset dependency, or the supported daily/weekly forecast products. | Add explicit spec requirements/assumptions for the approved cleaned dataset lineage, reused UC-03/UC-04 forecast products, and supported forecast products/horizons. |
@@ -134,6 +136,7 @@ In this analysis, some critical issues were brought up. For C1, we prompted Code
 
 ## Use Case 6
 ### Specification Analysis Report
+
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|
 | C1 | Constitution Alignment | CRITICAL | spec.md:8 | The spec does not identify required data sources or
@@ -154,6 +157,7 @@ In this analysis, some critical issues were brought up. C1 addresses a constitut
 
 ## Use Case 7
 ### Specification Analysis Report
+
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|
 | C1 | Constitution Alignment | CRITICAL | spec.md:8, plan.md:22, tasks.md:134 | UC-07 artifacts trace to
@@ -171,4 +175,24 @@ tasks if needed. |
 UC-02 approved cleaned-dataset lineage, but the spec only says “approved historical 311 demand data already
 stored.” | Make the UC-02 lineage dependency explicit in the spec’s governing dependencies or assumptions. |
 
-In this analysis, C1 presents a critical constitution violation that we fixed via prompting. There are also two inconsistencies I1 and I2 related to authentication and approved data storage between our use case and spec/plan. We prompted Codex to update the spec/plan to fix these inconsistencies. For A1, this is a valid abmiguity when the planner decides to ignore the warning. This should be explicitly defined, so we prompted to fix this as well.
+In this analysis, C1 presents a critical constitution violation that we fixed via prompting. There are also two inconsistencies I1 and I2 related to authentication and approved data storage between our use case and spec/plan. We prompted Codex to update the spec/plan to fix these inconsistencies. For A1, this is a valid ambiguity when the planner decides to ignore the warning. This should be explicitly defined, so we prompted to fix this as well.
+
+## Use Case 8
+### Specification Analysis Report
+
+ | ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| C1 | Constitution Alignment | CRITICAL | constitution.md, spec.md:110, tasks.md:27 | The constitution requires every task list to include explicit observability work. FR-014 requires logging outcomes, but tasks.md has no explicit
+logging/observability implementation or test task. | Add explicit backend observability tasks and tests for request lifecycle, warning, missing-data, retrieval-failure, alignment-failure, and render-failure logging. |
+| E1 | Coverage Gap | HIGH | spec.md:137, tasks.md | SC-001 requires usability validation with planners, but there is no task covering usability testing, scripted UX validation, or evidence capture. | Add a task for usability
+validation or revise the success criterion to match available validation work. |
+| E2 | Coverage Gap | HIGH | spec.md:138, plan.md:18, tasks.md | SC-002 defines a 10-second performance target, but there is no performance test, instrumentation, or threshold-validation task. | Add tasks for timing instrumentation
+and an integration/performance check for the normal-threshold request path. |
+| I1 | Inconsistency | MEDIUM | plan.md:142, spec.md:87, tasks.md:63 | The plan says to provide a context endpoint “if needed,” while the spec requires authenticated comparison context retrieval and the tasks implement that endpoint
+unconditionally. | Make the plan deterministic: either require the context endpoint or remove it from tasks/spec. |
+| I2 | Inconsistency | MEDIUM | plan.md:66, tasks.md:69 | The plan’s frontend structure shows top-level frontend/src/pages/, but tasks place the page under frontend/src/features/demand-comparisons/pages/. | Align the plan structure
+with feature-local pages, or move the page task to the planned top-level path. |
+| D1 | Duplication | LOW | spec.md:108, spec.md:109 | FR-012 already requires blocking results on alignment failure; FR-013 partially repeats that while also adding display-failure handling. | Keep FR-013 focused on render/display
+failure, or explicitly cross-reference FR-012 to avoid overlap. |
+
+For this analysis, there were inconsistencies present. For C1, I prompted Codex to add an explicit backend observability tasks and tests for request lifecycle, warning, missing-data, retrieval-failure, alignment-failure, and render-failure logging. For E1, I prompted Codex to add a task for usability validation. For E2, I prompted Codex to Add tasks for timing instrumentation and an integration/performance check for the normal-threshold request path. For I1, I prompted Codex to require the context endpoint. FOr I2, I prompted Codex to align the tasks frontend structure with the plan. D1 can be left as it is.

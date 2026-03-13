@@ -175,7 +175,7 @@ Question 1: How should UC-06 define the evaluation scope across forecast product
 
 Response: Chose Option C since daily and weekly forecasts represent different horizons, so they should be evaluated separately.
 
-### Use Case 7
+## Use Case 7
 ### Question 1
 Question 1: How should UC-07 define the geographic filtering scope for historical demand exploration?
 
@@ -188,3 +188,26 @@ Question 1: How should UC-07 define the geographic filtering scope for historica
 | Short | Provide a different short answer (<=5 words) |
 
 Response: Chose Option B as we should support the geography levels that are available and consistent in our data source.
+
+## Use Case 8
+### Question 1
+Question 1: When the planner selects multiple categories or geographies, and forecast data exists for only some of them, what should the system do?
+
+|--------|-------------|
+  | A | Fail the entire request if any selected category or geography is missing data. |
+  | B | Show partial comparison results for available combinations and explicitly identify the missing combinations. |
+  | C | Automatically drop missing combinations without calling them out to the planner. |
+  | Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option B as we should show partial comparison results for available combinations and explicitly identify the missing combinations.
+
+### Question 2
+Question 2: If some of the selected historical and forecast data cannot be aligned to the same category or geographic definitions, should the system still show a partial comparison or block the comparison entirely?
+
+|--------|-------------|
+  | A | Show an error state and do not display the comparison if any selected historical and forecast data cannot be aligned to common definitions. |
+  | B | Show only the combinations that can be aligned and silently omit the rest. |
+  | C | Show only the combinations that can be aligned and explicitly identify the excluded combinations. |
+  | Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option A as we should fail the comparison when selected data cannot be aligned to the same category or geographic definitions. That avoids presenting partial matches that could look valid but distort planning decisions.
