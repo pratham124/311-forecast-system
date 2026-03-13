@@ -1,0 +1,624 @@
+openapi: 3.1.0
+info:
+  title: Surge Alerts API
+  version: 0.1.0
+  description: >
+    Typed operational contracts for UC-11 abnormal-demand surge evaluation
+    replay, surge-evaluation review, and surge-notification event retrieval.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/surge-alerts/evaluations:
+    post:
+      summary: Trigger a manual surge evaluation replay for a successful ingestion run
+      operationId: triggerSurgeEvaluation
+      tags:
+        - SurgeAlerts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurgeEvaluationTriggerRequest'
+      responses:
+        '202':
+          description: Evaluation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeEvaluationTriggerResponse'
+        '400':
+          description: Invalid evaluation trigger request
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to trigger surge evaluation
+    get:
+      summary: List surge evaluation runs for operational review
+      operationId: listSurgeEvaluations
+      tags:
+        - SurgeAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: ingestionRunId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/SurgeEvaluationRunStatus'
+        - in: query
+          name: createdAfter
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: createdBefore
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Surge evaluation runs returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeEvaluationRunListResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view surge evaluations
+  /api/v1/surge-alerts/evaluations/{surgeEvaluationRunId}:
+    get:
+      summary: Get one surge evaluation run with candidate outcomes
+      operationId: getSurgeEvaluation
+      tags:
+        - SurgeAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: surgeEvaluationRunId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Surge evaluation run returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeEvaluationRunDetail'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view this surge evaluation
+        '404':
+          description: Surge evaluation run not found
+  /api/v1/surge-alerts/events:
+    get:
+      summary: List surge notification events for operational review
+      operationId: listSurgeAlertEvents
+      tags:
+        - SurgeAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: serviceCategory
+          schema:
+            type: string
+        - in: query
+          name: geographyValue
+          schema:
+            type: string
+        - in: query
+          name: forecastProduct
+          schema:
+            $ref: '#/components/schemas/ForecastProduct'
+        - in: query
+          name: overallDeliveryStatus
+          schema:
+            $ref: '#/components/schemas/OverallDeliveryStatus'
+        - in: query
+          name: createdAfter
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: createdBefore
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Surge alert events returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeAlertEventListResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view surge alert events
+  /api/v1/surge-alerts/events/{surgeNotificationEventId}:
+    get:
+      summary: Get one surge alert event with candidate and channel-attempt details
+      operationId: getSurgeAlertEvent
+      tags:
+        - SurgeAlerts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: surgeNotificationEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Surge alert event returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeAlertEvent'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view this surge alert event
+        '404':
+          description: Surge alert event not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SurgeEvaluationTriggerRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - ingestionRunId
+      properties:
+        ingestionRunId:
+          type: string
+          format: uuid
+    SurgeEvaluationTriggerResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeEvaluationRunId
+        - status
+        - triggerSource
+      properties:
+        surgeEvaluationRunId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - accepted
+        triggerSource:
+          type: string
+          enum:
+            - manual_replay
+        acceptedAt:
+          type: string
+          format: date-time
+    SurgeEvaluationRunListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurgeEvaluationRunSummary'
+    SurgeEvaluationRunSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeEvaluationRunId
+        - ingestionRunId
+        - triggerSource
+        - status
+        - evaluatedScopeCount
+        - candidateCount
+        - confirmedCount
+        - notificationCreatedCount
+        - startedAt
+      properties:
+        surgeEvaluationRunId:
+          type: string
+          format: uuid
+        ingestionRunId:
+          type: string
+          format: uuid
+        triggerSource:
+          $ref: '#/components/schemas/TriggerSource'
+        status:
+          $ref: '#/components/schemas/SurgeEvaluationRunStatus'
+        evaluatedScopeCount:
+          type: integer
+          minimum: 0
+        candidateCount:
+          type: integer
+          minimum: 0
+        confirmedCount:
+          type: integer
+          minimum: 0
+        filteredCount:
+          type: integer
+          minimum: 0
+        suppressedCount:
+          type: integer
+          minimum: 0
+        detectorFailureCount:
+          type: integer
+          minimum: 0
+        notificationCreatedCount:
+          type: integer
+          minimum: 0
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        failureSummary:
+          type: string
+          nullable: true
+    SurgeEvaluationRunDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeEvaluationRunId
+        - ingestionRunId
+        - triggerSource
+        - status
+        - evaluatedScopeCount
+        - candidateCount
+        - confirmedCount
+        - notificationCreatedCount
+        - startedAt
+        - candidates
+      properties:
+        surgeEvaluationRunId:
+          type: string
+          format: uuid
+        ingestionRunId:
+          type: string
+          format: uuid
+        triggerSource:
+          $ref: '#/components/schemas/TriggerSource'
+        status:
+          $ref: '#/components/schemas/SurgeEvaluationRunStatus'
+        evaluatedScopeCount:
+          type: integer
+          minimum: 0
+        candidateCount:
+          type: integer
+          minimum: 0
+        confirmedCount:
+          type: integer
+          minimum: 0
+        filteredCount:
+          type: integer
+          minimum: 0
+        suppressedCount:
+          type: integer
+          minimum: 0
+        detectorFailureCount:
+          type: integer
+          minimum: 0
+        notificationCreatedCount:
+          type: integer
+          minimum: 0
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        failureSummary:
+          type: string
+          nullable: true
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurgeCandidateReview'
+    SurgeCandidateReview:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeCandidateId
+        - serviceCategory
+        - evaluationWindowStart
+        - evaluationWindowEnd
+        - actualDemandValue
+        - forecastP50Value
+        - residualValue
+        - candidateStatus
+        - detectedAt
+      properties:
+        surgeCandidateId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        actualDemandValue:
+          type: number
+        forecastP50Value:
+          type: number
+        residualValue:
+          type: number
+        residualZScore:
+          type: number
+          nullable: true
+        percentAboveForecast:
+          type: number
+          nullable: true
+        candidateStatus:
+          $ref: '#/components/schemas/CandidateStatus'
+        confirmationOutcome:
+          $ref: '#/components/schemas/ConfirmationOutcome'
+          nullable: true
+        surgeNotificationEventId:
+          type: string
+          format: uuid
+          nullable: true
+        failureReason:
+          type: string
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+        detectedAt:
+          type: string
+          format: date-time
+    SurgeAlertEventListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurgeAlertEventSummary'
+    SurgeAlertEventSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeNotificationEventId
+        - serviceCategory
+        - forecastProduct
+        - actualDemandValue
+        - forecastP50Value
+        - residualValue
+        - residualZScore
+        - percentAboveForecast
+        - overallDeliveryStatus
+        - createdAt
+      properties:
+        surgeNotificationEventId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastProduct:
+          $ref: '#/components/schemas/ForecastProduct'
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        actualDemandValue:
+          type: number
+        forecastP50Value:
+          type: number
+        residualValue:
+          type: number
+        residualZScore:
+          type: number
+        percentAboveForecast:
+          type: number
+          nullable: true
+        overallDeliveryStatus:
+          $ref: '#/components/schemas/OverallDeliveryStatus'
+        createdAt:
+          type: string
+          format: date-time
+    SurgeAlertEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - surgeNotificationEventId
+        - surgeEvaluationRunId
+        - ingestionRunId
+        - serviceCategory
+        - forecastProduct
+        - evaluationWindowStart
+        - evaluationWindowEnd
+        - actualDemandValue
+        - forecastP50Value
+        - residualValue
+        - residualZScore
+        - percentAboveForecast
+        - confirmationOutcome
+        - overallDeliveryStatus
+        - channelAttempts
+        - createdAt
+      properties:
+        surgeNotificationEventId:
+          type: string
+          format: uuid
+        surgeEvaluationRunId:
+          type: string
+          format: uuid
+        surgeCandidateId:
+          type: string
+          format: uuid
+        surgeDetectionConfigurationId:
+          type: string
+          format: uuid
+        ingestionRunId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastProduct:
+          $ref: '#/components/schemas/ForecastProduct'
+        forecastReferenceId:
+          type: string
+          format: uuid
+          nullable: true
+        evaluationWindowStart:
+          type: string
+          format: date-time
+        evaluationWindowEnd:
+          type: string
+          format: date-time
+        actualDemandValue:
+          type: number
+        forecastP50Value:
+          type: number
+        residualValue:
+          type: number
+        residualZScore:
+          type: number
+        percentAboveForecast:
+          type: number
+          nullable: true
+        zScoreThreshold:
+          type: number
+        percentAboveForecastFloor:
+          type: number
+        confirmationOutcome:
+          $ref: '#/components/schemas/ConfirmationOutcome'
+        overallDeliveryStatus:
+          $ref: '#/components/schemas/OverallDeliveryStatus'
+        correlationId:
+          type: string
+          nullable: true
+        followUpReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        failedChannelCount:
+          type: integer
+          minimum: 0
+        channelAttempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationChannelAttempt'
+    NotificationChannelAttempt:
+      type: object
+      additionalProperties: false
+      required:
+        - channelType
+        - attemptNumber
+        - attemptedAt
+        - status
+      properties:
+        channelType:
+          type: string
+          enum:
+            - email
+            - sms
+            - dashboard
+        attemptNumber:
+          type: integer
+          minimum: 1
+        attemptedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - succeeded
+            - failed
+        failureReason:
+          type: string
+          nullable: true
+        providerReference:
+          type: string
+          nullable: true
+    TriggerSource:
+      type: string
+      enum:
+        - ingestion_completion
+        - manual_replay
+    SurgeEvaluationRunStatus:
+      type: string
+      enum:
+        - running
+        - completed
+        - completed_with_failures
+    ForecastProduct:
+      type: string
+      enum:
+        - daily
+        - weekly
+    CandidateStatus:
+      type: string
+      enum:
+        - flagged
+        - below_candidate_threshold
+        - detector_failed
+    ConfirmationOutcome:
+      type: string
+      enum:
+        - confirmed
+        - filtered
+        - suppressed_active_surge
+        - failed
+    OverallDeliveryStatus:
+      type: string
+      enum:
+        - delivered
+        - partial_delivery
+        - retry_pending
+        - manual_review_required

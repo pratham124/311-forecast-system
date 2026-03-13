@@ -142,3 +142,15 @@ I prompted Codex to combine all the checklists into one. Majority of checklist i
 - [ ] CHK036 Are the terms “forecast window,” “forecast window type,” and “forecast window key” used consistently enough across spec and plan to support one canonical data and API vocabulary? [Consistency, Spec §FR-003, Plan §Data Model Direction, Data Model §ThresholdState]
 
 These are necessary, so I prompted to add this to the specification and plan.
+
+## Use Case 11
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-11; the following items were especially noteworthy:
+
+- [x] CHK002 Are requirements defined for how daily versus weekly forecast products are chosen when comparing newly ingested actual demand against the active P50 forecast for the same scope? This is checked because the spec, plan, and data model all make the daily-only forecast selection rule explicit for UC-11 surge evaluation.
+- [x] CHK010 Is the distinction between detector-stage candidate detection, dual-threshold confirmation, and active-surge suppression clear enough to avoid conflicting interpretations during implementation and review? This is checked because the spec separates candidate detection, confirmation, filtered outcomes, and suppression semantics cleanly.
+- [x] CHK012 Are delivery-success rules consistent between the spec’s successful-delivery wording and the plan or data-model distinction among `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required`? This is checked because the plan and data model define the delivery-status vocabulary and the review flow consistently enough for implementation.
+- [x] CHK023 Are data and concurrency requirements defined for overlapping ingestion completions or replay requests that evaluate the same scope while surge state is changing? This is checked because the surge-state model and task dependencies make the state-transition and suppression behavior explicit.
+- [x] CHK029 Are security requirements specific about role boundaries between recipients of surge notifications and administrators or operators allowed to trigger replays and inspect detailed event histories? This is checked because the plan and API contract keep replay and review endpoints authenticated and role-aware.
+
+These were all satisfied, so no additional checklist follow-up was needed.

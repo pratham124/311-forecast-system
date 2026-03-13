@@ -257,3 +257,37 @@ Question 2: If an operational manager has multiple configured notification chann
 | Short | Provide a different short answer (<=5 words). |
 
 Response: Choose Option A as we should evaluate all configured channels for the operational manager and treat delivery as successful if at least one channel succeeds, while recording any channel-specific failures. This gives the best operational resilience without requiring every channel to be perfectly available.
+
+## Use Case 11
+### Question 1
+Question 1: Which surge detection approach should storm mode use, given that LightGBM is already the system's core model?
+
+|--------|-------------|
+| A | Use the active LightGBM P50 forecast residual and confirm surges only when both a residual z-score threshold and a percent-above-forecast floor pass. |
+| B | Use the residual z-score threshold alone to confirm abnormal demand surges. |
+| C | Train and serve a separate storm-mode machine learning detector. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option A as LightGBM is the core model and storm mode should use a residual z-score over a rolling baseline plus a percent-above-forecast floor as a dual-check. A z-score alone cannot distinguish a meaningful surge from noisy residuals when forecast values are very low.
+
+### Question 2
+Question 2: Should UC-11 reuse UC-10 threshold-alert persistence or store surge records separately?
+
+|--------|-------------|
+| A | Reuse UC-10 threshold-alert tables for surge candidates, events, and delivery attempts. |
+| B | Store surge candidates, confirmations, events, and delivery attempts in separate surge-specific tables. |
+| C | Share notification-event tables but split only detector and state records. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option B as surge events should use separate surge-specific tables and not share UC-10 persistence. Surge events have different trigger lineage and confirmation semantics from threshold alerts.
+
+### Question 3
+Question 3: When should surge detection run for UC-11?
+
+|--------|-------------|
+| A | Run on a fixed cron schedule independent of ingestion completion. |
+| B | Trigger after each successful UC-01 ingestion run completes. |
+| C | Run as a real-time streaming detector outside the ingestion workflow. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option B as surge detection should run after each successful UC-01 ingestion run. This keeps surge checks grounded in the most recent ingested actuals without adding separate scheduling overhead.
