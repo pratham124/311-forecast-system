@@ -341,6 +341,21 @@ Response: Choose Option A as the drill-down should preserve any reliable context
 ## Use Case 13
 
 The original `/speckit.clarify` question text and option tables for UC-13 were not preserved in the repository, and no additional ambiguities remain beyond the accepted clarifications already captured in `spec.md`.
+
+## Use Case 18
+
+### Question 1
+Question 1:
+
+| Option | Description |
+|--------|-------------|
+| A | Any signed-in user can access the user guide |
+| B | Only specific roles can access the user guide |
+| C | The guide is public, even without sign-in |
+| Short | Provide a different short answer (<=5 words) |
+
+Response: Choose Option A as the spec currently assumes the user guide is broadly available to any product user, which is the lowest-friction and lowest-risk default for internal help content unless there is a compliance reason to restrict it.
+
 ## Use Case 19
 ### Question 1
 Question 1: Who is allowed to submit feedback/bug reports?

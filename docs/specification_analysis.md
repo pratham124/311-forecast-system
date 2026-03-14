@@ -213,6 +213,22 @@ Overall, the generated spec.md repeats the flows from the use case. The only cha
 One issue in the original use case was that deduplication and frequency behavior appeared in the main flow but remained open-ended in the related information, and the generated spec fixes this by making scoped frequency or deduplication controls explicit per service category with optional geography. Another issue was that the use case implied channel selection but did not state whether zero-channel saves were valid, and the generated spec fixes this by requiring at least one supported notification channel before save.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008 cover authenticated configuration access, display of the shared active configuration, threshold scope rules, channel selection, and scoped frequency or deduplication controls. FR-009 through FR-014 cover validation of thresholds, required channel selection, unsupported-channel rejection, and prevention of invalid saves. FR-015 through FR-024 cover successful storage, confirmation, logging, storage-failure handling, active-configuration continuity, future-alert application of the saved configuration, scope distinction, persisted preferences, and scoped evaluation of frequency or deduplication rules.
+
+## Use Case 18
+
+Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
+
+1. Acceptance Scenario 1 (user opens the guide and readable content is shown) -> Main Success Scenario Steps 1–3
+2. Acceptance Scenario 2 (user can read the guide once loading completes without error) -> Main Success Scenario Steps 2–3
+3. Acceptance Scenario 3 (user navigates between guide sections successfully) -> Main Success Scenario Step 4
+4. Acceptance Scenario 4 (user can continue navigating without reopening the guide) -> Main Success Scenario Step 4
+5. Acceptance Scenario 5 (successful guide access is logged) -> Main Success Scenario Step 5
+6. Acceptance Scenario 6 (documentation unavailable shows error and logs missing content) -> Extension 2a
+7. Acceptance Scenario 7 (rendering failure shows error state and logs failure) -> Extension 3a
+
+
+Additionally, the functional requirements are largely congruent to the use case, but it is not a pure restatement: it adds a signed-in-user access rule, stronger failure-display constraints, and a new requirement that error messaging explain the issue is not caused by user navigation.
+
 ## Use Case 19
 
 Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:

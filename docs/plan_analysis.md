@@ -74,6 +74,12 @@ Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 t
 The architectural decisions made in plan.md for UC-13 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-12 without redefining them, and introduces only six UC-13-specific entities: AlertConfigurationVersion, ActiveAlertConfigurationMarker, AlertConfigurationThresholdRule, AlertConfigurationChannelSelection, AlertConfigurationDeliveryPreference, and AlertConfigurationUpdateAttempt. This matches the interface in `./contracts/alert-configuration-api.yaml` and is congruent with the functional requirements in this use case, including authenticated access, shared active-configuration replacement, validation-rejection handling, and storage-failure continuity.
+
+## Use Case 18
+The architectural decisions made in plan.md for UC-18 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data.model.md is independent from other use cases and introduces four new UC-18 specific entities or read models: GuideSection, GuideAccessEvent, UserGuideView, GuideRenderOutcome. This matches the interface in `./contracts/user-guide-api.yaml` and is congruent with the functional requirements in this use case.
+
 ## Use Case 19
 The architectural decisions made in plan.md for UC-19 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
