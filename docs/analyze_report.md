@@ -328,6 +328,7 @@ traceability to UC-18 acceptance tests. For C2, I prompted Codex to add a task f
 | A1 | Ambiguity | MEDIUM | spec.md:64, plan.md:39, tasks.md:53-58,91-97 | The spec identifies duplicate submissions as an edge case but never states the intended behavior. The plan quietly decides duplicates should be kept as separate reports, yet no requirement or task traceability publishes that policy. | Add an explicit duplicate-handling requirement so the planned non-blocking behavior is traceable and reviewable. |
 
 For this analysis, I would treat the two high-severity items as real blockers before implementation. UC-19 currently misses task coverage for the user-visible entry point into the feedback flow, and the submission outcome semantics drift between the use case, plan, and API contract around storage failure. The medium findings are worth tracking next: the measurable success criteria are not yet backed by verification work, and duplicate-submission handling is still only an implicit planning decision.
+In this analysis, I1 brings up a valuable point that the spec and plan use different vocabulary when referring to the states. We prompted Codex to fix this issue. Additionally, I2 shows that the the plan and tasks use different naming for the API endpoint. This is an easy fix as well and we prompted Codex to fix this.
 
 ## Use Case 15
 ### Specification Analysis Report
