@@ -43,31 +43,31 @@ The task sequence for UC-10 makes sense and there are no blocking dependencies i
 
 ## Use Case 11
 
-The task sequence for UC-11 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-11 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement surge-notification foundations (threshold models, state tracking, run logging) -> implement abnormal-surge detection (residual and z-score evaluation) -> implement notification triggering with suppression while surge remains active -> implement failure handling and delivery/audit traceability -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 12
 
-The task sequence for UC-12 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-12 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend + visualization contracts -> implement alert-detail foundations (shared models/repos/auth/router) -> implement forecast distribution retrieval for selected alerts -> implement driver-attribution retrieval and aggregation -> implement anomaly-context retrieval and combined detail rendering -> implement partial-data and failure handling with acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 13
 
-The task sequence for UC-13 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-13 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend -> implement alert-configuration foundations (schemas, repositories, route wiring, auth) -> implement threshold updates across category and geography scopes -> implement notification-channel and frequency-rule configuration -> implement validation checks (range constraints and required channels) -> implement persistence plus preserve-prior-config behavior on invalid updates -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 14
 
-The task sequence for UC-14 makes sense and there are no blocking dependency issues in the implementation of this task; the general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-14 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend + evaluation contracts -> implement historical forecast and actual-demand retrieval with time alignment -> implement forecast-accuracy metric computation (for example MAE/RMSE/MAPE) -> implement comparison visualization and trend summaries -> implement missing-data and retrieval-failure handling -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 15
 
-The task sequence for UC-15 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-15 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend + weather/event ingestion client -> implement weather and major-event monitoring foundations -> implement storm-mode trigger detection and validation -> implement forecast uncertainty-band widening during storm mode -> implement alert-sensitivity adjustments by category/geography -> implement fallback to standard forecasting/alerts when weather data is missing or invalid -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 16
 
-The task sequence for UC-16 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-16 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup backend/frontend -> implement forecast-confidence foundations (quality signals + typed contracts) -> implement degraded-confidence detection (missing inputs, shocks, anomaly flags) -> implement UI confidence indicator rendering (banner/icon/message) -> implement signal-unavailable and render-failure handling -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 17
 
-The task sequence for UC-17 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+The task sequence for UC-17 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup public-facing backend/frontend surface -> implement approved-forecast retrieval for public view -> implement public-safety filtering and sanitization of restricted details -> implement category-level demand visualization and summaries -> implement missing-forecast and render-failure handling with clear user-facing states -> implement acceptance tests. So we can validate that the tasks for this use case are correct.
 
 ## Use Case 18
 
