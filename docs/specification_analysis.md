@@ -255,6 +255,23 @@ Overall, the generated spec.md repeats the flows from the use case. The main fix
 One issue in the original use case was that weather conditions and major events were described too broadly, while the generated spec fixes this through clarifications by making storm-mode activation scope-limited and weather-triggered only. Another issue was that the original forecast-adjustment failure path only said to use standard uncertainty, while the generated spec fixes this by requiring both uncertainty and alert sensitivity to revert to baseline for the affected scope.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-009 cover weather monitoring, trigger validation, scope-limited activation, uncertainty adjustment, alert sensitivity adjustment, notification delivery, and lifecycle logging. FR-010 through FR-017 cover weather unavailability, rejected triggers, adjustment-failure reversion, notification-delivery retry state, traceability, authenticated diagnostics, and scope isolation.
+## Use Case 16
+
+Overall, the generated spec.md repeats the flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. The acceptance tests and specification map cleanly to UC-16 as follows:
+
+1. AT-01 (forecast visualization loads for the operational manager) -> Main Success Scenario Step 1
+2. AT-02 (system retrieves forecast data and associated confidence/quality signals) -> Main Success Scenario Step 2
+3. AT-03 (degraded confidence conditions are detected from signals) -> Main Success Scenario Step 3
+4. AT-04 (system prepares a visual confidence indicator for degraded confidence) -> Main Success Scenario Step 4
+5. AT-05 (UI displays forecast together with the degradation indicator) -> Main Success Scenario Step 5 and Success End Condition
+6. AT-06 (system logs display of degraded confidence status) -> Main Success Scenario Step 6
+7. AT-07 (confidence signals unavailable: forecast shown without indicator and missing confidence is logged) -> Extension 2a
+8. AT-08 (false degradation signal is dismissed and forecast is shown normally) -> Extension 3a
+9. AT-09 (visualization rendering error: indicator not displayed and failure is logged) -> Extension 4a
+
+One issue in the original use case was that the degradation or materiality thresholds were still open-ended, and the generated spec fixes this through clarification by requiring one centrally managed rule set for degraded-confidence assessment. Another issue was that the UI explanation level and render-failure behavior were not yet finalized, and the generated spec fixes this by requiring a clear generic warning with optional reason categories plus continued forecast visibility when the indicator cannot be rendered.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008a cover authenticated access, forecast and signal retrieval, degraded-confidence evaluation, centralized materiality rules, warning preparation, display, and non-blocking degraded-warning communication. FR-009 through FR-015 cover success-path observability, missing-signal fallback, false-signal dismissal, warning suppression when confidence cannot be confirmed, render-failure handling, continued forecast visibility, and correlated request tracing.
 ## Use Case 18
 
 Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
