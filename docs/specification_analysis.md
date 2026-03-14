@@ -272,6 +272,24 @@ Overall, the generated spec.md repeats the flows from the use case. The only cha
 One issue in the original use case was that the degradation or materiality thresholds were still open-ended, and the generated spec fixes this through clarification by requiring one centrally managed rule set for degraded-confidence assessment. Another issue was that the UI explanation level and render-failure behavior were not yet finalized, and the generated spec fixes this by requiring a clear generic warning with optional reason categories plus continued forecast visibility when the indicator cannot be rendered.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008a cover authenticated access, forecast and signal retrieval, degraded-confidence evaluation, centralized materiality rules, warning preparation, display, and non-blocking degraded-warning communication. FR-009 through FR-015 cover success-path observability, missing-signal fallback, false-signal dismissal, warning suppression when confidence cannot be confirmed, render-failure handling, continued forecast visibility, and correlated request tracing.
+
+## Use Case 17
+
+Overall, the generated spec.md mostly repeats the flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. The acceptance tests and specification map cleanly to UC-17 as follows:
+
+1. AT-01 (public forecast portal loads) -> Main Success Scenario Step 1
+2. AT-02 (system retrieves approved forecast demand data by service category) -> Main Success Scenario Step 2
+3. AT-03 (system prepares data for public visualization) -> Main Success Scenario Step 3
+4. AT-04 (charts/summaries render showing expected demand levels by category) -> Main Success Scenario Steps 4-5 and Success End Condition
+5. AT-05 (successful public display is logged) -> Main Success Scenario Step 6
+6. AT-06 (forecast data unavailable: system logs missing data and displays error message) -> Extension 2a and Failed End Condition
+7. AT-07 (public-safety filtering fails: system sanitizes data and displays safe summary) -> Extension 3a
+8. AT-08 (visualization rendering error: system logs failure and displays error state) -> Extension 4a and Failed End Condition
+
+One issue in the original use case was that authentication expectations for the public portal were left open, and the generated spec fixes this through clarification by making UC-17 explicitly anonymous. Another issue was that the use case did not define the approved forecast source, minimum public payload, or incomplete-coverage behavior precisely enough, and the generated spec fixes this by constraining UC-17 to the current approved public-safe forecast version, a limited category-level response contract, and explicit incomplete-coverage messaging.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-007a cover anonymous portal access, approved public-safe forecast retrieval, public visualization preparation, public-safe output constraints, filtering, sanitization, and the minimum allowed response fields. FR-008 through FR-014 cover successful retrieval and display logging, missing-data handling, render-failure handling, non-misleading failure behavior, approved-public-safe disclosure rules, incomplete-category-coverage handling, and internally consistent single-version responses.
+
 ## Use Case 18
 
 Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:

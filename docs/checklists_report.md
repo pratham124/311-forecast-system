@@ -227,6 +227,18 @@ I prompted Codex to combine all the checklists into one. All checklist items wer
 
 These were all satisfied, so no additional checklist follow-up was needed.
 
+## Use Case 17
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-17; the following items were especially noteworthy:
+
+- [x] CHK003 Are the required fields of the public-safe payload fully specified, including service category, demand value or demand-level summary, forecast window label, published timestamp, and coverage messaging? This is checked because the spec, data model, and contract all define one constrained category-level public payload.
+- [x] CHK013 Are anonymous-access assumptions consistent with the API contract and plan so that no hidden authentication, authorization, or session dependency is introduced on the public read path? This is checked because the spec, plan, and contract consistently treat UC-17 as an anonymous public portal.
+- [x] CHK014 Are the rules for sanitization and allowed output fields consistent between the spec, data model, and OpenAPI schema so restricted details cannot leak through alternative property names or nullable fields? This is checked because the finalized artifacts keep one public-safe vocabulary and explicitly exclude restricted operational detail from the returned payload.
+- [x] CHK018 Are primary UX scenarios defined for successful viewing, sanitized viewing, incomplete-coverage viewing, unavailable data, and client-side render failure? This is checked because the user stories, implementation plan, and contract cover success, sanitization, incomplete coverage, missing-data, and render-failure states.
+- [x] CHK036 Are the terms “approved public-safe forecast version,” “public forecast visualization payload,” “sanitization outcome,” “portal status,” and “display outcome” used consistently enough across spec, plan, data model, and contract to support one canonical public API vocabulary? This is checked because those artifacts use the same UC-17 vocabulary end to end.
+
+These were all satisfied, so no additional checklist follow-up was needed.
+
 ## Use Case 19
 For this use case, all checklist items were complete and validated. This makes sense considering we have explicitly defined UC-19 and already performed clarifications to address the key gaps in our spec (feedback/bug report categorization, anonymous submission support). Additionally, the functionality in this use case is fairly simple. No changes needed to be addressed.
 
