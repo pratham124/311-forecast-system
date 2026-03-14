@@ -64,3 +64,8 @@ Furthermore, data_model.md reuses all shared entities from UC-01 through UC-09 w
 The architectural decisions made in plan.md for UC-11 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-10 without redefining them, and introduces seven new UC-11-specific entities: SurgeDetectionConfiguration, SurgeEvaluationRun, SurgeCandidate, SurgeConfirmationOutcome, SurgeState, SurgeNotificationEvent, and SurgeNotificationChannelAttempt. This matches the interface in `./contracts/surge-alerts-api.yaml` and is congruent with the functional requirements in this use case.
+
+## Use Case 12
+The architectural decisions made in plan.md for UC-12 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-11 without redefining them, and introduces five new UC-12-specific entities or read models: AlertDetailLoadRecord, ForecastDistributionContext, DriverAttributionContext, AnomalyContextWindow, and AlertDetailView. This matches the interface in `./contracts/alert-detail-context-api.yaml` and is congruent with the functional requirements in this use case.

@@ -173,3 +173,24 @@ Overall, the generated spec.md repeats the flows from the use case. The acceptan
 8. AT-08 (delivery failure is logged and marked for retry or manual review) -> Extension 5a and Failed End Condition
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-007 cover ingestion-triggered evaluation, residual-based candidate detection, dual-threshold confirmation, and the rule that no notification is created before confirmation. FR-008 through FR-011 cover surge event contents, notification delivery, and logging. FR-012 through FR-018 cover detector failures, filtered outcomes, delivery-failure handling, surge-specific persistence, traceability, and optional geography handling. FR-019 through FR-021 cover duplicate suppression and re-arming behavior for repeated surges on the same scope.
+
+## Use Case 12
+
+Overall, the generated spec.md repeats the flows from the use case. The acceptance tests and specification map cleanly to UC-12 as follows:
+
+1. AT-01 (alert list loads and allows selecting an alert) -> Main Success Scenario Steps 1-2
+2. AT-02 (system retrieves forecast distribution data for the selected alert) -> Main Success Scenario Step 3
+3. AT-03 (system retrieves driver attribution data for the selected alert) -> Main Success Scenario Step 4
+4. AT-04 (system retrieves anomaly context for the selected alert) -> Main Success Scenario Step 5
+5. AT-05 (system prepares combined data for visualization) -> Main Success Scenario Step 6
+6. AT-06 (system renders detailed views and displays alert details) -> Main Success Scenario Steps 7-8 and Success End Condition
+7. AT-07 (successful alert detail rendering is logged) -> Main Success Scenario Step 9 and Success End Condition
+8. AT-08 (forecast distribution data unavailable: show available context without distribution view) -> Extension 3a
+9. AT-09 (driver attribution data unavailable: show alert without driver breakdown) -> Extension 4a
+10. AT-10 (anomaly context unavailable: show available alert information only) -> Extension 5a
+11. AT-11 (visualization rendering error shows error state and logs failure) -> Extension 7a and Failed End Condition
+12. AT-12 (retrieval failure shows error state and logs failure) -> Failed End Condition
+
+One issue in the original use case was that the open issues around driver attribution scope and anomaly context window were not yet finalized; the generated spec fixes this through clarifications by making the top 5 drivers and previous 7 days explicit. Another issue was that retrieval failure existed only at the failed-end-condition level rather than as a detailed requirement, and the generated spec fixes this with explicit failure-handling requirements and observability rules.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-009 cover authenticated alert selection, alert-detail context loading, retrieval of distribution, drivers, and anomalies, preparation, rendering, display, and successful logging. FR-010 through FR-013b cover single-component and multi-component unavailable cases, including the no-reliable-component unavailable-detail state. FR-014 through FR-016 cover retrieval failures, rendering failures, and correlated operational logging.

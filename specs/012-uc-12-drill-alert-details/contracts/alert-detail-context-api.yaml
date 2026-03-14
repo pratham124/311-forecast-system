@@ -1,0 +1,355 @@
+openapi: 3.1.0
+info:
+  title: Alert Detail Context API
+  version: 0.1.0
+  description: >
+    Typed operational contracts for UC-12 alert drill-down, including complete,
+    partial, and error detail retrieval plus final render-outcome reporting.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/alert-details/{alertSource}/{alertId}:
+    get:
+      summary: Retrieve normalized drill-down context for a selected alert
+      operationId: getAlertDetailContext
+      tags:
+        - AlertDetails
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: alertSource
+          required: true
+          schema:
+            $ref: '#/components/schemas/AlertSource'
+        - in: path
+          name: alertId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alert detail payload returned with rendered, partial, or error state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDetailResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view alert details
+        '404':
+          description: Selected alert not found
+  /api/v1/alert-details/{alertDetailLoadId}/render-events:
+    post:
+      summary: Record the final client render outcome for an alert-detail load
+      operationId: recordAlertDetailRenderEvent
+      tags:
+        - AlertDetails
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: alertDetailLoadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertDetailRenderEvent'
+      responses:
+        '202':
+          description: Render outcome accepted
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to report render outcomes
+        '404':
+          description: Alert-detail load not found
+        '422':
+          description: Invalid render event
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AlertSource:
+      type: string
+      enum:
+        - threshold_alert
+        - surge_alert
+    ViewStatus:
+      type: string
+      enum:
+        - loading
+        - rendered
+        - partial
+        - error
+    ComponentStatus:
+      type: string
+      enum:
+        - available
+        - unavailable
+        - failed
+    MissingOrFailedComponent:
+      type: string
+      enum:
+        - distribution
+        - drivers
+        - anomalies
+    AlertDetailResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - alertDetailLoadId
+        - alertSource
+        - alertId
+        - serviceCategory
+        - alertTriggeredAt
+        - viewStatus
+        - missingComponents
+        - failedComponents
+        - components
+      properties:
+        alertDetailLoadId:
+          type: string
+          format: uuid
+        alertSource:
+          $ref: '#/components/schemas/AlertSource'
+        alertId:
+          type: string
+          format: uuid
+        alertTitle:
+          type: string
+          nullable: true
+        serviceCategory:
+          type: string
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        alertTriggeredAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+          nullable: true
+        viewStatus:
+          $ref: '#/components/schemas/ViewStatus'
+        statusMessage:
+          type: string
+          nullable: true
+        missingComponents:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissingOrFailedComponent'
+        failedComponents:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissingOrFailedComponent'
+        components:
+          type: object
+          additionalProperties: false
+          required:
+            - distribution
+            - drivers
+            - anomalies
+          properties:
+            distribution:
+              $ref: '#/components/schemas/DistributionComponent'
+            drivers:
+              $ref: '#/components/schemas/DriverComponent'
+            anomalies:
+              $ref: '#/components/schemas/AnomalyComponent'
+      allOf:
+        - if:
+            properties:
+              viewStatus:
+                const: rendered
+          then:
+            properties:
+              missingComponents:
+                maxItems: 0
+              failedComponents:
+                maxItems: 0
+        - if:
+            properties:
+              viewStatus:
+                const: partial
+          then:
+            required:
+              - statusMessage
+        - if:
+            properties:
+              viewStatus:
+                const: error
+          then:
+            required:
+              - statusMessage
+    DistributionComponent:
+      type: object
+      additionalProperties: false
+      required:
+        - componentStatus
+      properties:
+        componentStatus:
+          $ref: '#/components/schemas/ComponentStatus'
+        forecastProduct:
+          type: string
+        forecastWindowStart:
+          type: string
+          format: date-time
+        forecastWindowEnd:
+          type: string
+          format: date-time
+        summaryValue:
+          type: number
+          nullable: true
+        bandLabels:
+          type: array
+          items:
+            type: string
+        curvePoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/DistributionPoint'
+        statusMessage:
+          type: string
+          nullable: true
+    DistributionPoint:
+      type: object
+      additionalProperties: false
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+          nullable: true
+        lowerBound:
+          type: number
+          nullable: true
+        upperBound:
+          type: number
+          nullable: true
+    DriverComponent:
+      type: object
+      additionalProperties: false
+      required:
+        - componentStatus
+        - rankLimit
+      properties:
+        componentStatus:
+          $ref: '#/components/schemas/ComponentStatus'
+        rankLimit:
+          type: integer
+          const: 5
+        drivers:
+          type: array
+          items:
+            $ref: '#/components/schemas/DriverContribution'
+        statusMessage:
+          type: string
+          nullable: true
+    DriverContribution:
+      type: object
+      additionalProperties: false
+      required:
+        - rank
+        - driverName
+        - contributionValue
+      properties:
+        rank:
+          type: integer
+          minimum: 1
+          maximum: 5
+        driverName:
+          type: string
+        contributionValue:
+          type: number
+        contributionDirection:
+          type: string
+          enum:
+            - positive
+            - negative
+            - mixed
+    AnomalyComponent:
+      type: object
+      additionalProperties: false
+      required:
+        - componentStatus
+        - windowStart
+        - windowEnd
+      properties:
+        componentStatus:
+          $ref: '#/components/schemas/ComponentStatus'
+        windowStart:
+          type: string
+          format: date-time
+        windowEnd:
+          type: string
+          format: date-time
+        anomalyPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyPoint'
+        statusMessage:
+          type: string
+          nullable: true
+    AnomalyPoint:
+      type: object
+      additionalProperties: false
+      required:
+        - timestamp
+        - anomalyType
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        anomalyType:
+          type: string
+        severity:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+        observedValue:
+          type: number
+          nullable: true
+        expectedValue:
+          type: number
+          nullable: true
+    AlertDetailRenderEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - renderStatus
+      properties:
+        renderStatus:
+          type: string
+          enum:
+            - rendered
+            - render-failed
+        failureReason:
+          type: string
+          nullable: true
+      allOf:
+        - if:
+            properties:
+              renderStatus:
+                const: render-failed
+          then:
+            required:
+              - failureReason
