@@ -1,0 +1,262 @@
+openapi: 3.1.0
+info:
+  title: Degraded Forecast Confidence API
+  version: 0.1.0
+  description: >
+    Typed contracts for UC-16 degraded-forecast-confidence retrieval and final
+    indicator-render observability.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-views/confidence-status:
+    get:
+      summary: Retrieve normalized degraded-confidence state for a forecast view
+      operationId: getForecastConfidenceView
+      tags:
+        - ForecastConfidence
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: forecastViewId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: forecastRunId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: forecastVersionId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: timeRangeStart
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: timeRangeEnd
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: serviceCategory
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyType
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyValue
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Confidence-display state returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastConfidenceView'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view forecast-confidence state
+        '422':
+          description: Invalid forecast scope parameters
+  /api/v1/forecast-views/confidence-status/{forecastConfidenceRequestId}/render-events:
+    post:
+      summary: Record the final client render outcome for a forecast-confidence request
+      operationId: recordForecastConfidenceRenderEvent
+      tags:
+        - ForecastConfidence
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: forecastConfidenceRequestId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForecastConfidenceRenderEventRequest'
+      responses:
+        '202':
+          description: Render outcome accepted
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to report render outcomes for the referenced request
+        '404':
+          description: Forecast-confidence request not found
+        '422':
+          description: Invalid render event
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AssessmentStatus:
+      type: string
+      enum:
+        - degraded_confirmed
+        - normal
+        - signals_missing
+        - dismissed
+        - error
+    IndicatorState:
+      type: string
+      enum:
+        - display_required
+        - not_displayed
+        - render_failed
+    ReasonCategory:
+      type: string
+      enum:
+        - missing_inputs
+        - shock
+        - anomaly
+        - quality_condition
+        - unknown
+    RenderOutcome:
+      type: string
+      enum:
+        - rendered
+        - render_failed
+    ForecastConfidenceView:
+      type: object
+      additionalProperties: false
+      required:
+        - forecastConfidenceRequestId
+        - forecastConfidenceResultId
+        - timeRangeStart
+        - timeRangeEnd
+        - assessmentStatus
+        - indicatorState
+        - reasonCategories
+        - forecastVisible
+      properties:
+        forecastConfidenceRequestId:
+          type: string
+          format: uuid
+        forecastConfidenceResultId:
+          type: string
+          format: uuid
+        forecastViewId:
+          type: string
+          format: uuid
+          nullable: true
+        forecastRunId:
+          type: string
+          format: uuid
+          nullable: true
+        forecastVersionId:
+          type: string
+          format: uuid
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        assessmentStatus:
+          $ref: '#/components/schemas/AssessmentStatus'
+        indicatorState:
+          $ref: '#/components/schemas/IndicatorState'
+        warningMessage:
+          type: string
+          nullable: true
+        reasonCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReasonCategory'
+        statusMessage:
+          type: string
+          nullable: true
+        forecastVisible:
+          type: boolean
+      allOf:
+        - if:
+            properties:
+              assessmentStatus:
+                const: degraded_confirmed
+          then:
+            required:
+              - warningMessage
+            properties:
+              indicatorState:
+                const: display_required
+        - if:
+            properties:
+              assessmentStatus:
+                enum:
+                  - signals_missing
+                  - dismissed
+                  - error
+          then:
+            required:
+              - statusMessage
+        - if:
+            properties:
+              indicatorState:
+                const: render_failed
+          then:
+            required:
+              - statusMessage
+    ForecastConfidenceRenderEventRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - forecastConfidenceResultId
+        - renderOutcome
+        - indicatorRenderAttempted
+      properties:
+        forecastConfidenceResultId:
+          type: string
+          format: uuid
+        renderOutcome:
+          $ref: '#/components/schemas/RenderOutcome'
+        indicatorRenderAttempted:
+          type: boolean
+        failureReason:
+          type: string
+          nullable: true
+      allOf:
+        - if:
+            properties:
+              renderOutcome:
+                const: render_failed
+          then:
+            required:
+              - failureReason

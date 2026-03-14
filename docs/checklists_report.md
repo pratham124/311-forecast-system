@@ -215,6 +215,18 @@ I prompted Codex to combine all the checklists into one. All checklist items wer
 
 These were all satisfied, so no additional checklist follow-up was needed.
 
+## Use Case 16
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-16; the following items were especially noteworthy:
+
+- [x] CHK006 Is “clear degraded-confidence indicator” translated into observable UI requirements about message purpose, visibility, and non-blocking behavior rather than left as a subjective design statement? This is checked because the spec explicitly requires a clear degraded-confidence indicator, non-blocking forecast access, and user-appropriate warning language.
+- [x] CHK010 Is “log degraded-confidence detection outcomes and indicator-display outcomes for each forecast-visualization request” defined clearly enough to distinguish backend preparation from final client render reporting? This is checked because the spec, plan, data model, and contract separate prepared assessment outcomes from final render-event reporting.
+- [x] CHK012 Are the vocabulary and state transitions consistent across spec, plan, data model, and API contract for `degraded_confirmed`, `normal`, `signals_missing`, `dismissed`, `error`, `display_required`, `not_displayed`, and `render_failed`? This is checked because the finalized artifacts use one canonical confidence-state vocabulary throughout.
+- [x] CHK021 Are API error and authorization scenarios covered by written requirements for invalid scope parameters, unknown request identifiers on render reporting, and callers without forecast-view permission? This is checked because the spec, plan, and contract all make authenticated, role-aware access and typed validation or rejection behavior explicit.
+- [x] CHK033 Are frontend-backend dependency requirements defined for reporting render outcomes, including when a client is expected to post render telemetry and how failures are classified? This is checked because the plan, data model, and contract explicitly define authenticated render-event reporting and `rendered` versus `render_failed` outcomes.
+
+These were all satisfied, so no additional checklist follow-up was needed.
+
 ## Use Case 19
 For this use case, all checklist items were complete and validated. This makes sense considering we have explicitly defined UC-19 and already performed clarifications to address the key gaps in our spec (feedback/bug report categorization, anonymous submission support). Additionally, the functionality in this use case is fairly simple. No changes needed to be addressed.
 
