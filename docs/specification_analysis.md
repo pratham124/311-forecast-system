@@ -234,6 +234,20 @@ Overall, the generated spec.md repeats the flows from the use case. The main fix
 One issue in the original use case was that the standard reporting period and metric definitions were still listed as open issues; the generated spec fixes this by making the default window the last 30 completed days and by requiring MAE, RMSE, and MAPE explicitly. Another issue was that the original use case did not make authenticated render-outcome reporting behavior explicit, and the generated spec fixes this with clear protected-access and rejection requirements.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-004 cover authenticated access plus forecast and actual retrieval for the requested scope. FR-005 through FR-010 cover MAE, RMSE, and MAPE retrieval or fallback computation, aligned comparison preparation, and rendered comparison output. FR-011 through FR-019 cover successful observability, missing forecast or actual handling, metrics-unavailable fallback, rendering failure handling, request correlation, and exact-bucket alignment.
+## Use Case 18
+
+Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
+
+1. Acceptance Scenario 1 (user opens the guide and readable content is shown) -> Main Success Scenario Steps 1–3
+2. Acceptance Scenario 2 (user can read the guide once loading completes without error) -> Main Success Scenario Steps 2–3
+3. Acceptance Scenario 3 (user navigates between guide sections successfully) -> Main Success Scenario Step 4
+4. Acceptance Scenario 4 (user can continue navigating without reopening the guide) -> Main Success Scenario Step 4
+5. Acceptance Scenario 5 (successful guide access is logged) -> Main Success Scenario Step 5
+6. Acceptance Scenario 6 (documentation unavailable shows error and logs missing content) -> Extension 2a
+7. Acceptance Scenario 7 (rendering failure shows error state and logs failure) -> Extension 3a
+
+
+Additionally, the functional requirements are largely congruent to the use case, but it is not a pure restatement: it adds a signed-in-user access rule, stronger failure-display constraints, and a new requirement that error messaging explain the issue is not caused by user navigation.
 
 ## Use Case 19
 

@@ -147,11 +147,11 @@ These are necessary, so I prompted to add this to the specification and plan.
 
 I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-11; the following items were especially noteworthy:
 
-- [x] CHK002 Are requirements defined for how daily versus weekly forecast products are chosen when comparing newly ingested actual demand against the active P50 forecast for the same scope? This is checked because the spec, plan, and data model all make the daily-only forecast selection rule explicit for UC-11 surge evaluation.
-- [x] CHK010 Is the distinction between detector-stage candidate detection, dual-threshold confirmation, and active-surge suppression clear enough to avoid conflicting interpretations during implementation and review? This is checked because the spec separates candidate detection, confirmation, filtered outcomes, and suppression semantics cleanly.
-- [x] CHK012 Are delivery-success rules consistent between the spec’s successful-delivery wording and the plan or data-model distinction among `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required`? This is checked because the plan and data model define the delivery-status vocabulary and the review flow consistently enough for implementation.
-- [x] CHK023 Are data and concurrency requirements defined for overlapping ingestion completions or replay requests that evaluate the same scope while surge state is changing? This is checked because the surge-state model and task dependencies make the state-transition and suppression behavior explicit.
-- [x] CHK029 Are security requirements specific about role boundaries between recipients of surge notifications and administrators or operators allowed to trigger replays and inspect detailed event histories? This is checked because the plan and API contract keep replay and review endpoints authenticated and role-aware.
+- [] CHK002 Are requirements defined for how daily versus weekly forecast products are chosen when comparing newly ingested actual demand against the active P50 forecast for the same scope? This is checked because the spec, plan, and data model all make the daily-only forecast selection rule explicit for UC-11 surge evaluation.
+- [] CHK010 Is the distinction between detector-stage candidate detection, dual-threshold confirmation, and active-surge suppression clear enough to avoid conflicting interpretations during implementation and review? This is checked because the spec separates candidate detection, confirmation, filtered outcomes, and suppression semantics cleanly.
+- [] CHK012 Are delivery-success rules consistent between the spec’s successful-delivery wording and the plan or data-model distinction among `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required`? This is checked because the plan and data model define the delivery-status vocabulary and the review flow consistently enough for implementation.
+- [] CHK023 Are data and concurrency requirements defined for overlapping ingestion completions or replay requests that evaluate the same scope while surge state is changing? This is checked because the surge-state model and task dependencies make the state-transition and suppression behavior explicit.
+- [] CHK029 Are security requirements specific about role boundaries between recipients of surge notifications and administrators or operators allowed to trigger replays and inspect detailed event histories? This is checked because the plan and API contract keep replay and review endpoints authenticated and role-aware.
 
 These were all satisfied, so no additional checklist follow-up was needed.
 
@@ -159,11 +159,23 @@ These were all satisfied, so no additional checklist follow-up was needed.
 
 I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-12; the following items were especially noteworthy:
 
-- [x] CHK003 Are the allowed supporting-component outcomes fully specified, including `available`, `unavailable`, and `failed`, rather than leaving partial-view behavior to implementation inference? This is checked because the spec, plan, and data model define these component outcomes and keep partial versus error behavior explicit.
-- [x] CHK009 Is the distinction between `unavailable` and `failed` clear enough that teams will implement the same UX, data, and API behavior for each outcome? This is checked because the requirements and implementation notes separate partial-view behavior from terminal error behavior clearly.
-- [x] CHK013 Are the accepted clarifications for top 5 drivers and previous 7-day anomalies used consistently across the spec, plan, data model, and API contract? This is checked because the clarification decisions are carried through all of those artifacts consistently.
-- [x] CHK023 Are boundary rules specified for exactly zero available components, where all supporting components are unavailable rather than failed and the UI must avoid implying a usable partial view exists? This is checked because FR-013b and the corresponding plan/data-model rules define the unavailable-detail fallback state explicitly.
-- [x] CHK029 Are security requirements specific about role boundaries between operational managers allowed to view alert details and administrators or system actors allowed to report or inspect render outcomes? This is checked because the plan and API contract keep alert-detail retrieval and render-event reporting authenticated and role-aware.
+- [] CHK003 Are the allowed supporting-component outcomes fully specified, including `available`, `unavailable`, and `failed`, rather than leaving partial-view behavior to implementation inference? This is checked because the spec, plan, and data model define these component outcomes and keep partial versus error behavior explicit.
+- [] CHK009 Is the distinction between `unavailable` and `failed` clear enough that teams will implement the same UX, data, and API behavior for each outcome? This is checked because the requirements and implementation notes separate partial-view behavior from terminal error behavior clearly.
+- [] CHK013 Are the accepted clarifications for top 5 drivers and previous 7-day anomalies used consistently across the spec, plan, data model, and API contract? This is checked because the clarification decisions are carried through all of those artifacts consistently.
+- [] CHK023 Are boundary rules specified for exactly zero available components, where all supporting components are unavailable rather than failed and the UI must avoid implying a usable partial view exists? This is checked because FR-013b and the corresponding plan/data-model rules define the unavailable-detail fallback state explicitly.
+- [] CHK029 Are security requirements specific about role boundaries between operational managers allowed to view alert details and administrators or system actors allowed to report or inspect render outcomes? This is checked because the plan and API contract keep alert-detail retrieval and render-event reporting authenticated and role-aware.
+
+These were all satisfied, so no additional checklist follow-up was needed.
+
+## Use Case 13
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-13; the following items were especially noteworthy:
+
+- [x] CHK009 Is the concept of “one shared active configuration” clear enough to distinguish it from drafts, superseded versions, and save-attempt records during UI reloads and downstream alert evaluation? This is checked because the spec, plan, and data model all separate the active marker, immutable versions, and save-attempt outcomes cleanly.
+- [x] CHK021 Are API error and authorization scenarios covered by written requirements for unauthenticated access, unauthorized role use, malformed payloads, and stale or unsupported channel selections? This is checked because the spec, plan, and API contract make authenticated, role-aware access and validation outcomes explicit.
+- [x] CHK023 Are concurrency requirements defined for overlapping save requests from different authorized managers trying to replace the single active configuration at nearly the same time? This is checked because the plan and data model require atomic active-marker replacement and preserve the previous active configuration on failed saves.
+- [x] CHK024 Are edge cases specified for supported channels that are listed on initial page load but become unavailable before save validation completes? This is checked because the plan explicitly validates channel availability again at save time rather than trusting the initial load state.
+- [x] CHK030 Are reliability and operational-safety requirements defined for atomic activation, partial-write prevention, and continued downstream alert evaluation when a save attempt fails after validation? This is checked because the artifacts require transactional activation, explicit `storage_failed` outcomes, and retention of the previous active configuration.
 
 These were all satisfied, so no additional checklist follow-up was needed.
 
@@ -193,3 +205,9 @@ These were all satisfied, so no additional checklist follow-up was needed.
 
 ## Use Case 19
 For this use case, all checklist items were complete and validated. This makes sense considering we have explicitly defined UC-19 and already performed clarifications to address the key gaps in our spec (feedback/bug report categorization, anonymous submission support). Additionally, the functionality in this use case is fairly simple. No changes needed to be addressed.
+
+For this use case, all checklist items were complete and validated. This makes sense considering we have explicitly defined UC-19 and already performed clarifications to address the key gaps in our spec (feedback/bug report categorization, anonymous submission support). Additionally, the functionality in this use case is fairly simple. No changes needed to be addressed.
+
+## Use Case 18
+
+I prompted Codex to combine all the checklists into one. For this use case, all checklist items were complete and validated.

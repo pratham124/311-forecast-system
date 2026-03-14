@@ -280,6 +280,7 @@ For this analysis, I addressed the two high-severity issues and one medium under
 For this analysis, I addressed the high-severity constitution issue by keeping interactive configuration authoring in services while moving downstream alert-consumer integration back to dedicated pipeline modules. I also fixed the plan and task mismatch by adding the missing `backend/src/pipelines/` and `frontend/tests/` structure to the plan, and removed the conditional wording from `FR-008` so frequency and deduplication controls are explicitly in scope across the spec, plan, data model, contract, and tasks. No remaining CRITICAL findings were identified, and the resulting UC-13 task sequence remains non-blocking.
 
 ## Use Case 14
+## Use Case 18
 ### Specification Analysis Report
 
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
@@ -289,9 +290,35 @@ For this analysis, I addressed the high-severity constitution issue by keeping i
 | A03 | Underspecification | MEDIUM | docs/UC-14.md, spec.md | The source use case still says standard reporting periods and metric definitions are “not yet finalized,” while the generated spec now fixes the default window to the last 30 completed days and fixes MAE, RMSE, and MAPE as required metrics. | Treat the generated spec as the governing clarified scope and note the original use-case open issue as superseded rather than reopening the design. |
 
 For this analysis, I addressed both high-severity issues directly. I added an explicit authenticated and authorized render-event requirement to the UC-14 spec and kept the contract and task wording aligned with that protected endpoint behavior. I also removed the unsupported weekly-product branch from the UC-14 plan, data model, contract, tasks, and checklist so the design stays bounded to retained daily forecast history. The remaining medium issue was reviewed and left as a documented superseded open issue because the generated spec already fixes it by defining the default 30-day window and the required MAE, RMSE, and MAPE metrics.
+| C1 | Constitution Alignment | CRITICAL | tasks.md, constitution.md Development Workflow & Quality Gates | The task list does not include an explicit acceptance-test alignment task, even though the constitution says every task list
+must include work for acceptance-test alignment. Existing tests reference UC-18 behavior, but there is no task to verify or update UC-18-AT.md. | Add an explicit task to review/update docs/UC-18-AT.md and confirm implementation-task
+traceability to UC-18 acceptance tests. |
+| C2 | Constitution Alignment | CRITICAL | tasks.md, constitution.md Development Workflow & Quality Gates | The task list does not include an explicit schema-validation task. Creating schemas is planned, but the constitution requires
+task work for schema validation, not just schema definition. | Add a task for request/response and persistence-schema validation coverage, likely in backend unit/integration tests. |
+| I1 | Inconsistency | HIGH | spec.md §FR-001, contracts/user-guide-api.yaml, tasks.md T011 | The spec says any signed-in user can access the guide, but the contract advertises 403 for guide retrieval and render reporting. That
+implies additional authorization restrictions not described in the spec. | Either narrow the spec to define extra authorization rules or remove/justify 403 as non-role-specific edge behavior. |
+| U1 | Underspecification | HIGH | spec.md §FR-002, plan.md Implementation Steps 1, tasks.md T018 | “Wherever this feature is intended to be available” is not specific enough to drive implementation or review. Tasks assume one host
+page, but the spec implies multiple product surfaces. | Define the supported entry-point surfaces explicitly or state that a single host surface is the MVP scope. |
+| G1 | Coverage Gap | HIGH | spec.md §SC-004, tasks.md | The measurable outcome to reduce support requests by 20% has no operational or analytics task coverage. | Add a task for post-release measurement instrumentation or explicitly
+mark SC-004 as a business KPI tracked outside this implementation scope. |
+| A1 | Ambiguity | MEDIUM | spec.md §FR-004, §SC-001, plan.md Performance Goals | “Readable format” is still subjective. The plan and tasks assume implementation details, but the spec does not define objective readability criteria. |
+Add measurable readability criteria or acceptance cues such as required content structure, legibility constraints, or supported navigation affordances. |
+| A2 | Ambiguity | MEDIUM | spec.md User Story 1, docs/UC-18-AT.md AT-01, tasks.md | The acceptance test mentions a loading state or transition, but the spec does not define loading-state requirements and tasks do not explicitly cover
+them. | Clarify whether loading-state behavior is required and, if so, add explicit spec language and corresponding frontend task coverage. |
+| G2 | Coverage Gap | MEDIUM | spec.md §SC-001, §SC-002, tasks.md | The spec has measurable performance outcomes for guide open and navigation, but tasks do not include performance verification or instrumentation work. | Add backend/
+frontend timing verification or acceptance-measurement tasks for open and navigation latency. |
+| I2 | Inconsistency | MEDIUM | plan.md Project Structure, tasks.md | The plan assumes a full backend/frontend source tree, but the repository does not currently contain those directories. Tasks are executable only if that structure
+already exists or will be created elsewhere. | Add setup tasks that create or validate the target app structure, or adjust the plan/tasks to the real repository layout. |
+| U2 | Underspecification | MEDIUM | spec.md §FR-009, §FR-010, §FR-011, data-model.md GuideAccessEvent | The spec says to log successful access and failures, but it does not define the minimum fields beyond time and outcome. The data
+model adds more fields than the spec requires. | Promote minimum observability fields from the data model into the spec or explicitly mark them as implementation-level decisions. |
+| T1 | Terminology Drift | LOW | spec.md, plan.md, data-model.md | The artifacts alternate between “help or user guide entry point,” “guide-open attempt,” “guide access event,” and “render outcome.” The meaning is mostly consistent
+but not normalized. | Standardize canonical terms in the spec and reuse them in plan/tasks for easier traceability. |
+
+For this analysis, there were inconsistencies present. For C1, I prompted Codex to add an explicit task to review/update docs/UC-18-AT.md and confirm implementation-task
+traceability to UC-18 acceptance tests. For C2, I prompted Codex to add a task for request/response and persistence-schema validation coverage, likely in backend unit/integration tests. For I1, I prompted codex to that the spec is correct and 403 should not be present in the contract. For U1, I prompted Codex to state that a single host surface is the MVP scope. For G1, I prompted Codex to add task for post-release measurement instrumentation. For A1, I prompted Codex to add measurable readability criteria or acceptance cues such as required content structure, legibility constraints, or supported navigation affordances. For A2, I prompted Codex that loading-state behavior is required and to add explicit spec language and corresponding frontend task coverage. FOr G2, I prompted Codex to add backend/ frontend timing verification or acceptance-measurement tasks for open and navigation latency. For I2, I prompted codex to add setup tasks that create or validate the target app structure, or adjust the plan/tasks to the real repository layout. FOr U2, I prompted codes to  explicitly mark them as implementation-level decisions. T1 is fine as it is.
 
 ## Use Case 19
-Specification Analysis Report
+### Specification Analysis Report
 
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|
