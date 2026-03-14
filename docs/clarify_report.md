@@ -291,3 +291,49 @@ Question 3: When should surge detection run for UC-11?
 | Short | Provide a different short answer (<=5 words). |
 
 Response: Choose Option B as surge detection should run after each successful UC-01 ingestion run. This keeps surge checks grounded in the most recent ingested actuals without adding separate scheduling overhead.
+
+## Use Case 12
+### Question 1
+Question 1: Driver Attribution Scope
+What driver attribution output should the drill-down show for an alert?
+
+Recommended: Option A — Show the top 5 ranked contributing drivers for the selected alert.
+
+| Option | Description |
+|--------|-------------|
+| A | Show the top 5 ranked contributing drivers for the selected alert. |
+| B | Show all available contributing drivers for the selected alert. |
+| C | Show only the single highest-ranked contributing driver. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option A as showing the top 5 ranked contributing drivers gives enough explanatory context for investigation without overcrowding the drill-down view. It also keeps the UI and acceptance criteria bounded around a consistent, testable driver set.
+
+### Question 2
+Question 2: Anomaly Context Window
+What recent anomaly window should the detail view use around the selected alert?
+
+Recommended: Option B — Show anomalies from the previous 7 days.
+
+| Option | Description |
+|--------|-------------|
+| A | Show anomalies from the previous 24 hours. |
+| B | Show anomalies from the previous 7 days. |
+| C | Show anomalies from the previous 30 days. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option B as a 7-day anomaly window provides enough recent context to interpret whether the alert fits an emerging pattern without making the detail timeline too noisy. It also aligns well with operational review over the past week.
+
+### Question 3
+Question 3: Multiple Missing Components
+If two or more supporting components are unavailable, should the system still show whatever remains or switch to an error state?
+
+Recommended: Option A — Show the remaining reliable context and clearly mark each unavailable component.
+
+| Option | Description |
+|--------|-------------|
+| A | Show the remaining reliable context and clearly mark each unavailable component. |
+| B | Switch to an overall error state whenever two or more supporting components are unavailable. |
+| C | Show only alert metadata and hide all context panels when multiple supporting components are unavailable. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Choose Option A as the drill-down should preserve any reliable context that is still available rather than discarding useful information. Clear unavailable-state labeling keeps the view honest while maintaining operational value during partial outages.

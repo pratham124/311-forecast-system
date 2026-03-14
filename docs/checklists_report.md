@@ -154,3 +154,15 @@ I prompted Codex to combine all the checklists into one. All checklist items wer
 - [x] CHK029 Are security requirements specific about role boundaries between recipients of surge notifications and administrators or operators allowed to trigger replays and inspect detailed event histories? This is checked because the plan and API contract keep replay and review endpoints authenticated and role-aware.
 
 These were all satisfied, so no additional checklist follow-up was needed.
+
+## Use Case 12
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-12; the following items were especially noteworthy:
+
+- [x] CHK003 Are the allowed supporting-component outcomes fully specified, including `available`, `unavailable`, and `failed`, rather than leaving partial-view behavior to implementation inference? This is checked because the spec, plan, and data model define these component outcomes and keep partial versus error behavior explicit.
+- [x] CHK009 Is the distinction between `unavailable` and `failed` clear enough that teams will implement the same UX, data, and API behavior for each outcome? This is checked because the requirements and implementation notes separate partial-view behavior from terminal error behavior clearly.
+- [x] CHK013 Are the accepted clarifications for top 5 drivers and previous 7-day anomalies used consistently across the spec, plan, data model, and API contract? This is checked because the clarification decisions are carried through all of those artifacts consistently.
+- [x] CHK023 Are boundary rules specified for exactly zero available components, where all supporting components are unavailable rather than failed and the UI must avoid implying a usable partial view exists? This is checked because FR-013b and the corresponding plan/data-model rules define the unavailable-detail fallback state explicitly.
+- [x] CHK029 Are security requirements specific about role boundaries between operational managers allowed to view alert details and administrators or system actors allowed to report or inspect render outcomes? This is checked because the plan and API contract keep alert-detail retrieval and render-event reporting authenticated and role-aware.
+
+These were all satisfied, so no additional checklist follow-up was needed.
