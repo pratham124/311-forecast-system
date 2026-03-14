@@ -1,0 +1,524 @@
+openapi: 3.1.0
+info:
+  title: Storm Mode API
+  version: 0.1.0
+  description: >
+    Typed diagnostic contracts for UC-15 storm-mode activation and evaluation
+    review, including current activation state and detailed correlated
+    evaluation outcomes.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/storm-mode/activations/current:
+    get:
+      summary: Retrieve current storm-mode activation state for supported scopes
+      operationId: listCurrentStormModeActivations
+      tags:
+        - StormMode
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: serviceCategory
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyType
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyValue
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current storm-mode activation view returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - activations
+                properties:
+                  activations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StormModeActivationView'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to inspect storm-mode activations
+        '422':
+          description: Invalid scope parameters
+  /api/v1/storm-mode/evaluations:
+    get:
+      summary: Retrieve recent storm-mode evaluation runs for operational review
+      operationId: listStormModeEvaluations
+      tags:
+        - StormMode
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/StormModeRunStatus'
+        - in: query
+          name: triggerSource
+          required: false
+          schema:
+            $ref: '#/components/schemas/TriggerSource'
+      responses:
+        '200':
+          description: Storm-mode evaluation run summaries returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - evaluations
+                properties:
+                  evaluations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StormModeEvaluationSummary'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to inspect storm-mode evaluations
+  /api/v1/storm-mode/evaluations/{stormModeEvaluationRunId}:
+    get:
+      summary: Retrieve a detailed storm-mode evaluation view
+      operationId: getStormModeEvaluation
+      tags:
+        - StormMode
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: stormModeEvaluationRunId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed storm-mode evaluation returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StormModeEvaluationResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to inspect the referenced storm-mode evaluation
+        '404':
+          description: Storm-mode evaluation run not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TriggerSource:
+      type: string
+      enum:
+        - scheduled_monitoring
+        - forecast_refresh
+        - manual_replay
+    StormModeRunStatus:
+      type: string
+      enum:
+        - running
+        - completed
+        - completed_with_failures
+    TriggerOutcome:
+      type: string
+      enum:
+        - validated
+        - rejected
+        - weather_unavailable
+        - no_trigger
+    ActivationStatus:
+      type: string
+      enum:
+        - active
+        - inactive
+        - reverted_to_baseline
+        - expired
+    ForecastAdjustmentStatus:
+      type: string
+      enum:
+        - storm_adjusted
+        - baseline_applied
+        - adjustment_failed
+    AlertSensitivityStatus:
+      type: string
+      enum:
+        - storm_adjusted
+        - baseline_applied
+        - not_applicable
+    AlertEvaluationOutcome:
+      type: string
+      enum:
+        - no_alert
+        - alert_created
+        - baseline_only
+        - evaluation_failed
+    NotificationReferenceType:
+      type: string
+      enum:
+        - threshold_alert
+        - surge_alert
+    NotificationDeliveryStatus:
+      type: string
+      enum:
+        - delivered
+        - partial_delivery
+        - retry_pending
+        - manual_review_required
+    StormModeEvaluationSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeEvaluationRunId
+        - triggerSource
+        - status
+        - startedAt
+        - evaluatedScopeCount
+        - validatedTriggerCount
+        - activationCount
+        - baselineReversionCount
+        - linkedNotificationCount
+      properties:
+        stormModeEvaluationRunId:
+          type: string
+          format: uuid
+        triggerSource:
+          $ref: '#/components/schemas/TriggerSource'
+        status:
+          $ref: '#/components/schemas/StormModeRunStatus'
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        evaluatedScopeCount:
+          type: integer
+          minimum: 0
+        validatedTriggerCount:
+          type: integer
+          minimum: 0
+        activationCount:
+          type: integer
+          minimum: 0
+        baselineReversionCount:
+          type: integer
+          minimum: 0
+        linkedNotificationCount:
+          type: integer
+          minimum: 0
+        failureSummary:
+          type: string
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+    StormModeActivationView:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeActivationId
+        - effectiveWindowStart
+        - effectiveWindowEnd
+        - activationStatus
+      properties:
+        stormModeActivationId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        effectiveWindowStart:
+          type: string
+          format: date-time
+        effectiveWindowEnd:
+          type: string
+          format: date-time
+        activationStatus:
+          $ref: '#/components/schemas/ActivationStatus'
+        effectiveUncertaintyProfile:
+          type: object
+          additionalProperties: true
+          nullable: true
+        effectiveAlertSensitivityProfile:
+          type: object
+          additionalProperties: true
+          nullable: true
+        statusMessage:
+          type: string
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+    StormModeEvaluationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeEvaluationRunId
+        - triggerSource
+        - status
+        - startedAt
+        - triggerAssessments
+        - activations
+        - forecastAdjustments
+        - alertEvaluations
+      properties:
+        stormModeEvaluationRunId:
+          type: string
+          format: uuid
+        triggerSource:
+          $ref: '#/components/schemas/TriggerSource'
+        status:
+          $ref: '#/components/schemas/StormModeRunStatus'
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+        failureSummary:
+          type: string
+          nullable: true
+        triggerAssessments:
+          type: array
+          items:
+            $ref: '#/components/schemas/StormModeTriggerAssessment'
+        activations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StormModeActivation'
+        forecastAdjustments:
+          type: array
+          items:
+            $ref: '#/components/schemas/StormModeForecastAdjustment'
+        alertEvaluations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StormModeAlertEvaluation'
+    StormModeTriggerAssessment:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeTriggerAssessmentId
+        - weatherSource
+        - effectiveWindowStart
+        - effectiveWindowEnd
+        - triggerOutcome
+      properties:
+        stormModeTriggerAssessmentId:
+          type: string
+          format: uuid
+        weatherSource:
+          type: string
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        effectiveWindowStart:
+          type: string
+          format: date-time
+        effectiveWindowEnd:
+          type: string
+          format: date-time
+        triggerOutcome:
+          $ref: '#/components/schemas/TriggerOutcome'
+        detectedConditionSummary:
+          type: string
+          nullable: true
+        validationReason:
+          type: string
+          nullable: true
+        validatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        correlationId:
+          type: string
+          nullable: true
+    StormModeActivation:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeActivationId
+        - stormModeTriggerAssessmentId
+        - effectiveWindowStart
+        - effectiveWindowEnd
+        - activationStatus
+      properties:
+        stormModeActivationId:
+          type: string
+          format: uuid
+        stormModeTriggerAssessmentId:
+          type: string
+          format: uuid
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        effectiveWindowStart:
+          type: string
+          format: date-time
+        effectiveWindowEnd:
+          type: string
+          format: date-time
+        activationStatus:
+          $ref: '#/components/schemas/ActivationStatus'
+        effectiveUncertaintyProfile:
+          type: object
+          additionalProperties: true
+          nullable: true
+        effectiveAlertSensitivityProfile:
+          type: object
+          additionalProperties: true
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deactivatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reversionReason:
+          type: string
+          nullable: true
+    StormModeForecastAdjustment:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeForecastAdjustmentId
+        - stormModeActivationId
+        - forecastProductName
+        - adjustmentStatus
+        - baselineUncertaintySummary
+        - effectiveUncertaintySummary
+        - uncertaintyWideningApplied
+        - adjustedAt
+      properties:
+        stormModeForecastAdjustmentId:
+          type: string
+          format: uuid
+        stormModeActivationId:
+          type: string
+          format: uuid
+        forecastRunId:
+          type: string
+          format: uuid
+          nullable: true
+        forecastVersionId:
+          type: string
+          format: uuid
+          nullable: true
+        forecastProductName:
+          type: string
+        adjustmentStatus:
+          $ref: '#/components/schemas/ForecastAdjustmentStatus'
+        baselineUncertaintySummary:
+          type: object
+          additionalProperties: true
+        effectiveUncertaintySummary:
+          type: object
+          additionalProperties: true
+        uncertaintyWideningApplied:
+          type: boolean
+        adjustedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+          nullable: true
+    StormModeAlertEvaluation:
+      type: object
+      additionalProperties: false
+      required:
+        - stormModeAlertEvaluationId
+        - stormModeActivationId
+        - alertSensitivityStatus
+        - effectiveAlertSensitivitySummary
+        - baselineAlertSensitivitySummary
+        - evaluationOutcome
+        - evaluatedAt
+      properties:
+        stormModeAlertEvaluationId:
+          type: string
+          format: uuid
+        stormModeActivationId:
+          type: string
+          format: uuid
+        thresholdEvaluationRunId:
+          type: string
+          format: uuid
+          nullable: true
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        alertSensitivityStatus:
+          $ref: '#/components/schemas/AlertSensitivityStatus'
+        effectiveAlertSensitivitySummary:
+          type: object
+          additionalProperties: true
+        baselineAlertSensitivitySummary:
+          type: object
+          additionalProperties: true
+        evaluationOutcome:
+          $ref: '#/components/schemas/AlertEvaluationOutcome'
+        notificationReferenceType:
+          $ref: '#/components/schemas/NotificationReferenceType'
+        notificationReferenceId:
+          type: string
+          format: uuid
+          nullable: true
+        notificationDeliveryStatus:
+          $ref: '#/components/schemas/NotificationDeliveryStatus'
+        evaluatedAt:
+          type: string
+          format: date-time
+        failureReason:
+          type: string
+          nullable: true
