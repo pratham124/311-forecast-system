@@ -2,7 +2,7 @@
 
 **Purpose**: Validate the quality of UX, security, data, performance, and API requirements for UC-18 before implementation review.
 **Created**: 2026-03-13
-**Feature**: [spec.md](/root/311-forecast-system/specs/013-access-user-guide/spec.md)
+**Feature**: [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/spec.md)
 
 **Note**: This checklist is a PR-review gate for requirements quality. It tests whether the written requirements are complete, clear, consistent, measurable, and ready for implementation.
 

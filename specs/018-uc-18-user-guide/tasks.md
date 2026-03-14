@@ -1,7 +1,7 @@
 # Tasks: Access User Guide
 
-**Input**: Design documents from `/specs/013-access-user-guide/`
-**Prerequisites**: [plan.md](/root/311-forecast-system/specs/013-access-user-guide/plan.md), [spec.md](/root/311-forecast-system/specs/013-access-user-guide/spec.md), [research.md](/root/311-forecast-system/specs/013-access-user-guide/research.md), [data-model.md](/root/311-forecast-system/specs/013-access-user-guide/data-model.md), [contracts/user-guide-api.yaml](/root/311-forecast-system/specs/013-access-user-guide/contracts/user-guide-api.yaml)
+**Input**: Design documents from `/specs/018-uc-18-user-guide/`
+**Prerequisites**: [plan.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/plan.md), [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/spec.md), [research.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/research.md), [data-model.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/data-model.md), [contracts/user-guide-api.yaml](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/contracts/user-guide-api.yaml)
 
 **Tests**: Include contract, integration, and frontend interaction coverage because the plan and quickstart explicitly require them.
 
@@ -120,11 +120,11 @@
 
 **Purpose**: Improvements that affect multiple user stories.
 
-- [ ] T038 [P] Update the quickstart verification steps and implementation notes for delivered behavior in `specs/013-access-user-guide/quickstart.md`
+- [ ] T038 [P] Update the quickstart verification steps and implementation notes for delivered behavior in `specs/018-uc-18-user-guide/quickstart.md`
 - [ ] T039 [P] Add unit coverage for guide outcome vocabulary, failure-message normalization, and section ordering helpers in `backend/tests/unit/test_user_guide_service.py`
 - [ ] T040 [P] Add frontend feature-level smoke coverage for full guide lifecycle states in `frontend/tests/user-guide-lifecycle.test.tsx` (depends on T023, T028, T037)
 - [ ] T041 [P] Add post-release measurement instrumentation for support-request trend tracking in `backend/app/core/metrics.py`
-- [ ] T042 Run the UC-18 quickstart validation after completed shipped-story work and relevant validation tasks, then document any follow-up findings in `specs/013-access-user-guide/tasks.md`
+- [ ] T042 Run the UC-18 quickstart validation after completed shipped-story work and relevant validation tasks, then document any follow-up findings in `specs/018-uc-18-user-guide/tasks.md`
 
 ---
 
