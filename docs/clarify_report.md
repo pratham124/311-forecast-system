@@ -337,3 +337,7 @@ Recommended: Option A — Show the remaining reliable context and clearly mark e
 | Short | Provide a different short answer (<=5 words). |
 
 Response: Choose Option A as the drill-down should preserve any reliable context that is still available rather than discarding useful information. Clear unavailable-state labeling keeps the view honest while maintaining operational value during partial outages.
+
+## Use Case 13
+
+The original `/speckit.clarify` question text and option tables for UC-13 were not preserved in the repository, and no additional ambiguities remain beyond the accepted clarifications already captured in `spec.md`.
