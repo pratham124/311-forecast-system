@@ -30,6 +30,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-11
 - Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies (010-demand-threshold-alerts)
 - PostgreSQL for threshold configuration, evaluation runs, per-scope evaluation outcomes, notification events, channel delivery attempts, and active threshold-state tracking (010-demand-threshold-alerts)
 - PostgreSQL for threshold configuration, evaluation runs, per-scope evaluation outcomes, threshold state, notification events, and channel-attempt records (010-demand-threshold-alerts)
+- Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, JWT authentication, role-based authorization dependencies (019-feedback-bug-reporting)
+- PostgreSQL for feedback-submission records, submission status events, and reviewer-facing queue records (019-feedback-bug-reporting)
 
 - Python 3.11 + FastAPI, Pydantic, SQLAlchemy or SQLModel-compatible PostgreSQL access layer, HTTP client for Socrata ingestion, APScheduler-compatible scheduling, structured logging (001-pull-311-data)
 
@@ -50,9 +52,9 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11: Follow standard conventions
 
 ## Recent Changes
+- 019-feedback-bug-reporting: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, JWT authentication, role-based authorization dependencies
 - 010-demand-threshold-alerts: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies
 - 010-demand-threshold-alerts: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, APScheduler-compatible scheduling, structured logging, JWT authentication, role-based authorization dependencies
-- 009-add-weather-overlay: Added Python 3.11 backend services and TypeScript React frontend + FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, Government of Canada MSC GeoMet client modules
 
 
 <!-- MANUAL ADDITIONS START -->

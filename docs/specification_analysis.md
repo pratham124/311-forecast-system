@@ -213,3 +213,16 @@ Overall, the generated spec.md repeats the flows from the use case. The only cha
 One issue in the original use case was that deduplication and frequency behavior appeared in the main flow but remained open-ended in the related information, and the generated spec fixes this by making scoped frequency or deduplication controls explicit per service category with optional geography. Another issue was that the use case implied channel selection but did not state whether zero-channel saves were valid, and the generated spec fixes this by requiring at least one supported notification channel before save.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008 cover authenticated configuration access, display of the shared active configuration, threshold scope rules, channel selection, and scoped frequency or deduplication controls. FR-009 through FR-014 cover validation of thresholds, required channel selection, unsupported-channel rejection, and prevention of invalid saves. FR-015 through FR-024 cover successful storage, confirmation, logging, storage-failure handling, active-configuration continuity, future-alert application of the saved configuration, scope distinction, persisted preferences, and scoped evaluation of frequency or deduplication rules.
+## Use Case 19
+
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario 1 (valid submission is accepted and confirmed to the user) -> Main Success Scenario Steps 1-6 and 8
+2. Acceptance Scenario 2 (submission without report type is blocked with a required-type validation message) -> Extension 5a (5a1-5a2)
+3. Acceptance Scenario 3 (completed valid submission is available for team review with details and timestamp) -> Main Success Scenario Step 7 and Success End Condition
+4. Acceptance Scenario 4 (missing required field shows validation errors and prevents processing) -> Extension 5a (5a1-5a2)
+5. Acceptance Scenario 5 (invalid field content shows corrective validation guidance before retry) -> Extension 5a (5a1-5a2)
+6. Acceptance Scenario 6 (external issue tracking unavailable retains submission for retry and informs user of delay) -> Extension 6a (6a1-6a2)
+7. Acceptance Scenario 7 (local storage failure notifies user and records failure) -> Extension 7a (7a1-7a2) and Failed End Condition
+
+Additionally, the functional requirements are congruent to the use case.
