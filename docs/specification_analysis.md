@@ -234,6 +234,27 @@ Overall, the generated spec.md repeats the flows from the use case. The main fix
 One issue in the original use case was that the standard reporting period and metric definitions were still listed as open issues; the generated spec fixes this by making the default window the last 30 completed days and by requiring MAE, RMSE, and MAPE explicitly. Another issue was that the original use case did not make authenticated render-outcome reporting behavior explicit, and the generated spec fixes this with clear protected-access and rejection requirements.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-004 cover authenticated access plus forecast and actual retrieval for the requested scope. FR-005 through FR-010 cover MAE, RMSE, and MAPE retrieval or fallback computation, aligned comparison preparation, and rendered comparison output. FR-011 through FR-019 cover successful observability, missing forecast or actual handling, metrics-unavailable fallback, rendering failure handling, request correlation, and exact-bucket alignment.
+
+## Use Case 15
+
+Overall, the generated spec.md repeats the flows from the use case. The main fixes from the source use case are that the previously open-ended activation scope, trigger-source scope, and adjustment-failure fallback behavior are now made explicit in the generated spec. The acceptance tests and specification map cleanly to UC-15 as follows:
+
+1. AT-01 (system monitors weather and event data feeds) -> Main Success Scenario Step 1
+2. AT-02 (storm/event detection triggers validation and activates storm mode when criteria are met) -> Main Success Scenario Steps 2-3
+3. AT-03 (forecasting engine incorporates weather/event factors into uncertainty calculations) -> Main Success Scenario Step 4
+4. AT-04 (alert logic increases sensitivity where appropriate during storm mode) -> Main Success Scenario Step 5
+5. AT-05 (system generates forecasts with expanded uncertainty bands) -> Main Success Scenario Step 6
+6. AT-06 (system evaluates demand conditions using updated sensitivity and generates alerts accordingly) -> Main Success Scenario Step 7
+7. AT-07 (notification service sends alerts based on adjusted storm-mode logic) -> Main Success Scenario Step 8 and Success End Condition
+8. AT-08 (system logs storm mode activation and adjusted operations) -> Main Success Scenario Step 9 and Success End Condition
+9. AT-09 (weather/event data unavailable: system logs and continues with standard forecasting and alerts) -> Extension 1a (1a1-1a2) and Failed End Condition
+10. AT-10 (false event detection is rejected; storm mode is not activated) -> Extension 2a (2a1-2a2)
+11. AT-11 (forecast adjustment failure: system logs error and uses standard uncertainty) -> Extension 4a (4a1-4a2) and Failed End Condition
+12. AT-12 (notification failure: system logs delivery failure and marks event for retry) -> Extension 8a (8a1-8a2)
+
+One issue in the original use case was that weather conditions and major events were described too broadly, while the generated spec fixes this through clarifications by making storm-mode activation scope-limited and weather-triggered only. Another issue was that the original forecast-adjustment failure path only said to use standard uncertainty, while the generated spec fixes this by requiring both uncertainty and alert sensitivity to revert to baseline for the affected scope.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-009 cover weather monitoring, trigger validation, scope-limited activation, uncertainty adjustment, alert sensitivity adjustment, notification delivery, and lifecycle logging. FR-010 through FR-017 cover weather unavailability, rejected triggers, adjustment-failure reversion, notification-delivery retry state, traceability, authenticated diagnostics, and scope isolation.
 ## Use Case 18
 
 Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:

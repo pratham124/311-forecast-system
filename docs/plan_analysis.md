@@ -79,6 +79,12 @@ Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 t
 The architectural decisions made in plan.md for UC-14 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
 Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-13 without redefining them, and introduces only five UC-14-specific entities: ForecastAccuracyRequest, ForecastAccuracyMetricResolution, ForecastAccuracyComparisonResult, ForecastAccuracyAlignedBucket, and ForecastAccuracyRenderEvent. This matches the interface in `./contracts/forecast-accuracy-api.yaml` and is congruent with the functional requirements in this use case, including authenticated access, retained daily forecast history reuse, metrics fallback, aligned comparison output, and render-event observability.
+
+## Use Case 15
+The architectural decisions made in plan.md for UC-15 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-14 without redefining them, and introduces only five UC-15-specific entities plus derived diagnostic views: StormModeEvaluationRun, StormModeTriggerAssessment, StormModeActivation, StormModeForecastAdjustment, and StormModeAlertEvaluation. This matches the interface in `./contracts/storm-mode-api.yaml` and is congruent with the functional requirements in this use case, including authenticated diagnostics, scope-limited activation, baseline fallback, notification-lineage reuse, and traceable evaluation outcomes.
+
 ## Use Case 18
 The architectural decisions made in plan.md for UC-18 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 

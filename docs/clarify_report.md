@@ -345,6 +345,11 @@ The original `/speckit.clarify` question text and option tables for UC-13 were n
 ## Use Case 14
 
 The original `/speckit.clarify` question text and option tables for UC-14 were not preserved in the repository, and no additional ambiguities remain beyond the accepted clarifications already captured in `spec.md`.
+
+## Use Case 15
+
+The original `/speckit.clarify` question text and option tables for UC-15 were not preserved in the repository. The accepted clarifications already captured in `spec.md` are that storm mode activates only for the affected scope, uses weather-only trigger inputs, and reverts both uncertainty and alert sensitivity to baseline when forecast adjustment fails.
+
 ## Use Case 18
 
 ### Question 1

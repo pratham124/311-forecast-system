@@ -203,6 +203,18 @@ I prompted Codex to combine all the checklists into one. All checklist items wer
 
 These were all satisfied, so no additional checklist follow-up was needed.
 
+## Use Case 15
+
+I prompted Codex to combine all the checklists into one. All checklist items were complete and validated in UC-15; the following items were especially noteworthy:
+
+- [x] CHK002 Are requirements defined for how storm-mode evaluation aligns to both forecast-refresh and alert-evaluation timing so scope-limited activation occurs before dependent downstream logic for that same scope proceeds? This is checked because the spec, plan, and data model make ordering and downstream timing explicit.
+- [x] CHK012 Are fallback and failure-handling rules consistent between the spec’s wording and the plan’s stronger statement that forecast-adjustment failure forces both uncertainty and alert sensitivity to baseline for the same scope? This is checked because the artifacts consistently carry the revert-both baseline rule after clarification.
+- [x] CHK021 Are API error and authorization scenarios covered by written requirements for invalid scope filters, unauthorized diagnostic reads, and missing storm-mode evaluation identifiers? This is checked because the spec, plan, and contract all make authenticated, role-aware diagnostics and rejection behavior explicit.
+- [x] CHK029 Are security requirements specific about role boundaries between operational managers, administrators, and any service actors permitted to trigger manual replay or inspect detailed storm-mode diagnostics? This is checked because the plan and API contract keep storm-mode diagnostics authenticated and role-aware.
+- [x] CHK036 Are the terms “storm mode trigger,” “activation,” “forecast adjustment,” “alert sensitivity,” “baseline applied,” and “reverted to baseline” used consistently enough across spec, plan, data model, and API contract to support one canonical implementation vocabulary? This is checked because the finalized artifacts use one stable storm-mode vocabulary throughout.
+
+These were all satisfied, so no additional checklist follow-up was needed.
+
 ## Use Case 19
 For this use case, all checklist items were complete and validated. This makes sense considering we have explicitly defined UC-19 and already performed clarifications to address the key gaps in our spec (feedback/bug report categorization, anonymous submission support). Additionally, the functionality in this use case is fairly simple. No changes needed to be addressed.
 

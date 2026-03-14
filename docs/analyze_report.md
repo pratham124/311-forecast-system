@@ -331,3 +331,14 @@ detail endpoint path param naming is inconsistent ({submissionId} vs {feedbackSu
 path parameter naming in plan and tasks to match contract. |
 
 In this analysis, I1 brings up a valuable point that the spec and plan use different vocabulary when referring to the states. We prompted Codex to fix this issue. Additionally, I2 shows that the the plan and tasks use different naming for the API endpoint. This is an easy fix as well and we prompted Codex to fix this.
+
+## Use Case 15
+### Specification Analysis Report
+
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| A01 | Constitution Alignment | HIGH | spec.md:88-90, plan.md:117-120, contracts/storm-mode-api.yaml, tasks.md:57 | The plan, contract, and task coverage treated storm-mode diagnostic endpoints as authenticated and role-aware, but the spec did not explicitly publish the required auth or authorization behavior for those protected reads. | Add an explicit spec requirement that storm-mode diagnostic endpoints require authenticated operational-manager or administrator access and reject unauthorized requests without exposing storm-mode details. |
+| A02 | Inconsistency | HIGH | plan.md:8,13,19,36,97,109,125, quickstart.md:5,23,44, research.md:5, data-model.md:107 | UC-15 is specified as a weather-triggered storm-mode feature, but the design artifacts drifted into unsupported “major-event” or generic event-signal scope that was never required by the use case or spec. | Narrow the plan, research, quickstart, and data-model wording back to weather-only trigger inputs unless the spec and acceptance tests are explicitly expanded. |
+| A03 | Coverage Gap | MEDIUM | tasks.md:57,132, constitution.md:72-74 | The task list included contract tests and quickstart mapping, but schema-validation work and acceptance-test alignment were not stated explicitly enough for the constitution’s task-quality gate. | Make schema-validation coverage and acceptance-test alignment explicit in the task wording so the planned verification is unambiguous. |
+
+For this analysis, I addressed both high-severity issues directly. I added an explicit protected diagnostics requirement to the UC-15 spec so the spec now matches the authenticated and role-aware storm-mode endpoints already defined in the plan and API contract. I also removed the unsupported “major-event” scope drift from the UC-15 design artifacts so the feature remains bounded to weather-triggered storm mode. The remaining medium issue was also tightened by updating the task list to call out schema-validation coverage and acceptance-test alignment explicitly.
