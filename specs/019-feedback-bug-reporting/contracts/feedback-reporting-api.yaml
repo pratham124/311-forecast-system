@@ -1,0 +1,235 @@
+openapi: 3.1.0
+info:
+  title: Feedback Reporting API
+  version: 0.1.0
+  description: >
+    Typed contracts for UC-19 feedback and bug-report submission and reviewer retrieval.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/feedback-submissions:
+    post:
+      summary: Submit feedback or bug report
+      operationId: submitFeedback
+      tags:
+        - Feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackSubmissionCreateRequest'
+      responses:
+        '202':
+          description: Submission accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackSubmissionCreateResponse'
+        '400':
+          description: Invalid input
+    get:
+      summary: List submitted reports for authorized reviewers
+      operationId: listFeedbackSubmissions
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: reportType
+          schema:
+            $ref: '#/components/schemas/ReportType'
+        - in: query
+          name: processingStatus
+          schema:
+            $ref: '#/components/schemas/ProcessingStatus'
+        - in: query
+          name: submittedAfter
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: submittedBefore
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Submission list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackSubmissionListResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller lacks reviewer permissions
+  /api/v1/feedback-submissions/{feedbackSubmissionId}:
+    get:
+      summary: Get one submitted report for authorized reviewers
+      operationId: getFeedbackSubmission
+      tags:
+        - Feedback
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: feedbackSubmissionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Submission returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackSubmissionDetail'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller lacks reviewer permissions
+        '404':
+          description: Submission not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ReportType:
+      type: string
+      enum: [Feedback, Bug Report]
+    SubmitterKind:
+      type: string
+      enum: [anonymous, authenticated]
+    ProcessingStatus:
+      type: string
+      enum: [accepted, deferred_for_retry, forwarded, forward_failed]
+
+    FeedbackSubmissionCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - reportType
+        - description
+      properties:
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        contactEmail:
+          type: string
+          format: email
+
+    FeedbackSubmissionCreateResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - feedbackSubmissionId
+        - reportType
+        - processingStatus
+        - acceptedAt
+        - userOutcome
+      properties:
+        feedbackSubmissionId:
+          type: string
+          format: uuid
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        processingStatus:
+          $ref: '#/components/schemas/ProcessingStatus'
+        acceptedAt:
+          type: string
+          format: date-time
+        userOutcome:
+          type: string
+          enum: [accepted, accepted_with_delay, failed]
+
+    SubmissionStatusEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - eventType
+        - recordedAt
+      properties:
+        eventType:
+          $ref: '#/components/schemas/ProcessingStatus'
+        eventReason:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+
+    FeedbackSubmissionSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - feedbackSubmissionId
+        - reportType
+        - submitterKind
+        - processingStatus
+        - submittedAt
+      properties:
+        feedbackSubmissionId:
+          type: string
+          format: uuid
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        submitterKind:
+          $ref: '#/components/schemas/SubmitterKind'
+        processingStatus:
+          $ref: '#/components/schemas/ProcessingStatus'
+        submittedAt:
+          type: string
+          format: date-time
+
+    FeedbackSubmissionListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedbackSubmissionSummary'
+
+    FeedbackSubmissionDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - feedbackSubmissionId
+        - reportType
+        - description
+        - submitterKind
+        - processingStatus
+        - submittedAt
+        - statusEvents
+      properties:
+        feedbackSubmissionId:
+          type: string
+          format: uuid
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        description:
+          type: string
+        contactEmail:
+          type: string
+          format: email
+        submitterKind:
+          $ref: '#/components/schemas/SubmitterKind'
+        processingStatus:
+          $ref: '#/components/schemas/ProcessingStatus'
+        submittedAt:
+          type: string
+          format: date-time
+        statusEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionStatusEvent'

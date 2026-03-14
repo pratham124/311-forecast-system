@@ -35,6 +35,9 @@ daily next-7-day demand at the service-category level, use a single global Light
 model with category encoded as a feature, produce predictive quantiles including P10,
 P50, and P90, and use strictly chronological, leakage-free training, validation, and
 evaluation splits. A simple baseline forecast MUST be retained for comparison.
+These obligations apply to ingestion, validation, forecasting, evaluation, and
+alerting features that operate on demand or enrichment data. Features that do not
+participate in forecasting-data pipelines are exempt from this principle.
 
 ### III. Layered Backend & Pipeline Isolation
 The backend MUST be implemented in Python with FastAPI and PostgreSQL, and MUST keep a
@@ -90,12 +93,14 @@ the backend, and failed scheduled runs MUST leave prior valid outputs available.
 ## Development Workflow & Quality Gates
 
 - Every plan MUST pass a constitution check before implementation begins and again after
-  design. The check MUST verify use-case traceability, canonical data-source usage,
-  layered architecture, typed contracts, security coverage, time-safe forecasting, and
-  last-known-good activation behavior.
-- Every spec MUST identify the governing use cases, required data sources, external
-  integrations, forecast horizon, uncertainty outputs, failure handling, and measurable
-  success criteria.
+  design. The check MUST verify use-case traceability, layered architecture, typed
+  contracts, security coverage, and last-known-good activation behavior. For features
+  that operate on forecasting-data pipelines, the check MUST also verify canonical
+  data-source usage and time-safe forecasting controls.
+- Every spec MUST identify the governing use cases, external integrations, failure
+  handling, and measurable success criteria. For features that operate on
+  forecasting-data pipelines, the spec MUST also identify required data sources,
+  forecast horizon, and uncertainty outputs.
 - Every task list MUST include work for acceptance-test alignment, schema validation,
   observability, auth where relevant, and failure-safe activation where relevant.
 - Reviews MUST reject features that place business logic in FastAPI routes, bypass typed
@@ -117,4 +122,4 @@ the backend, and failed scheduled runs MUST leave prior valid outputs available.
   and acceptance review. Non-compliant work MUST be corrected before completion claims
   are accepted.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-08 | **Last Amended**: 2026-03-08
+**Version**: 1.1.0 | **Ratified**: 2026-03-08 | **Last Amended**: 2026-03-14
