@@ -341,6 +341,11 @@ Response: Choose Option A as the drill-down should preserve any reliable context
 ## Use Case 13
 
 The original `/speckit.clarify` question text and option tables for UC-13 were not preserved in the repository, and no additional ambiguities remain beyond the accepted clarifications already captured in `spec.md`.
+
+## Use Case 14
+
+The original `/speckit.clarify` question text and option tables for UC-14 were not preserved in the repository, and no additional ambiguities remain beyond the accepted clarifications already captured in `spec.md`.
+
 ## Use Case 19
 ### Question 1
 Question 1: Who is allowed to submit feedback/bug reports?

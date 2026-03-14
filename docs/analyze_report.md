@@ -278,6 +278,18 @@ For this analysis, I addressed the two high-severity issues and one medium under
 | A03 | Ambiguity | MEDIUM | spec.md | `FR-008` said frequency and deduplication controls apply “when those controls are part of the alert configuration feature,” but the user stories, acceptance tests, plan, data model, and tasks all treat those controls as in-scope UC-13 behavior. | Remove the conditional wording and make frequency or deduplication configuration explicitly required in the spec. |
 
 For this analysis, I addressed the high-severity constitution issue by keeping interactive configuration authoring in services while moving downstream alert-consumer integration back to dedicated pipeline modules. I also fixed the plan and task mismatch by adding the missing `backend/src/pipelines/` and `frontend/tests/` structure to the plan, and removed the conditional wording from `FR-008` so frequency and deduplication controls are explicitly in scope across the spec, plan, data model, contract, and tasks. No remaining CRITICAL findings were identified, and the resulting UC-13 task sequence remains non-blocking.
+
+## Use Case 14
+### Specification Analysis Report
+
+| ID | Category | Severity | Location(s) | Summary | Recommendation |
+|----|----------|----------|-------------|---------|----------------|
+| A01 | Constitution Alignment | HIGH | spec.md, plan.md, tasks.md, contracts/forecast-accuracy-api.yaml | The plan, tasks, and contract defined an authenticated `POST /render-events` surface, but the spec only covered authenticated access to the analysis interface and did not state authorization or rejection behavior for render-outcome reporting. | Add an explicit spec requirement that render-event submissions are authenticated, authorized, and rejected when the caller or request context does not match. |
+| A02 | Inconsistency | HIGH | plan.md, data-model.md, tasks.md, contracts/forecast-accuracy-api.yaml | UC-14’s use case and spec describe historical forecast comparison generically, but the design artifacts expanded scope into daily-versus-weekly product selection and weekly-specific lineage handling that was never required by the feature. | Narrow UC-14 back to retained daily forecast history unless weekly-product comparison is explicitly added to the spec and acceptance tests. |
+| A03 | Underspecification | MEDIUM | docs/UC-14.md, spec.md | The source use case still says standard reporting periods and metric definitions are “not yet finalized,” while the generated spec now fixes the default window to the last 30 completed days and fixes MAE, RMSE, and MAPE as required metrics. | Treat the generated spec as the governing clarified scope and note the original use-case open issue as superseded rather than reopening the design. |
+
+For this analysis, I addressed both high-severity issues directly. I added an explicit authenticated and authorized render-event requirement to the UC-14 spec and kept the contract and task wording aligned with that protected endpoint behavior. I also removed the unsupported weekly-product branch from the UC-14 plan, data model, contract, tasks, and checklist so the design stays bounded to retained daily forecast history. The remaining medium issue was reviewed and left as a documented superseded open issue because the generated spec already fixes it by defining the default 30-day window and the required MAE, RMSE, and MAPE metrics.
+
 ## Use Case 19
 Specification Analysis Report
 

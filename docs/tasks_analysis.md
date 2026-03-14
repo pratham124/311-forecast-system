@@ -62,6 +62,10 @@ The task sequence for UC-12 makes sense and there are no blocking dependency iss
 
 The task sequence for UC-13 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
 
+## Use Case 14
+
+The task sequence for UC-14 makes sense and there are no blocking dependency issues in the implementation of this task; the general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
+
 ## Use Case 19
 
 The task sequence for UC-19 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: implement feedback submission models -> implement API for posting reports -> implement UI for submitting feedback/bug reports -> implement error/sanity checks. So we can validate that the tasks for this use case are correct.

@@ -1,0 +1,288 @@
+openapi: 3.1.0
+info:
+  title: Forecast Accuracy API
+  version: 0.1.0
+  description: >
+    Typed contracts for UC-14 forecast-performance retrieval, including
+    rendered-with-metrics, rendered-without-metrics, unavailable, and
+    render-failure observability flows.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/forecast-accuracy:
+    get:
+      summary: Retrieve a normalized forecast-accuracy view for the default or selected scope
+      operationId: getForecastAccuracyView
+      tags:
+        - ForecastAccuracy
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: timeRangeStart
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: timeRangeEnd
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: serviceCategory
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyType
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: geographyValue
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Forecast-accuracy view returned successfully, with or without metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastAccuracyResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to view forecast accuracy
+        '422':
+          description: Invalid scope parameters
+  /api/v1/forecast-accuracy/{forecastAccuracyRequestId}/render-events:
+    post:
+      summary: Record the final client render outcome for a forecast-accuracy request
+      operationId: recordForecastAccuracyRenderEvent
+      tags:
+        - ForecastAccuracy
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: forecastAccuracyRequestId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForecastAccuracyRenderEventRequest'
+      responses:
+        '202':
+          description: Render outcome accepted
+        '401':
+          description: Authentication required
+        '403':
+          description: Caller is not allowed to report render outcomes for the referenced request
+        '404':
+          description: Forecast-accuracy request not found
+        '422':
+          description: Invalid render event
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ViewStatus:
+      type: string
+      enum:
+        - rendered_with_metrics
+        - rendered_without_metrics
+        - unavailable
+        - error
+    MetricResolutionStatus:
+      type: string
+      enum:
+        - retrieved_precomputed
+        - computed_on_demand
+        - unavailable
+        - failed
+    ForecastProductName:
+      type: string
+      enum:
+        - daily_1_day
+    ComparisonGranularity:
+      type: string
+      enum:
+        - hourly
+        - daily
+    ForecastAccuracyResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - forecastAccuracyRequestId
+        - forecastAccuracyResultId
+        - timeRangeStart
+        - timeRangeEnd
+        - comparisonGranularity
+        - viewStatus
+        - alignedBuckets
+      properties:
+        forecastAccuracyRequestId:
+          type: string
+          format: uuid
+        forecastAccuracyResultId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          nullable: true
+        timeRangeStart:
+          type: string
+          format: date-time
+        timeRangeEnd:
+          type: string
+          format: date-time
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastProductName:
+          $ref: '#/components/schemas/ForecastProductName'
+        comparisonGranularity:
+          $ref: '#/components/schemas/ComparisonGranularity'
+        viewStatus:
+          $ref: '#/components/schemas/ViewStatus'
+        metricResolutionStatus:
+          $ref: '#/components/schemas/MetricResolutionStatus'
+        statusMessage:
+          type: string
+          nullable: true
+        metrics:
+          $ref: '#/components/schemas/ForecastAccuracyMetrics'
+        alignedBuckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastAccuracyAlignedBucket'
+      allOf:
+        - if:
+            properties:
+              viewStatus:
+                const: rendered_with_metrics
+          then:
+            required:
+              - metricResolutionStatus
+              - metrics
+        - if:
+            properties:
+              viewStatus:
+                const: rendered_without_metrics
+          then:
+            required:
+              - metricResolutionStatus
+              - statusMessage
+        - if:
+            properties:
+              viewStatus:
+                const: unavailable
+          then:
+            required:
+              - statusMessage
+            properties:
+              alignedBuckets:
+                maxItems: 0
+        - if:
+            properties:
+              viewStatus:
+                const: error
+          then:
+            required:
+              - statusMessage
+            properties:
+              alignedBuckets:
+                maxItems: 0
+    ForecastAccuracyMetrics:
+      type: object
+      additionalProperties: false
+      required:
+        - mae
+        - rmse
+        - mape
+      properties:
+        mae:
+          type: number
+        rmse:
+          type: number
+        mape:
+          type: number
+    ForecastAccuracyAlignedBucket:
+      type: object
+      additionalProperties: false
+      required:
+        - bucketStart
+        - bucketEnd
+        - forecastValue
+        - actualValue
+        - absoluteErrorValue
+      properties:
+        bucketStart:
+          type: string
+          format: date-time
+        bucketEnd:
+          type: string
+          format: date-time
+        serviceCategory:
+          type: string
+          nullable: true
+        geographyType:
+          type: string
+          nullable: true
+        geographyValue:
+          type: string
+          nullable: true
+        forecastValue:
+          type: number
+        actualValue:
+          type: number
+        absoluteErrorValue:
+          type: number
+        percentageErrorValue:
+          type: number
+          nullable: true
+    RenderOutcome:
+      type: string
+      enum:
+        - rendered
+        - failed
+    ForecastAccuracyRenderEventRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - forecastAccuracyResultId
+        - renderOutcome
+      properties:
+        forecastAccuracyResultId:
+          type: string
+          format: uuid
+        renderOutcome:
+          $ref: '#/components/schemas/RenderOutcome'
+        failureReason:
+          type: string
+          nullable: true
+      allOf:
+        - if:
+            properties:
+              renderOutcome:
+                const: failed
+          then:
+            required:
+              - failureReason
