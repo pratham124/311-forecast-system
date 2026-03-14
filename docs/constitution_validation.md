@@ -1,0 +1,5 @@
+# Manual Validation of consititution.md
+
+The generated constitution.md file matches exactly what we specified in the /speckit.constitution command. Every behavior in the app must map to a use case (and use cases are defined in "UC-XX.md" in the project root). Each feature must pass the defined acceptance tests for the use case that feature is implemented (where test are defined in "UC-XX-AT.md"). Additionally, we specified that the app should be implemented using FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend. This is directly written into the constitution. Furthermore, we specified data sources that the app should use as the source of truth for our forecasting models, and these are directly baked into the constitution.
+
+Overall, we can validate the generated constitution.md file is correct and matches what was specified.
