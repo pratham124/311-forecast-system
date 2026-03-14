@@ -337,3 +337,30 @@ Recommended: Option A — Show the remaining reliable context and clearly mark e
 | Short | Provide a different short answer (<=5 words). |
 
 Response: Choose Option A as the drill-down should preserve any reliable context that is still available rather than discarding useful information. Clear unavailable-state labeling keeps the view honest while maintaining operational value during partial outages.
+
+## Use Case 19
+### Question 1
+Question 1: Who is allowed to submit feedback/bug reports?
+
+| Option | Description |
+|--------|-------------|
+| A | Authenticated users only; require signed-in identity on every submission. |
+| B | Allow anonymous and authenticated submissions; contact info optional. |
+| C | Allow anonymous feedback, but require authentication for bug reports. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Chose Option B as this maximizes the number of reports we can receive to make the app better. It also allows for following up on users who decide to include contact info.
+
+## Question 2
+Question 2: Should users be required to classify submissions as Feedback vs Bug Report at the time of
+submission?
+
+
+| Option | Description |
+|--------|-------------|
+| A | Require users to choose exactly one type: Feedback or Bug Report. |
+| B | Make type optional; system/team can classify later. |
+| C | Auto-classify by content only; do not ask user for type. |
+| Short | Provide a different short answer (<=5 words). |
+
+Response: Chose Option A since making this explicit makes things more obvious and clear. It also helps us identify weakpoints in our app earlier if these are already classified.

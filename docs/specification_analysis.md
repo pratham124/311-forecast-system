@@ -194,3 +194,17 @@ Overall, the generated spec.md repeats the flows from the use case. The acceptan
 One issue in the original use case was that the open issues around driver attribution scope and anomaly context window were not yet finalized; the generated spec fixes this through clarifications by making the top 5 drivers and previous 7 days explicit. Another issue was that retrieval failure existed only at the failed-end-condition level rather than as a detailed requirement, and the generated spec fixes this with explicit failure-handling requirements and observability rules.
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-009 cover authenticated alert selection, alert-detail context loading, retrieval of distribution, drivers, and anomalies, preparation, rendering, display, and successful logging. FR-010 through FR-013b cover single-component and multi-component unavailable cases, including the no-reliable-component unavailable-detail state. FR-014 through FR-016 cover retrieval failures, rendering failures, and correlated operational logging.
+
+## Use Case 19
+
+Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:
+
+1. Acceptance Scenario 1 (valid submission is accepted and confirmed to the user) -> Main Success Scenario Steps 1-6 and 8
+2. Acceptance Scenario 2 (submission without report type is blocked with a required-type validation message) -> Extension 5a (5a1-5a2)
+3. Acceptance Scenario 3 (completed valid submission is available for team review with details and timestamp) -> Main Success Scenario Step 7 and Success End Condition
+4. Acceptance Scenario 4 (missing required field shows validation errors and prevents processing) -> Extension 5a (5a1-5a2)
+5. Acceptance Scenario 5 (invalid field content shows corrective validation guidance before retry) -> Extension 5a (5a1-5a2)
+6. Acceptance Scenario 6 (external issue tracking unavailable retains submission for retry and informs user of delay) -> Extension 6a (6a1-6a2)
+7. Acceptance Scenario 7 (local storage failure notifies user and records failure) -> Extension 7a (7a1-7a2) and Failed End Condition
+
+Additionally, the functional requirements are congruent to the use case.
