@@ -214,6 +214,26 @@ One issue in the original use case was that deduplication and frequency behavior
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008 cover authenticated configuration access, display of the shared active configuration, threshold scope rules, channel selection, and scoped frequency or deduplication controls. FR-009 through FR-014 cover validation of thresholds, required channel selection, unsupported-channel rejection, and prevention of invalid saves. FR-015 through FR-024 cover successful storage, confirmation, logging, storage-failure handling, active-configuration continuity, future-alert application of the saved configuration, scope distinction, persisted preferences, and scoped evaluation of frequency or deduplication rules.
 
+## Use Case 14
+
+Overall, the generated spec.md repeats the flows from the use case. The main fixes from the source use case are that the previously open-ended reporting period and metric-definition questions are now made explicit in the generated spec. The acceptance tests and specification map cleanly to UC-14 as follows:
+
+1. AT-01 (load the forecast-performance interface for the default scope without an immediate error) -> Main Success Scenario Step 1
+2. AT-02 (system retrieves stored historical forecasts) -> Main Success Scenario Step 2
+3. AT-03 (system retrieves corresponding actual demand data) -> Main Success Scenario Step 3
+4. AT-04 (system retrieves or computes accuracy metrics) -> Main Success Scenario Step 4
+5. AT-05 (system aligns forecasts and actuals for comparison) -> Main Success Scenario Step 5
+6. AT-06 (system prepares data for visualization) -> Main Success Scenario Step 6
+7. AT-07 (system renders prediction-vs-actual comparisons and accuracy metrics) -> Main Success Scenario Steps 7-8 and Success End Condition
+8. AT-08 (successful retrieval and visualization are logged) -> Main Success Scenario Step 9 and Success End Condition
+9. AT-09 (historical forecast data unavailable shows error state and logs condition) -> Extension 2a and Failed End Condition
+10. AT-10 (actual demand data unavailable shows error state and logs condition) -> Extension 3a and Failed End Condition
+11. AT-11 (metrics missing: system logs condition and displays comparison without metrics when possible) -> Extension 4a
+12. AT-12 (visualization rendering error shows error state and logs failure) -> Extension 7a and Failed End Condition
+
+One issue in the original use case was that the standard reporting period and metric definitions were still listed as open issues; the generated spec fixes this by making the default window the last 30 completed days and by requiring MAE, RMSE, and MAPE explicitly. Another issue was that the original use case did not make authenticated render-outcome reporting behavior explicit, and the generated spec fixes this with clear protected-access and rejection requirements.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-004 cover authenticated access plus forecast and actual retrieval for the requested scope. FR-005 through FR-010 cover MAE, RMSE, and MAPE retrieval or fallback computation, aligned comparison preparation, and rendered comparison output. FR-011 through FR-019 cover successful observability, missing forecast or actual handling, metrics-unavailable fallback, rendering failure handling, request correlation, and exact-bucket alignment.
 ## Use Case 18
 
 Overall, the generated spec.md mostly repeats the flows from the use case. Most acceptance scenarios map cleanly to the use case as follows:
