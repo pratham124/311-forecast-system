@@ -195,6 +195,24 @@ One issue in the original use case was that the open issues around driver attrib
 
 Additionally, the functional requirements are congruent to the use case. FR-001 through FR-009 cover authenticated alert selection, alert-detail context loading, retrieval of distribution, drivers, and anomalies, preparation, rendering, display, and successful logging. FR-010 through FR-013b cover single-component and multi-component unavailable cases, including the no-reliable-component unavailable-detail state. FR-014 through FR-016 cover retrieval failures, rendering failures, and correlated operational logging.
 
+## Use Case 13
+
+Overall, the generated spec.md repeats the flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. The acceptance tests and specification map cleanly to UC-13 as follows:
+
+1. AT-01 (alert configuration settings loads and displays current values) -> Main Success Scenario Steps 1-2
+2. AT-02 (adjust thresholds by category and optional geography) -> Main Success Scenario Step 3
+3. AT-03 (select supported notification channels) -> Main Success Scenario Step 4
+4. AT-04 (configure frequency and deduplication preferences) -> Main Success Scenario Step 5
+5. AT-05 (save configuration validates and stores updated settings) -> Main Success Scenario Steps 6-8 and Success End Condition
+6. AT-06 (successful configuration update is logged) -> Main Success Scenario Step 9
+7. AT-07 (saved settings are applied to subsequent alert behavior) -> Success End Condition
+8. AT-08 (invalid threshold values are rejected and configuration is not saved) -> Extension 7a
+9. AT-09 (unsupported notification channel selection is rejected) -> Extension 4a
+10. AT-10 (storage failure logs error and retains previous configuration) -> Extension 8a and Failed End Condition
+
+One issue in the original use case was that deduplication and frequency behavior appeared in the main flow but remained open-ended in the related information, and the generated spec fixes this by making scoped frequency or deduplication controls explicit per service category with optional geography. Another issue was that the use case implied channel selection but did not state whether zero-channel saves were valid, and the generated spec fixes this by requiring at least one supported notification channel before save.
+
+Additionally, the functional requirements are congruent to the use case. FR-001 through FR-008 cover authenticated configuration access, display of the shared active configuration, threshold scope rules, channel selection, and scoped frequency or deduplication controls. FR-009 through FR-014 cover validation of thresholds, required channel selection, unsupported-channel rejection, and prevention of invalid saves. FR-015 through FR-024 cover successful storage, confirmation, logging, storage-failure handling, active-configuration continuity, future-alert application of the saved configuration, scope distinction, persisted preferences, and scoped evaluation of frequency or deduplication rules.
 ## Use Case 19
 
 Overall, the generated spec.md repeats all flows from the use case. The only changes made from the use case are the clarifications we addressed via /speckit.clarify. Each acceptance scenario and edge case maps to a flow in the use case as follows:

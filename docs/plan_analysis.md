@@ -70,6 +70,10 @@ The architectural decisions made in plan.md for UC-12 match the intent set forth
 
 Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-11 without redefining them, and introduces five new UC-12-specific entities or read models: AlertDetailLoadRecord, ForecastDistributionContext, DriverAttributionContext, AnomalyContextWindow, and AlertDetailView. This matches the interface in `./contracts/alert-detail-context-api.yaml` and is congruent with the functional requirements in this use case.
 
+## Use Case 13
+The architectural decisions made in plan.md for UC-13 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
+
+Furthermore, data_model.md reuses the shared lineage and vocabulary from UC-01 through UC-12 without redefining them, and introduces only six UC-13-specific entities: AlertConfigurationVersion, ActiveAlertConfigurationMarker, AlertConfigurationThresholdRule, AlertConfigurationChannelSelection, AlertConfigurationDeliveryPreference, and AlertConfigurationUpdateAttempt. This matches the interface in `./contracts/alert-configuration-api.yaml` and is congruent with the functional requirements in this use case, including authenticated access, shared active-configuration replacement, validation-rejection handling, and storage-failure continuity.
 ## Use Case 19
 The architectural decisions made in plan.md for UC-19 match the intent set forth in the constitution: FastAPI with PostgreSQL integration for the backend and a React TypeScript frontend.
 
