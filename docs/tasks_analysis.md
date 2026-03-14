@@ -62,6 +62,12 @@ The task sequence for UC-12 makes sense and there are no blocking dependency iss
 
 The task sequence for UC-13 makes sense and there are no blocking dependency issues in the implementation of this task. The general sequence of the tasks are: Setup -> Foundational -> US1 -> US2 -> US3 -> Polish. So we can validate that the tasks for this use case are correct.
 
+## Use Case 18
+
+The task sequence for UC-05 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: setup shared backend/frontend scaffolding -> implement foundational models/repositories/services/types/logging -> implement guide open flow (retrieve + display + access logging) -> implement guide navigation -> implement failure handling and render-event reporting -> finish polish, smoke coverage, metrics, and quickstart validation.
+
 ## Use Case 19
 
 The task sequence for UC-19 makes sense and there are no blocking dependencies in the implementation of this task. The general sequence of the tasks are: implement feedback submission models -> implement API for posting reports -> implement UI for submitting feedback/bug reports -> implement error/sanity checks. So we can validate that the tasks for this use case are correct.
+The phases that can run in parallel are also identified clearly. After `T001`, `T002` and `T003` can run in parallel. After `T004`, the foundational tasks `T005` through `T011` can run in parallel before `T012`. Within US1, `T013` through `T016` can run in parallel, `T017` through `T019` can run in parallel before `T020`, and `T022` can proceed in parallel with backend service work after the typed contracts exist. Within US2, `T024` through `T027` can run in parallel, and `T029` and `T030` can run in parallel after `T028`. Within US3, `T032` through `T035` can run in parallel, and `T037` and `T039` can run in parallel after `T036`. The polish tasks `T041` through `T043` can also run in parallel before the final validation task `T044`.
+

@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: User Guide API
+  version: 0.1.0
+  description: >
+    Contract for UC-18 Access User Guide. Provides authenticated access to the
+    current published guide and allows the client to report final render
+    outcomes for observability.
+servers:
+  - url: https://api.proactive311.local
+paths:
+  /api/v1/help/user-guide:
+    get:
+      summary: Load the current published user guide
+      operationId: getUserGuide
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: entryPoint
+          required: true
+          schema:
+            type: string
+          description: Product surface where the help or user guide option was selected.
+      responses:
+        '200':
+          description: The guide payload was resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGuideView'
+        '401':
+          description: The caller is not authenticated.
+  /api/v1/help/user-guide/{guideAccessEventId}/render-events:
+    post:
+      summary: Record the final client render outcome for a guide-open attempt
+      operationId: postUserGuideRenderEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guideAccessEventId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuideRenderOutcomeRequest'
+      responses:
+        '202':
+          description: Render outcome accepted for processing and persistence.
+        '401':
+          description: The caller is not authenticated.
+        '404':
+          description: The guide access event was not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserGuideView:
+      type: object
+      required:
+        - guideAccessEventId
+        - status
+        - entryPoint
+      properties:
+        guideAccessEventId:
+          type: string
+        status:
+          type: string
+          enum:
+            - available
+            - unavailable
+            - error
+        title:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        body:
+          type: string
+          description: Normalized instructional content ready for readable display.
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuideSection'
+        statusMessage:
+          type: string
+        entryPoint:
+          type: string
+      allOf:
+        - if:
+            properties:
+              status:
+                const: available
+          then:
+            required:
+              - title
+              - publishedAt
+              - body
+              - sections
+        - if:
+            properties:
+              status:
+                enum:
+                  - unavailable
+                  - error
+          then:
+            required:
+              - statusMessage
+    GuideSection:
+      type: object
+      required:
+        - sectionId
+        - label
+        - orderIndex
+      properties:
+        sectionId:
+          type: string
+        label:
+          type: string
+        orderIndex:
+          type: integer
+          minimum: 0
+        anchorTarget:
+          type: string
+        contentExcerpt:
+          type: string
+    GuideRenderOutcomeRequest:
+      type: object
+      required:
+        - renderOutcome
+      properties:
+        renderOutcome:
+          type: string
+          enum:
+            - rendered
+            - render_failed
+        failureMessage:
+          type: string
+      allOf:
+        - if:
+            properties:
+              renderOutcome:
+                const: render_failed
+          then:
+            required:
+              - failureMessage
