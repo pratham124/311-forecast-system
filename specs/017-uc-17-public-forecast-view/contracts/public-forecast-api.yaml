@@ -1,0 +1,187 @@
+openapi: 3.1.0
+info:
+  title: Public Forecast API
+  version: 0.1.0
+  description: >
+    Typed contracts for UC-17 public retrieval of the current approved
+    public-safe 311 demand forecast by category and final display-outcome
+    reporting for anonymous portal requests.
+servers:
+  - url: https://api.proactive311.local
+paths:
+  /api/v1/public/forecast-categories/current:
+    get:
+      summary: Load the current approved public-safe forecast view by category
+      operationId: getPublicForecastView
+      tags:
+        - PublicForecast
+      parameters:
+        - in: header
+          name: X-Client-Correlation-Id
+          required: false
+          schema:
+            type: string
+          description: Optional client-supplied correlation identifier for observability.
+      responses:
+        '200':
+          description: Public forecast view resolved, including available or explicit non-success status states.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicForecastView'
+  /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events:
+    post:
+      summary: Record the final client display outcome for an anonymous public forecast request
+      operationId: postPublicForecastDisplayEvent
+      tags:
+        - PublicForecast
+      parameters:
+        - in: path
+          name: publicForecastRequestId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicForecastDisplayEventRequest'
+      responses:
+        '202':
+          description: Display outcome accepted for processing and persistence.
+        '404':
+          description: Public forecast request was not found.
+        '422':
+          description: Invalid display event payload.
+components:
+  schemas:
+    PortalStatus:
+      type: string
+      enum:
+        - available
+        - unavailable
+        - error
+    SanitizationStatus:
+      type: string
+      enum:
+        - passed_as_is
+        - sanitized
+        - blocked
+        - failed
+    CoverageStatus:
+      type: string
+      enum:
+        - complete
+        - incomplete
+    DisplayOutcome:
+      type: string
+      enum:
+        - rendered
+        - render_failed
+    PublicForecastCategorySummary:
+      type: object
+      additionalProperties: false
+      required:
+        - serviceCategory
+      properties:
+        serviceCategory:
+          type: string
+        forecastDemandValue:
+          type: number
+          nullable: true
+        demandLevelSummary:
+          type: string
+          nullable: true
+      anyOf:
+        - required:
+            - forecastDemandValue
+        - required:
+            - demandLevelSummary
+    PublicForecastView:
+      type: object
+      additionalProperties: false
+      required:
+        - publicForecastRequestId
+        - status
+      properties:
+        publicForecastRequestId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PortalStatus'
+        forecastWindowLabel:
+          type: string
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        coverageStatus:
+          $ref: '#/components/schemas/CoverageStatus'
+        coverageMessage:
+          type: string
+          nullable: true
+        sanitizationStatus:
+          $ref: '#/components/schemas/SanitizationStatus'
+        sanitizationSummary:
+          type: string
+          nullable: true
+        categorySummaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicForecastCategorySummary'
+        statusMessage:
+          type: string
+          nullable: true
+        clientCorrelationId:
+          type: string
+          nullable: true
+      allOf:
+        - if:
+            properties:
+              status:
+                const: available
+          then:
+            required:
+              - forecastWindowLabel
+              - publishedAt
+              - coverageStatus
+              - sanitizationStatus
+              - categorySummaries
+        - if:
+            properties:
+              coverageStatus:
+                const: incomplete
+          then:
+            required:
+              - coverageMessage
+        - if:
+            properties:
+              status:
+                enum:
+                  - unavailable
+                  - error
+          then:
+            required:
+              - statusMessage
+    PublicForecastDisplayEventRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - displayOutcome
+      properties:
+        displayOutcome:
+          $ref: '#/components/schemas/DisplayOutcome'
+        failureReason:
+          type: string
+          nullable: true
+      allOf:
+        - if:
+            properties:
+              displayOutcome:
+                const: render_failed
+          then:
+            required:
+              - failureReason

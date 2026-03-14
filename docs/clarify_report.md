@@ -350,6 +350,10 @@ The original `/speckit.clarify` question text and option tables for UC-14 were n
 
 The original `/speckit.clarify` question text and option tables for UC-15 were not preserved in the repository. The accepted clarifications already captured in `spec.md` are that storm mode activates only for the affected scope, uses weather-only trigger inputs, and reverts both uncertainty and alert sensitivity to baseline when forecast adjustment fails.
 
+## Use Case 17
+
+The original `/speckit.clarify` question text and option tables for UC-17 were not preserved in the repository. The accepted clarifications already captured in `spec.md` are that the portal is anonymous, reads only the current approved public-safe forecast version, limits the response to public-safe category-level fields, and marks incomplete category coverage explicitly rather than implying omitted categories are zero.
+
 ## Use Case 18
 
 ### Question 1
