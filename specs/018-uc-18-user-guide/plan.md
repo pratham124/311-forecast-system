@@ -1,7 +1,7 @@
 # Implementation Plan: Access User Guide
 
-**Branch**: `013-access-user-guide` | **Date**: 2026-03-13 | **Spec**: [spec.md](/root/311-forecast-system/specs/013-access-user-guide/spec.md)
-**Input**: Feature specification from `/specs/013-access-user-guide/spec.md`
+**Branch**: `013-access-user-guide` | **Date**: 2026-03-13 | **Spec**: [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/spec.md)
+**Input**: Feature specification from `/specs/018-uc-18-user-guide/spec.md`
 
 ## Summary
 
@@ -12,18 +12,18 @@ Implement UC-18 as an authenticated help flow that lets any signed-in user open 
 **Language/Version**: Python 3.11 backend services and TypeScript React frontend  
 **Primary Dependencies**: FastAPI, Pydantic-style typed schemas, SQLAlchemy-compatible PostgreSQL access layer, structured logging, React, TypeScript, Tailwind CSS, shared typed API/domain models, JWT authentication, role-based authorization dependencies  
 **Storage**: PostgreSQL for guide access and failure observability records plus references to the current published user guide content; guide body content may be sourced from the platform’s documentation storage rather than duplicated into separate per-access snapshots  
-**Testing**: pytest for backend unit, integration, and contract coverage; frontend interaction tests for guide load, section navigation, unavailable, and render-error states; acceptance tests aligned to [UC-18-AT.md](/root/311-forecast-system/docs/UC-18-AT.md)  
+**Testing**: pytest for backend unit, integration, and contract coverage; frontend interaction tests for guide load, section navigation, unavailable, and render-error states; acceptance tests aligned to [UC-18-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18-AT.md)  
 **Target Platform**: Linux-hosted web application with FastAPI backend and React frontend  
 **Project Type**: Web application with backend API plus typed frontend  
 **Performance Goals**: Reach readable guide content within 10 seconds for at least 95% of successful guide opens, complete section-to-section navigation within 2 seconds without reopening the guide, and record a terminal outcome for 100% of guide access attempts  
-**Constraints**: Must satisfy [UC-18.md](/root/311-forecast-system/docs/UC-18.md) and [UC-18-AT.md](/root/311-forecast-system/docs/UC-18-AT.md); must allow any signed-in user to access the guide; must provide a help or user guide entry point on one MVP host surface; must retrieve only the current published guide content; must show a loading state before either guide content or an explicit error state appears; must preserve readability and availability while users navigate sections or pages; must show clear unavailable states instead of blank, stale, partial, or corrupted guide content; must log successful access, retrieval failures, and rendering failures; must keep FastAPI routes thin, guide retrieval and event recording in services, persistence in repositories, and frontend rendering in typed feature modules; must not expose raw documentation storage internals or bypass backend authentication  
+**Constraints**: Must satisfy [UC-18.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18.md) and [UC-18-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18-AT.md); must allow any signed-in user to access the guide; must provide a help or user guide entry point on one MVP host surface; must retrieve only the current published guide content; must show a loading state before either guide content or an explicit error state appears; must preserve readability and availability while users navigate sections or pages; must show clear unavailable states instead of blank, stale, partial, or corrupted guide content; must log successful access, retrieval failures, and rendering failures; must keep FastAPI routes thin, guide retrieval and event recording in services, persistence in repositories, and frontend rendering in typed feature modules; must not expose raw documentation storage internals or bypass backend authentication  
 **Scale/Scope**: One user-guide experience on one authenticated MVP host surface, one normalized guide-read contract, one render-outcome contract for observability, and access-event history sufficient for operational review and support analysis
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- `PASS`: Use-case traceability is preserved. The plan remains bounded to [UC-18.md](/root/311-forecast-system/docs/UC-18.md), [UC-18-AT.md](/root/311-forecast-system/docs/UC-18-AT.md), and the accepted clarification captured in the feature spec.
+- `PASS`: Use-case traceability is preserved. The plan remains bounded to [UC-18.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18.md), [UC-18-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18-AT.md), and the accepted clarification captured in the feature spec.
 - `PASS`: Canonical Edmonton forecasting constraints are not impacted. UC-18 is a product-help feature and does not alter governed 311, weather, holiday, or forecast lineage.
 - `PASS`: Layered backend architecture is preserved. Route handlers remain transport-only; guide retrieval, navigation payload preparation, and observability recording stay in dedicated services and repositories.
 - `PASS`: Typed frontend modularity and secure access are preserved. The guide is delivered through authenticated backend APIs and consumed by typed frontend modules rather than direct storage access.
@@ -45,7 +45,7 @@ Implement UC-18 as an authenticated help flow that lets any signed-in user open 
 ### Documentation (this feature)
 
 ```text
-specs/013-access-user-guide/
+specs/018-uc-18-user-guide/
 ├── plan.md
 ├── research.md
 ├── data-model.md

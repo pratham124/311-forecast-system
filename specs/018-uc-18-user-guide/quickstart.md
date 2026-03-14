@@ -37,7 +37,7 @@ Use this guide to implement and verify UC-18 as an authenticated in-product help
 
 ## Acceptance Alignment
 
-Map implementation and tests directly to [UC-18](/root/311-forecast-system/docs/UC-18.md) and [UC-18-AT.md](/root/311-forecast-system/docs/UC-18-AT.md):
+Map implementation and tests directly to [UC-18](/Users/sahmed/Documents/311-forecast-system/docs/UC-18.md) and [UC-18-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18-AT.md):
 
 - AT-01: user selects the help or user guide option from a supported product surface
 - AT-02: backend retrieves the current published guide and records retrieval success
@@ -51,7 +51,7 @@ Map implementation and tests directly to [UC-18](/root/311-forecast-system/docs/
 
 - Unit tests for current-guide resolution, section ordering, outcome assignment, failure-message normalization, and access-event persistence
 - Integration tests across authenticated guide retrieval, unavailable-guide behavior, render-outcome reporting, and event logging
-- Contract tests for [user-guide-api.yaml](/root/311-forecast-system/specs/013-access-user-guide/contracts/user-guide-api.yaml)
+- Contract tests for [user-guide-api.yaml](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/contracts/user-guide-api.yaml)
 - Frontend interaction tests for guide open, section navigation, unavailable state, and render-failure handling
 
 ## Exit Conditions

@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-03-13  
-**Feature**: [spec.md](/root/311-forecast-system/specs/013-access-user-guide/spec.md)
+**Feature**: [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/spec.md)
 
 ## Content Quality
 
@@ -31,6 +31,6 @@
 
 ## Notes
 
-- Validation completed against [spec.md](/root/311-forecast-system/specs/013-access-user-guide/spec.md), [UC-18.md](/root/311-forecast-system/docs/UC-18.md), and [UC-18-AT.md](/root/311-forecast-system/docs/UC-18-AT.md) on 2026-03-13.
+- Validation completed against [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/018-uc-18-user-guide/spec.md), [UC-18.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18.md), and [UC-18-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-18-AT.md) on 2026-03-13.
 - No unresolved clarification markers remain.
 - No checklist failures were found in the final validation pass.
