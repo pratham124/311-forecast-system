@@ -108,6 +108,27 @@ No other transitions are valid.
 
 `stored/not current` → `stored/current`
 
+## Entity: DatasetRecord
+
+**Purpose**: Stores one normalized Edmonton 311 row belonging to a persisted `DatasetVersion`.
+
+**Fields**
+
+| Field | Type | Required | Rules |
+|--------|-------------|----------|-------|
+| `record_id` | Identifier | Yes | Unique per stored row |
+| `dataset_version_id` | Identifier | Yes | References the owning stored dataset version |
+| `source_record_id` | String | Yes | Normalized source row identifier |
+| `requested_at` | String | Yes | Normalized request timestamp value |
+| `category` | String | Yes | Normalized service category |
+| `record_payload` | JSON/Text | Yes | Durable normalized row snapshot for the stored dataset version |
+
+**Validation rules**
+
+- `DatasetRecord` rows may exist only for successful stored dataset versions.
+- No dataset records are stored for `no_new_records` runs or failed runs.
+- `record_payload` stores normalized dataset content, not raw failed-run observability payloads.
+
 ## Entity: CurrentDatasetMarker
 
 **Purpose**: Provides a stable query point for the dataset version currently active for downstream consumers and acceptance checks.
@@ -153,6 +174,7 @@ No other transitions are valid.
 - One `CandidateDataset` belongs to exactly one `IngestionRun`.
 - One `CandidateDataset` may produce zero or one stored `DatasetVersion`.
 - One `DatasetVersion` belongs to exactly one `IngestionRun`.
+- One `DatasetVersion` contains zero or more `DatasetRecord` rows.
 - One `SuccessfulPullCursor` belongs to the Edmonton 311 source and is updated by zero or more successful runs over time.
 - One `CurrentDatasetMarker` points to exactly one active `DatasetVersion`.
 - One failed `IngestionRun` must have one corresponding `FailureNotificationRecord`.

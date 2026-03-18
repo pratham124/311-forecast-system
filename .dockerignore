@@ -1,0 +1,15 @@
+.git/
+.venv/
+venv/
+node_modules/
+dist/
+build/
+coverage/
+htmlcov/
+__pycache__/
+*.pyc
+*.log
+.env*
+*.sqlite*
+.dockerignore
+Dockerfile*

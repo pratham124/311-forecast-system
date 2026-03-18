@@ -1,0 +1,3 @@
+prefix_rule(pattern=["apt-get", "update"], decision="allow")
+prefix_rule(pattern=["apt-get", "install", "-y", "python3-venv"], decision="allow")
+prefix_rule(pattern=[".venv/bin/pip", "install", "-r", "requirements.txt"], decision="allow")

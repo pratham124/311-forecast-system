@@ -23,11 +23,11 @@
 
 **Purpose**: Create the backend project skeleton and shared tooling needed for all UC-01 work.
 
-- [ ] T001 Create backend package structure in `backend/app/__init__.py`, `backend/app/api/routes/__init__.py`, `backend/app/clients/__init__.py`, `backend/app/core/__init__.py`, `backend/app/pipelines/ingestion/__init__.py`, `backend/app/repositories/__init__.py`, `backend/app/schemas/__init__.py`, `backend/app/services/__init__.py`, and `backend/tests/__init__.py`
-- [ ] T002 Initialize backend project configuration and dependencies in `backend/pyproject.toml`
-- [ ] T003 [P] Configure pytest discovery and test markers in `backend/pytest.ini`
-- [ ] T004 [P] Add backend environment configuration template for Edmonton source credentials, JWT settings, role claims, and storage settings in `backend/.env.example`
-- [ ] T005 Configure migration tooling and migration environment in `backend/alembic.ini` and `backend/migrations/env.py`
+- [X] T001 Create backend package structure in `backend/app/__init__.py`, `backend/app/api/routes/__init__.py`, `backend/app/clients/__init__.py`, `backend/app/core/__init__.py`, `backend/app/pipelines/ingestion/__init__.py`, `backend/app/repositories/__init__.py`, `backend/app/schemas/__init__.py`, `backend/app/services/__init__.py`, and `backend/tests/__init__.py`
+- [X] T002 Initialize backend project configuration and dependencies in `backend/pyproject.toml`
+- [X] T003 [P] Configure pytest discovery and test markers in `backend/pytest.ini`
+- [X] T004 [P] Add backend environment configuration template for Edmonton source credentials, JWT settings, role claims, and storage settings in `backend/.env.example`
+- [X] T005 Configure migration tooling and migration environment in `backend/alembic.ini` and `backend/migrations/env.py`
 
 ---
 
@@ -37,18 +37,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create shared configuration and settings loader for environment and secret-backed config in `backend/app/core/config.py`
-- [ ] T007 [P] Create structured logging setup with secret masking and redaction helpers in `backend/app/core/logging.py` (depends on T006)
-- [ ] T008 [P] Create database session and base metadata modules in `backend/app/core/db.py`
-- [ ] T009 Create shared SQLAlchemy models for `IngestionRun`, `SuccessfulPullCursor`, `CandidateDataset`, `DatasetVersion`, `CurrentDatasetMarker`, and `FailureNotificationRecord` in `backend/app/repositories/models.py`
-- [ ] T010 [P] Create shared Pydantic schemas for run status, current dataset, and failure notifications in `backend/app/schemas/ingestion.py`
-- [ ] T011 [P] Create repository interfaces for cursor, datasets, current marker, runs, and notifications in `backend/app/repositories/ingestion_repository.py`
-- [ ] T012 Create initial migration for all UC-01 persisted entities in `backend/migrations/versions/001_uc01_ingestion_foundation.py` (depends on T009)
-- [ ] T013 [P] Implement backend JWT auth dependencies and `OperationalManager`/`CityPlanner` role checks for ingestion endpoints in `backend/app/core/auth.py` (depends on T006)
-- [ ] T014 [P] Create scheduler service and configured job registration skeleton in `backend/app/services/scheduler_service.py`
-- [ ] T015 Create Edmonton 311 client skeleton, environment-based credential loading, and normalized source payload schema in `backend/app/clients/edmonton_311.py` (depends on T006)
-- [ ] T016 [P] Update the endpoint contract for JWT auth, role-protected ingestion surfaces, and redacted failure-notification responses in `specs/001-pull-311-data/contracts/ingestion-api.yaml`
-- [ ] T017 Create ingestion route registration and app wiring skeleton in `backend/app/api/routes/ingestion.py` and `backend/app/main.py` (depends on T013)
+- [X] T006 Create shared configuration and settings loader for environment and secret-backed config in `backend/app/core/config.py`
+- [X] T007 [P] Create structured logging setup with secret masking and redaction helpers in `backend/app/core/logging.py` (depends on T006)
+- [X] T008 [P] Create database session and base metadata modules in `backend/app/core/db.py`
+- [X] T009 Create shared SQLAlchemy models for `IngestionRun`, `SuccessfulPullCursor`, `CandidateDataset`, `DatasetVersion`, `CurrentDatasetMarker`, and `FailureNotificationRecord` in `backend/app/repositories/models.py`
+- [X] T010 [P] Create shared Pydantic schemas for run status, current dataset, and failure notifications in `backend/app/schemas/ingestion.py`
+- [X] T011 [P] Create repository interfaces for cursor, datasets, current marker, runs, and notifications in `backend/app/repositories/ingestion_repository.py`
+- [X] T012 Create initial migration for all UC-01 persisted entities in `backend/migrations/versions/001_uc01_ingestion_foundation.py` (depends on T009)
+- [X] T013 [P] Implement backend JWT auth dependencies and `OperationalManager`/`CityPlanner` role checks for ingestion endpoints in `backend/app/core/auth.py` (depends on T006)
+- [X] T014 [P] Create scheduler service and configured job registration skeleton in `backend/app/services/scheduler_service.py`
+- [X] T015 Create Edmonton 311 client skeleton, environment-based credential loading, and normalized source payload schema in `backend/app/clients/edmonton_311.py` (depends on T006)
+- [X] T016 [P] Update the endpoint contract for JWT auth, role-protected ingestion surfaces, and redacted failure-notification responses in `specs/001-pull-311-data/contracts/ingestion-api.yaml`
+- [X] T017 Create ingestion route registration and app wiring skeleton in `backend/app/api/routes/ingestion.py` and `backend/app/main.py` (depends on T013)
 
 **Checkpoint**: Foundation ready; user stories can now be implemented independently.
 
@@ -62,24 +62,24 @@
 
 ### Tests for User Story 1
 
-- [ ] T018 [P] [US1] Add unit tests for first-run cursor lookup and cursor advancement rules in `backend/tests/unit/test_cursor_service.py`
-- [ ] T019 [P] [US1] Add unit tests for candidate-to-stored-to-current activation boundaries in `backend/tests/unit/test_activation_rules.py`
-- [ ] T020 [P] [US1] Add unit tests for JWT RBAC dependency behavior for `OperationalManager` and `CityPlanner` access rules in `backend/tests/unit/test_auth_roles.py`
-- [ ] T021 [P] [US1] Add contract tests for trigger, run status, and current dataset endpoints covering authorized roles, forbidden roles, no-backdoor access, and the updated contract in `backend/tests/contract/test_ingestion_api.py` (depends on T016)
-- [ ] T022 [P] [US1] Add integration test for successful scheduled ingestion with new records in `backend/tests/integration/test_ingestion_success.py`
+- [X] T018 [P] [US1] Add unit tests for first-run cursor lookup and cursor advancement rules in `backend/tests/unit/test_cursor_service.py`
+- [X] T019 [P] [US1] Add unit tests for candidate-to-stored-to-current activation boundaries in `backend/tests/unit/test_activation_rules.py`
+- [X] T020 [P] [US1] Add unit tests for JWT RBAC dependency behavior for `OperationalManager` and `CityPlanner` access rules in `backend/tests/unit/test_auth_roles.py`
+- [X] T021 [P] [US1] Add contract tests for trigger, run status, and current dataset endpoints covering authorized roles, forbidden roles, no-backdoor access, and the updated contract in `backend/tests/contract/test_ingestion_api.py` (depends on T016)
+- [X] T022 [P] [US1] Add integration test for successful scheduled ingestion with new records in `backend/tests/integration/test_ingestion_success.py`
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Implement cursor repository operations in `backend/app/repositories/cursor_repository.py` (depends on T011)
-- [ ] T024 [P] [US1] Implement dataset version and current marker repository operations in `backend/app/repositories/dataset_repository.py` (depends on T011)
-- [ ] T025 [P] [US1] Implement run repository operations for successful ingestion state in `backend/app/repositories/run_repository.py` (depends on T011)
-- [ ] T026 [US1] Implement dataset validation service for required structure, required fields, parseable types, and completeness checks in `backend/app/services/dataset_validation_service.py`
-- [ ] T027 [US1] Implement candidate dataset service and validation handoff logic in `backend/app/services/candidate_dataset_service.py` (depends on T026)
-- [ ] T028 [US1] Implement successful ingestion orchestration, including first-run full fetch, exclusive cursor windowing, environment-based source credential use, stored dataset version creation, current marker activation, and post-store cursor advancement in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T015, T023, T024, T025, T027)
-- [ ] T029 [US1] Implement run status and current dataset query services in `backend/app/services/ingestion_query_service.py` (depends on T023, T024, T025)
-- [ ] T030 [US1] Implement FastAPI trigger, run status, and current dataset endpoints with JWT auth guards and `OperationalManager`/`CityPlanner` permissions in `backend/app/api/routes/ingestion.py` (depends on T013, T028, T029)
-- [ ] T031 [US1] Wire configured scheduled execution to the ingestion pipeline in `backend/app/services/scheduler_service.py` (depends on T014, T028)
-- [ ] T032 [US1] Add structured success and `new_data` logging fields with credential masking hooks in `backend/app/services/ingestion_logging_service.py` (depends on T007)
+- [X] T023 [P] [US1] Implement cursor repository operations in `backend/app/repositories/cursor_repository.py` (depends on T011)
+- [X] T024 [P] [US1] Implement dataset version and current marker repository operations in `backend/app/repositories/dataset_repository.py` (depends on T011)
+- [X] T025 [P] [US1] Implement run repository operations for successful ingestion state in `backend/app/repositories/run_repository.py` (depends on T011)
+- [X] T026 [US1] Implement dataset validation service for required structure, required fields, parseable types, and completeness checks in `backend/app/services/dataset_validation_service.py`
+- [X] T027 [US1] Implement candidate dataset service and validation handoff logic in `backend/app/services/candidate_dataset_service.py` (depends on T026)
+- [X] T028 [US1] Implement successful ingestion orchestration, including first-run full fetch, exclusive cursor windowing, environment-based source credential use, stored dataset version creation, current marker activation, and post-store cursor advancement in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T015, T023, T024, T025, T027)
+- [X] T029 [US1] Implement run status and current dataset query services in `backend/app/services/ingestion_query_service.py` (depends on T023, T024, T025)
+- [X] T030 [US1] Implement FastAPI trigger, run status, and current dataset endpoints with JWT auth guards and `OperationalManager`/`CityPlanner` permissions in `backend/app/api/routes/ingestion.py` (depends on T013, T028, T029)
+- [X] T031 [US1] Wire configured scheduled execution to the ingestion pipeline in `backend/app/services/scheduler_service.py` (depends on T014, T028)
+- [X] T032 [US1] Add structured success and `new_data` logging fields with credential masking hooks in `backend/app/services/ingestion_logging_service.py` (depends on T007)
 
 **Checkpoint**: User Story 1 should support AT-01 and the first-run behavior in isolation.
 
@@ -93,21 +93,21 @@
 
 ### Tests for User Story 2
 
-- [ ] T033 [P] [US2] Add unit tests for failure classification and redacted failure-notification payload creation in `backend/tests/unit/test_failure_notifications.py`
-- [ ] T034 [P] [US2] Add unit tests for log redaction, secret masking, and no raw-row persistence in `backend/tests/unit/test_log_redaction.py`
-- [ ] T035 [P] [US2] Add integration tests for authentication and source-unavailable failures in `backend/tests/integration/test_ingestion_source_failures.py`
-- [ ] T036 [P] [US2] Add integration tests for validation and storage failures in `backend/tests/integration/test_ingestion_processing_failures.py`
-- [ ] T037 [P] [US2] Add acceptance-aligned integration test for no partial activation on failed runs in `backend/tests/integration/test_no_partial_activation.py`
+- [X] T033 [P] [US2] Add unit tests for failure classification and redacted failure-notification payload creation in `backend/tests/unit/test_failure_notifications.py`
+- [X] T034 [P] [US2] Add unit tests for log redaction, secret masking, and no raw-row persistence in `backend/tests/unit/test_log_redaction.py`
+- [X] T035 [P] [US2] Add integration tests for authentication and source-unavailable failures in `backend/tests/integration/test_ingestion_source_failures.py`
+- [X] T036 [P] [US2] Add integration tests for validation and storage failures in `backend/tests/integration/test_ingestion_processing_failures.py`
+- [X] T037 [P] [US2] Add acceptance-aligned integration test for no partial activation on failed runs in `backend/tests/integration/test_no_partial_activation.py`
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Implement failure notification repository operations in `backend/app/repositories/failure_notification_repository.py` (depends on T011)
-- [ ] T039 [P] [US2] Implement failure notification schema mapping and summary-only serialization in `backend/app/schemas/failure_notifications.py` (depends on T010)
-- [ ] T040 [US2] Implement failure notification service with required minimum fields, redaction rules, and monitoring-store persistence in `backend/app/services/failure_notification_service.py` (depends on T038, T039)
-- [ ] T041 [US2] Extend the ingestion pipeline to classify `auth_failure`, `source_unavailable`, `validation_failure`, and `storage_failure`, preserve the previous current dataset, and retain only summary metadata for failed-run evidence in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T028, T040)
-- [ ] T042 [US2] Add storage-boundary enforcement so candidate datasets never become stored/current on failed runs in `backend/app/services/activation_guard_service.py` (depends on T027, T028)
-- [ ] T043 [US2] Implement failure-notification query endpoint with JWT auth guards and `OperationalManager`/`CityPlanner` permissions in `backend/app/api/routes/ingestion.py` (depends on T013, T040)
-- [ ] T044 [US2] Add structured failure logging, redaction, and correlation with failure notification records in `backend/app/services/ingestion_logging_service.py` (depends on T032, T040)
+- [X] T038 [P] [US2] Implement failure notification repository operations in `backend/app/repositories/failure_notification_repository.py` (depends on T011)
+- [X] T039 [P] [US2] Implement failure notification schema mapping and summary-only serialization in `backend/app/schemas/failure_notifications.py` (depends on T010)
+- [X] T040 [US2] Implement failure notification service with required minimum fields, redaction rules, and monitoring-store persistence in `backend/app/services/failure_notification_service.py` (depends on T038, T039)
+- [X] T041 [US2] Extend the ingestion pipeline to classify `auth_failure`, `source_unavailable`, `validation_failure`, and `storage_failure`, preserve the previous current dataset, and retain only summary metadata for failed-run evidence in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T028, T040)
+- [X] T042 [US2] Add storage-boundary enforcement so candidate datasets never become stored/current on failed runs in `backend/app/services/activation_guard_service.py` (depends on T027, T028)
+- [X] T043 [US2] Implement failure-notification query endpoint with JWT auth guards and `OperationalManager`/`CityPlanner` permissions in `backend/app/api/routes/ingestion.py` (depends on T013, T040)
+- [X] T044 [US2] Add structured failure logging, redaction, and correlation with failure notification records in `backend/app/services/ingestion_logging_service.py` (depends on T032, T040)
 
 **Checkpoint**: User Story 2 should support AT-02, AT-03, AT-05, AT-06, AT-07, and AT-08 independently once foundational and US1 work are present.
 
@@ -121,16 +121,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T045 [P] [US3] Add unit tests for no-new-records no-op rules in `backend/tests/unit/test_no_new_records_rules.py`
-- [ ] T046 [P] [US3] Add integration test for the no-new-records success path in `backend/tests/integration/test_ingestion_no_new_records.py`
-- [ ] T047 [P] [US3] Extend contract tests for `no_new_records` run-status fields and unchanged-state endpoint responses in `backend/tests/contract/test_ingestion_api.py`
+- [X] T045 [P] [US3] Add unit tests for no-new-records no-op rules in `backend/tests/unit/test_no_new_records_rules.py`
+- [X] T046 [P] [US3] Add integration test for the no-new-records success path in `backend/tests/integration/test_ingestion_no_new_records.py`
+- [X] T047 [P] [US3] Extend contract tests for `no_new_records` run-status fields and unchanged-state endpoint responses in `backend/tests/contract/test_ingestion_api.py`
 
 ### Implementation for User Story 3
 
-- [ ] T048 [US3] Extend the Edmonton 311 client result mapping to classify empty incremental responses as `no_new_records` in `backend/app/clients/edmonton_311.py` (depends on T015)
-- [ ] T049 [US3] Extend ingestion orchestration so `no_new_records` creates no candidate dataset, no stored dataset version, and no cursor advancement in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T028)
-- [ ] T050 [US3] Extend run status and current dataset query responses to expose unchanged-state success cleanly in `backend/app/services/ingestion_query_service.py` (depends on T029)
-- [ ] T051 [US3] Add structured `no_new_records` success logging with the same summary-only redaction rules in `backend/app/services/ingestion_logging_service.py` (depends on T032)
+- [X] T048 [US3] Extend the Edmonton 311 client result mapping to classify empty incremental responses as `no_new_records` in `backend/app/clients/edmonton_311.py` (depends on T015)
+- [X] T049 [US3] Extend ingestion orchestration so `no_new_records` creates no candidate dataset, no stored dataset version, and no cursor advancement in `backend/app/pipelines/ingestion/run_ingestion.py` (depends on T028)
+- [X] T050 [US3] Extend run status and current dataset query responses to expose unchanged-state success cleanly in `backend/app/services/ingestion_query_service.py` (depends on T029)
+- [X] T051 [US3] Add structured `no_new_records` success logging with the same summary-only redaction rules in `backend/app/services/ingestion_logging_service.py` (depends on T032)
 
 **Checkpoint**: User Story 3 should support AT-04 independently once foundational and shared orchestration work are present.
 
@@ -140,9 +140,9 @@
 
 **Purpose**: Final consistency, documentation, and end-to-end acceptance alignment across all user stories.
 
-- [ ] T052 Validate quickstart steps and update any mismatches in `specs/001-pull-311-data/quickstart.md`
-- [ ] T053 [P] Add end-to-end acceptance matrix coverage notes in `backend/tests/integration/README.md`
-- [ ] T054 Run full pytest coverage selection and document the command set in `specs/001-pull-311-data/quickstart.md`
+- [X] T052 Validate quickstart steps and update any mismatches in `specs/001-pull-311-data/quickstart.md`
+- [X] T053 [P] Add end-to-end acceptance matrix coverage notes in `backend/tests/integration/README.md`
+- [X] T054 Run full pytest coverage selection and document the command set in `specs/001-pull-311-data/quickstart.md`
 
 ---
 

@@ -38,6 +38,46 @@ Use this guide to implement and verify UC-01 with the minimum backend components
    - Emit structured logs for success, no-new-records success, and each failure category
    - Write failure notification for failed runs
 
+## Local Commands
+
+- Create the backend environment and install dependencies from `backend/pyproject.toml`.
+- Create a virtual environment with `python3 -m venv .venv` from `backend/`.
+- Install dependencies with `.venv/bin/pip install -r requirements.txt` from `backend/`.
+- Run the backend tests with `.venv/bin/pytest` from `backend/`.
+- Run a syntax-only validation pass with `python3 -m compileall app tests` from `backend/`.
+
+## Shared Dev Setup
+
+Use Docker for PostgreSQL and run the backend locally for the fastest team workflow.
+
+1. Start PostgreSQL from the repository root:
+   - `docker compose up -d postgres`
+2. Create the backend virtual environment:
+   - `cd backend`
+   - `python3 -m venv .venv`
+   - `.venv/bin/pip install -r requirements.txt`
+3. Point the backend at the shared local Postgres container:
+   - `export DATABASE_URL='postgresql+psycopg2://forecast_user:forecast_pass@localhost:5432/forecast_system'`
+4. Start the API locally:
+   - `.venv/bin/uvicorn app.main:app --reload`
+
+`DATABASE_URL` is required at runtime. The backend no longer falls back to SQLite outside tests.
+
+## Scheduled Run Setup
+
+- Disable scheduling for manual API testing:
+  - `export SCHEDULER_ENABLED=false`
+- Enable the internal scheduler for system-actor testing:
+  - `export SCHEDULER_ENABLED=true`
+  - `export SCHEDULER_CRON='0 0 * * 0'`
+
+## Branch Coverage
+
+- Run full branch coverage from `backend/`:
+  - `.venv/bin/pytest --cov=app --cov-branch --cov-report=term-missing`
+- Generate HTML coverage output:
+  - `.venv/bin/pytest --cov=app --cov-branch --cov-report=html`
+
 ## Acceptance Alignment
 
 Map implementation and tests directly to these acceptance scenarios:
@@ -67,3 +107,9 @@ Implementation is ready for task breakdown when:
 - The successful-pull cursor advances only after successful validated storage
 - Failed runs emit both logs and failure notification records
 - No code path can activate a dataset before validation and successful storage
+
+## Current Repository Notes
+
+- The repository now includes the UC-01 backend scaffold under `backend/`.
+- The contract uses JWT bearer auth on all ingestion observability routes.
+- If `pytest` is not installed in the local environment, install backend dev dependencies before running the full suite.
