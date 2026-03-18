@@ -16,6 +16,8 @@ paths:
         Available for test and controlled operational contexts. It must execute
         the same orchestration path used by the scheduled trigger.
       operationId: triggerEdmonton311Ingestion
+      security:
+        - BearerAuth: []
       requestBody:
         required: false
         content:
@@ -33,10 +35,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IngestionRunAccepted'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Caller lacks the OperationalManager role
   /api/v1/ingestion-runs/{runId}:
     get:
       summary: Retrieve the status and outcome of an ingestion run
       operationId: getIngestionRun
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: runId
@@ -50,12 +58,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IngestionRunStatus'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Caller lacks a read role
         '404':
           description: Run not found
   /api/v1/datasets/current:
     get:
       summary: Retrieve the currently active dataset version for the Edmonton 311 source
       operationId: getCurrentDataset
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Current dataset marker found
@@ -63,13 +77,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentDataset'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Caller lacks a read role
   /api/v1/monitoring/failure-notifications:
     get:
       summary: List failure notifications for failed ingestion runs
       operationId: listFailureNotifications
+      security:
+        - BearerAuth: []
       parameters:
         - in: query
-          name: runId
+          name: run_id
           required: false
           schema:
             type: string
@@ -86,13 +106,22 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/FailureNotification'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Caller lacks a read role
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     IngestionRunAccepted:
       type: object
-      required: [runId, status]
+      required: [run_id, status]
       properties:
-        runId:
+        run_id:
           type: string
         status:
           type: string
@@ -100,18 +129,18 @@ components:
     IngestionRunStatus:
       type: object
       required:
-        - runId
+        - run_id
         - status
-        - resultType
-        - startedAt
-        - cursorAdvanced
+        - result_type
+        - started_at
+        - cursor_advanced
       properties:
-        runId:
+        run_id:
           type: string
         status:
           type: string
           enum: [running, success, failed]
-        resultType:
+        result_type:
           type: string
           enum:
             - new_data
@@ -120,72 +149,72 @@ components:
             - source_unavailable
             - validation_failure
             - storage_failure
-        startedAt:
+        started_at:
           type: string
           format: date-time
-        completedAt:
+        completed_at:
           type: string
           format: date-time
-        cursorUsed:
+        cursor_used:
           type: string
-        cursorAdvanced:
+        cursor_advanced:
           type: boolean
-        candidateDatasetId:
+        candidate_dataset_id:
           type: string
-        datasetVersionId:
+        dataset_version_id:
           type: string
-        recordsReceived:
+        records_received:
           type: integer
           minimum: 0
-        failureReason:
+        failure_reason:
           type: string
     CurrentDataset:
       type: object
       required:
-        - sourceName
-        - datasetVersionId
-        - updatedAt
-        - updatedByRunId
-        - recordCount
+        - source_name
+        - dataset_version_id
+        - updated_at
+        - updated_by_run_id
+        - record_count
       properties:
-        sourceName:
+        source_name:
           type: string
           enum: [edmonton_311]
-        datasetVersionId:
+        dataset_version_id:
           type: string
-        updatedAt:
+        updated_at:
           type: string
           format: date-time
-        updatedByRunId:
+        updated_by_run_id:
           type: string
-        recordCount:
+        record_count:
           type: integer
           minimum: 0
     FailureNotification:
       type: object
       required:
-        - notificationId
-        - runId
-        - failureCategory
-        - runStatus
-        - recordedAt
+        - notification_id
+        - run_id
+        - failure_category
+        - run_status
+        - recorded_at
         - message
       properties:
-        notificationId:
+        notification_id:
           type: string
-        runId:
+        run_id:
           type: string
-        failureCategory:
+        failure_category:
           type: string
           enum:
             - auth_failure
             - source_unavailable
             - validation_failure
             - storage_failure
-        runStatus:
+        run_status:
           type: string
           enum: [failed]
-        recordedAt:
+        recorded_at:
           type: string
           format: date-time
         message:

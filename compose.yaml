@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: forecast-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: forecast_system
+      POSTGRES_USER: forecast_user
+      POSTGRES_PASSWORD: forecast_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - forecast_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forecast_user -d forecast_system"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  forecast_postgres_data:

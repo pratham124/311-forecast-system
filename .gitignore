@@ -10,3 +10,16 @@ tmp/
 shell_snapshots/
 history.jsonl
 sessions/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+*.egg-info/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+htmlcov/

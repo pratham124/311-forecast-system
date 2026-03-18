@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forecast-system-backend"
+version = "0.1.0"
+description = "UC-01 Edmonton 311 ingestion backend"
+requires-python = ">=3.11"
+dependencies = [
+  "apscheduler>=3.10,<4.0",
+  "fastapi>=0.111,<1.0",
+  "httpx>=0.27,<1.0",
+  "pydantic>=2.7,<3.0",
+  "psycopg2-binary>=2.9,<3.0",
+  "sqlalchemy>=2.0,<3.0",
+  "uvicorn>=0.30,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "alembic>=1.13,<2.0",
+  "pytest>=8.2,<9.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "tests*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+  "contract: contract-level API tests",
+  "integration: integration tests",
+  "unit: unit tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
