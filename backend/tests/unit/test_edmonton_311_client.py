@@ -434,3 +434,55 @@ def test_normalize_row_uses_unknown_defaults() -> None:
     assert normalized["service_request_id"] == ""
     assert normalized["requested_at"] == ""
     assert normalized["category"] == "unknown"
+
+
+@pytest.mark.unit
+def test_build_initial_where_with_cursor_and_without_lookback() -> None:
+    transport = SocrataEdmonton311Transport("https://example.invalid", first_run_lookback_days=0)
+
+    assert transport._build_initial_where("2026-03-01T00:00:00Z", "submitted_date") == "submitted_date > '2026-03-01T00:00:00Z'"
+    assert transport._build_initial_where(None, "submitted_date") is None
+
+
+@pytest.mark.unit
+def test_build_order_clause_and_literal_helpers_cover_remaining_paths() -> None:
+    assert SocrataEdmonton311Transport._build_order_clause("submitted_date", "id") == "submitted_date ASC, id ASC"
+    assert SocrataEdmonton311Transport._build_order_clause("submitted_date", None) == "submitted_date ASC"
+    assert SocrataEdmonton311Transport._format_soql_literal(7) == "7"
+    assert SocrataEdmonton311Transport._format_soql_literal(2.5) == "2.5"
+    assert SocrataEdmonton311Transport._format_soql_literal("O'Brien") == "'O''Brien'"
+
+
+@pytest.mark.unit
+def test_pick_field_returns_first_match() -> None:
+    assert SocrataEdmonton311Transport._pick_field({"a": 1, "b": 2}, ("b", "a")) == "b"
+
+
+@pytest.mark.unit
+def test_client_fetch_records_returns_no_new_records_when_transport_empty() -> None:
+    client = Edmonton311Client(FakeTransport([]))
+
+    result = client.fetch_records("existing-cursor")
+
+    assert result.result_type == "no_new_records"
+    assert result.records == []
+    assert result.cursor_value == "existing-cursor"
+
+
+@pytest.mark.unit
+def test_client_fetch_records_normalizes_rows_and_computes_cursor() -> None:
+    client = Edmonton311Client(
+        FakeTransport(
+            [
+                {":id": 2, "submitted_date": "2026-03-02T00:00:00Z", "service_name": "Waste"},
+                {":id": 3, "submitted_date": "2026-03-03T00:00:00Z", "service_name": "Transit"},
+            ]
+        )
+    )
+
+    result = client.fetch_records(None)
+
+    assert result.result_type == "new_data"
+    assert result.records[0]["service_request_id"] == "2"
+    assert result.records[0]["category"] == "Waste"
+    assert result.cursor_value == "2026-03-03T00:00:00Z"

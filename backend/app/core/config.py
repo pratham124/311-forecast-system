@@ -20,6 +20,7 @@ class Settings:
     edmonton_311_first_run_lookback_days: int
     edmonton_311_retry_attempts: int
     edmonton_311_retry_backoff_seconds: float
+    duplicate_review_threshold_percentage: float
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
@@ -50,4 +51,5 @@ def get_settings() -> Settings:
         edmonton_311_first_run_lookback_days=int(os.getenv("EDMONTON_311_FIRST_RUN_LOOKBACK_DAYS", "700")),
         edmonton_311_retry_attempts=int(os.getenv("EDMONTON_311_RETRY_ATTEMPTS", "3")),
         edmonton_311_retry_backoff_seconds=float(os.getenv("EDMONTON_311_RETRY_BACKOFF_SECONDS", "0.5")),
+        duplicate_review_threshold_percentage=float(os.getenv("DUPLICATE_REVIEW_THRESHOLD_PERCENTAGE", "20")),
     )

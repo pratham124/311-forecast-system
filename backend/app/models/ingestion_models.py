@@ -61,9 +61,16 @@ class DatasetVersion(Base):
         ForeignKey("candidate_datasets.candidate_dataset_id"),
         nullable=True,
     )
+    source_dataset_version_id: Mapped[str | None] = mapped_column(
+        ForeignKey("dataset_versions.dataset_version_id"),
+        nullable=True,
+    )
     record_count: Mapped[int] = mapped_column(Integer)
     validation_status: Mapped[str] = mapped_column(String(16))
     storage_status: Mapped[str] = mapped_column(String(16))
+    dataset_kind: Mapped[str] = mapped_column(String(16), default="source")
+    duplicate_group_count: Mapped[int] = mapped_column(Integer, default=0)
+    approved_by_validation_run_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     is_current: Mapped[bool] = mapped_column(Boolean, default=False)
     stored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

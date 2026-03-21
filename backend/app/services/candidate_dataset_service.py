@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.repositories.dataset_repository import DatasetRepository
-from app.repositories.models import CandidateDataset
+from app.models import CandidateDataset
 from app.services.dataset_validation_service import DatasetValidationService
 
 

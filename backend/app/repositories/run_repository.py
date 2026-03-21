@@ -4,7 +4,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.repositories.models import IngestionRun
+from app.models import IngestionRun
 
 
 class RunRepository:

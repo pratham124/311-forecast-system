@@ -3,10 +3,12 @@ from __future__ import annotations
 import base64
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Iterator
+from uuid import uuid4
 
-os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///./bootstrap-test.db")
+os.environ.setdefault("DATABASE_URL", f"sqlite+pysqlite:///{Path(tempfile.gettempdir()) / (f'bootstrap-test-{uuid4().hex}.db')}")
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,7 +18,7 @@ from app.api.routes.ingestion import get_client
 from app.clients.edmonton_311 import Edmonton311AuthError, Edmonton311Client, Edmonton311UnavailableError
 from app.core import config as config_module
 from app.core import db as db_module
-from app.core.db import Base, get_session_factory
+from app.core.db import get_session_factory, run_migrations
 from app.main import create_app
 from app.repositories.dataset_repository import DatasetRepository
 
@@ -57,7 +59,7 @@ def isolated_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Ite
     config_module.get_settings.cache_clear()
     db_module._engine = None
     db_module._session_factory = None
-    Base.metadata.create_all(bind=db_module.get_engine())
+    run_migrations()
     yield
     config_module.get_settings.cache_clear()
     db_module._engine = None

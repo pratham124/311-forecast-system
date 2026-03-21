@@ -24,7 +24,7 @@ def test_validation_failure_rejects_candidate_and_preserves_current(seed_current
     result = pipeline.run()
     current = DatasetRepository(session).get_current("edmonton_311")
 
-    assert result.result_type == "validation_failure"
+    assert result.result_type == "rejected"
     assert result.candidate_dataset_id is not None
     assert current.dataset_version_id == previous.dataset_version_id
     assert DatasetRepository(session).list_dataset_records(previous.dataset_version_id)

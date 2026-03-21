@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.repositories.models import CandidateDataset, CurrentDatasetMarker, DatasetRecord, DatasetVersion
+from app.models import CandidateDataset, CurrentDatasetMarker, DatasetRecord, DatasetVersion
 
 
 class DatasetRepository:
@@ -38,14 +38,25 @@ class DatasetRepository:
         candidate_id: str | None,
         record_count: int,
         records: list[dict[str, object]] | None = None,
+        *,
+        validation_status: str = "pending",
+        storage_status: str = "stored",
+        dataset_kind: str = "source",
+        source_dataset_version_id: str | None = None,
+        duplicate_group_count: int = 0,
+        approved_by_validation_run_id: str | None = None,
     ) -> DatasetVersion:
         dataset_version = DatasetVersion(
             source_name=source_name,
             ingestion_run_id=run_id,
             candidate_dataset_id=candidate_id,
+            source_dataset_version_id=source_dataset_version_id,
             record_count=record_count,
-            validation_status="passed",
-            storage_status="stored",
+            validation_status=validation_status,
+            storage_status=storage_status,
+            dataset_kind=dataset_kind,
+            duplicate_group_count=duplicate_group_count,
+            approved_by_validation_run_id=approved_by_validation_run_id,
             is_current=False,
             stored_at=datetime.utcnow(),
         )

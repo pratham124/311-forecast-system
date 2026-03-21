@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.repositories.models import CandidateDataset, CurrentDatasetMarker, DatasetVersion
+from app.models import CandidateDataset, CurrentDatasetMarker, DatasetVersion
 
 
 class ActivationGuardService:

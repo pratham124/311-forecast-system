@@ -23,3 +23,7 @@ Thumbs.db
 .vscode/
 .idea/
 htmlcov/
+build/
+*.log
+.env*
+.pytest_cache/

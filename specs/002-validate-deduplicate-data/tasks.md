@@ -22,9 +22,9 @@
 
 **Purpose**: Prepare the backend project structure for UC-02 validation and deduplication work
 
-- [ ] T001 Create the UC-02 backend module directories in `backend/app/models/`, `backend/app/pipelines/ingestion/`, `backend/app/repositories/`, `backend/app/services/`, `backend/app/schemas/`, and `backend/tests/`
-- [ ] T002 Create the validation feature package markers in `backend/app/pipelines/ingestion/__init__.py`, `backend/app/repositories/__init__.py`, `backend/app/services/__init__.py`, and `backend/app/schemas/__init__.py`
-- [ ] T003 [P] Create the UC-02 test package markers in `backend/tests/contract/__init__.py`, `backend/tests/integration/__init__.py`, and `backend/tests/unit/__init__.py`
+- [X] T001 Create the UC-02 backend module directories in `backend/app/models/`, `backend/app/pipelines/ingestion/`, `backend/app/repositories/`, `backend/app/services/`, `backend/app/schemas/`, and `backend/tests/`
+- [X] T002 Create the validation feature package markers in `backend/app/pipelines/ingestion/__init__.py`, `backend/app/repositories/__init__.py`, `backend/app/services/__init__.py`, and `backend/app/schemas/__init__.py`
+- [X] T003 [P] Create the UC-02 test package markers in `backend/tests/contract/__init__.py`, `backend/tests/integration/__init__.py`, and `backend/tests/unit/__init__.py`
 
 ---
 
@@ -34,14 +34,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create the UC-02 persistence schema migration in `backend/alembic/versions/002_uc02_validation_pipeline.py`
-- [ ] T005 [P] Define shared UC-02 ORM models in `backend/app/models/validation_models.py`
-- [ ] T006 [P] Define shared UC-02 API and service schemas in `backend/app/schemas/validation_status.py`
-- [ ] T007 [P] Implement shared validation-run and cleaned-dataset repositories in `backend/app/repositories/validation_repository.py`
-- [ ] T008 [P] Implement the shared approval-marker and operational-status repository helpers in `backend/app/repositories/approval_status_repository.py`
-- [ ] T009 [P] Implement shared authorization dependencies for operational status surfaces in `backend/app/api/dependencies/authz.py`
-- [ ] T010 Implement the shared validation orchestration entry point in `backend/app/pipelines/ingestion/validation_pipeline.py`
-- [ ] T011 Add UC-02 traceability notes and requirement mapping references in `specs/002-validate-deduplicate-data/tasks.md`
+- [X] T004 Create the UC-02 persistence schema migration in `backend/alembic/versions/002_uc02_validation_pipeline.py`
+- [X] T005 [P] Define shared UC-02 ORM models in `backend/app/models/validation_models.py`
+- [X] T006 [P] Define shared UC-02 API and service schemas in `backend/app/schemas/validation_status.py`
+- [X] T007 [P] Implement shared validation-run and cleaned-dataset repositories in `backend/app/repositories/validation_repository.py`
+- [X] T008 [P] Implement the shared approval-marker and operational-status repository helpers in `backend/app/repositories/approval_status_repository.py`
+- [X] T009 [P] Implement shared authorization dependencies for operational status surfaces in `backend/app/api/dependencies/authz.py`
+- [X] T010 Implement the shared validation orchestration entry point in `backend/app/pipelines/ingestion/validation_pipeline.py`
+- [X] T011 Add UC-02 traceability notes and requirement mapping references in `specs/002-validate-deduplicate-data/tasks.md`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -55,22 +55,22 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Add contract test for `GET /api/v1/validation-runs/{validationRunId}` success responses in `backend/tests/contract/test_validation_run_status.py`
-- [ ] T013 [P] [US1] Add contract test for `GET /api/v1/datasets/approved/current` success responses in `backend/tests/contract/test_approved_dataset_status.py`
-- [ ] T014 [P] [US1] Add integration test for the clean approval flow in `backend/tests/integration/test_validation_approval_flow.py`
-- [ ] T015 [P] [US1] Add unit tests for duplicate grouping and consolidation policy in `backend/tests/unit/test_duplicate_resolution_service.py`
-- [ ] T016 [P] [US1] Add integration test for the 15-minute UC-02 completion target in `backend/tests/integration/test_validation_completion_timing.py`
+- [X] T012 [P] [US1] Add contract test for `GET /api/v1/validation-runs/{validationRunId}` success responses in `backend/tests/contract/test_validation_run_status.py`
+- [X] T013 [P] [US1] Add contract test for `GET /api/v1/datasets/approved/current` success responses in `backend/tests/contract/test_approved_dataset_status.py`
+- [X] T014 [P] [US1] Add integration test for the clean approval flow in `backend/tests/integration/test_validation_approval_flow.py`
+- [X] T015 [P] [US1] Add unit tests for duplicate grouping and consolidation policy in `backend/tests/unit/test_duplicate_resolution_service.py`
+- [X] T016 [P] [US1] Add integration test for the 15-minute UC-02 completion target in `backend/tests/integration/test_validation_completion_timing.py`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implement schema-validation rule evaluation for required fields, data types, formats, and structural completeness in `backend/app/services/schema_validation_service.py`
-- [ ] T018 [P] [US1] Implement duplicate analysis and percentage calculation in `backend/app/services/duplicate_analysis_service.py`
-- [ ] T019 [P] [US1] Implement duplicate consolidation into one cleaned record per duplicate group in `backend/app/services/duplicate_resolution_service.py`
-- [ ] T020 [P] [US1] Implement approval-timing instrumentation in `backend/app/services/validation_metrics_service.py`
-- [ ] T021 [US1] Implement cleaned dataset version persistence and approval-marker update in `backend/app/services/cleaned_dataset_service.py`
-- [ ] T022 [US1] Wire the approved-path orchestration into `backend/app/pipelines/ingestion/approved_pipeline.py`
-- [ ] T023 [US1] Implement the approved dataset route in `backend/app/api/routes/approved_dataset_status.py`
-- [ ] T024 [US1] Implement the validation-run status route in `backend/app/api/routes/validation_run_status.py`
+- [X] T017 [P] [US1] Implement schema-validation rule evaluation for required fields, data types, formats, and structural completeness in `backend/app/services/schema_validation_service.py`
+- [X] T018 [P] [US1] Implement duplicate analysis and percentage calculation in `backend/app/services/duplicate_analysis_service.py`
+- [X] T019 [P] [US1] Implement duplicate consolidation into one cleaned record per duplicate group in `backend/app/services/duplicate_resolution_service.py`
+- [X] T020 [P] [US1] Implement approval-timing instrumentation in `backend/app/services/validation_metrics_service.py`
+- [X] T021 [US1] Implement cleaned dataset version persistence and approval-marker update in `backend/app/services/cleaned_dataset_service.py`
+- [X] T022 [US1] Wire the approved-path orchestration into `backend/app/pipelines/ingestion/approved_pipeline.py`
+- [X] T023 [US1] Implement the approved dataset route in `backend/app/api/routes/approved_dataset_status.py`
+- [X] T024 [US1] Implement the validation-run status route in `backend/app/api/routes/validation_run_status.py`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -84,15 +84,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Add integration test for schema rejection preserving the prior approved dataset in `backend/tests/integration/test_schema_rejection_flow.py`
-- [ ] T026 [P] [US2] Add unit tests for rejected outcome classification in `backend/tests/unit/test_schema_validation_outcomes.py`
+- [X] T025 [P] [US2] Add integration test for schema rejection preserving the prior approved dataset in `backend/tests/integration/test_schema_rejection_flow.py`
+- [X] T026 [P] [US2] Add unit tests for rejected outcome classification in `backend/tests/unit/test_schema_validation_outcomes.py`
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Update validation outcome persistence to classify schema-invalid datasets as `rejected` in `backend/app/repositories/validation_repository.py`
-- [ ] T028 [US2] Implement schema-rejection handling and duplicate-analysis short-circuiting in `backend/app/pipelines/ingestion/rejection_pipeline.py`
-- [ ] T029 [US2] Implement operationally necessary rejection summaries in `backend/app/services/validation_status_service.py`
-- [ ] T030 [US2] Enforce rejection visibility and approved-marker preservation rules in `backend/app/services/approval_status_service.py`
+- [X] T027 [US2] Update validation outcome persistence to classify schema-invalid datasets as `rejected` in `backend/app/repositories/validation_repository.py`
+- [X] T028 [US2] Implement schema-rejection handling and duplicate-analysis short-circuiting in `backend/app/pipelines/ingestion/rejection_pipeline.py`
+- [X] T029 [US2] Implement operationally necessary rejection summaries in `backend/app/services/validation_status_service.py`
+- [X] T030 [US2] Enforce rejection visibility and approved-marker preservation rules in `backend/app/services/approval_status_service.py`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -106,19 +106,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Add contract tests for unauthorized, forbidden, missing-resource, and invalid-query review-needed status-surface responses in `backend/tests/contract/test_validation_status_errors.py`
-- [ ] T032 [P] [US3] Add contract test for `GET /api/v1/datasets/review-needed` in `backend/tests/contract/test_review_needed_status.py`
-- [ ] T033 [P] [US3] Add integration test for review-needed threshold handling in `backend/tests/integration/test_review_needed_flow.py`
-- [ ] T034 [P] [US3] Add integration test for failed outcome and degraded outcome-persistence safety in `backend/tests/integration/test_failed_outcome_safety.py`
-- [ ] T035 [P] [US3] Add integration test for the 2-minute operator visibility target in `backend/tests/integration/test_operator_visibility_timing.py`
+- [X] T031 [P] [US3] Add contract tests for unauthorized, forbidden, missing-resource, and invalid-query review-needed status-surface responses in `backend/tests/contract/test_validation_status_errors.py`
+- [X] T032 [P] [US3] Add contract test for `GET /api/v1/datasets/review-needed` in `backend/tests/contract/test_review_needed_status.py`
+- [X] T033 [P] [US3] Add integration test for review-needed threshold handling in `backend/tests/integration/test_review_needed_flow.py`
+- [X] T034 [P] [US3] Add integration test for failed outcome and degraded outcome-persistence safety in `backend/tests/integration/test_failed_outcome_safety.py`
+- [X] T035 [P] [US3] Add integration test for the 2-minute operator visibility target in `backend/tests/integration/test_operator_visibility_timing.py`
 
 ### Implementation for User Story 3
 
-- [ ] T036 [P] [US3] Implement review-needed record persistence and summary exposure in `backend/app/repositories/review_needed_repository.py`
-- [ ] T037 [P] [US3] Implement failed-outcome and degraded-persistence safety handling in `backend/app/services/operational_status_service.py`
-- [ ] T038 [P] [US3] Implement operator-visibility timing instrumentation in `backend/app/services/operator_visibility_metrics_service.py`
-- [ ] T039 [US3] Wire review-needed, failed, and degraded-state handling into `backend/app/pipelines/ingestion/blocked_outcome_pipeline.py`
-- [ ] T040 [US3] Implement the review-needed status route in `backend/app/api/routes/review_needed_status.py`
+- [X] T036 [P] [US3] Implement review-needed record persistence and summary exposure in `backend/app/repositories/review_needed_repository.py`
+- [X] T037 [P] [US3] Implement failed-outcome and degraded-persistence safety handling in `backend/app/services/operational_status_service.py`
+- [X] T038 [P] [US3] Implement operator-visibility timing instrumentation in `backend/app/services/operator_visibility_metrics_service.py`
+- [X] T039 [US3] Wire review-needed, failed, and degraded-state handling into `backend/app/pipelines/ingestion/blocked_outcome_pipeline.py`
+- [X] T040 [US3] Implement the review-needed status route in `backend/app/api/routes/review_needed_status.py`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -128,11 +128,11 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T041 [P] Add cross-story unit coverage for approval-marker invariants in `backend/tests/unit/test_approval_marker_invariants.py`
-- [ ] T042 [P] Add cross-story integration coverage for operator visibility across approved, in-progress, rejected, failed, and review-needed candidates in `backend/tests/integration/test_operational_status_visibility.py`
-- [ ] T043 Harden structured logging and summary-only status exposure in `backend/app/core/logging.py`
-- [ ] T044 Update the implementation walkthrough and validation steps in `specs/002-validate-deduplicate-data/quickstart.md`
-- [ ] T045 Run the quickstart verification flow and record any follow-up notes in `specs/002-validate-deduplicate-data/tasks.md`
+- [X] T041 [P] Add cross-story unit coverage for approval-marker invariants in `backend/tests/unit/test_approval_marker_invariants.py`
+- [X] T042 [P] Add cross-story integration coverage for operator visibility across approved, in-progress, rejected, failed, and review-needed candidates in `backend/tests/integration/test_operational_status_visibility.py`
+- [X] T043 Harden structured logging and summary-only status exposure in `backend/app/core/logging.py`
+- [X] T044 Update the implementation walkthrough and validation steps in `specs/002-validate-deduplicate-data/quickstart.md`
+- [X] T045 Run the quickstart verification flow and record any follow-up notes in `specs/002-validate-deduplicate-data/tasks.md`
 
 ---
 
@@ -233,6 +233,21 @@ Task: "Implement operator-visibility timing instrumentation in backend/app/servi
 3. Merge stories in priority order after each story passes its independent tests
 
 ---
+
+## Traceability Notes
+
+- `AT-01` maps to `T012` through `T024` and is verified by `backend/tests/integration/test_validation_approval_flow.py`.
+- `AT-02` maps to `T025` through `T030` and is verified by `backend/tests/integration/test_schema_rejection_flow.py`.
+- `AT-03` and `AT-05` map to `T034`, `T037`, and `T039` and are verified by `backend/tests/integration/test_failed_outcome_safety.py` plus `backend/tests/integration/test_ingestion_processing_failures.py`.
+- `AT-04` maps to `T031` through `T040` and is verified by `backend/tests/integration/test_review_needed_flow.py` and `backend/tests/contract/test_review_needed_status.py`.
+- `AT-06` maps to `T041` through `T043` and is verified by `backend/tests/unit/test_approval_marker_invariants.py`, `backend/tests/integration/test_no_partial_activation.py`, and `backend/tests/integration/test_operational_status_visibility.py`.
+- `AT-07` maps to `T015`, `T019`, and `T021` and is verified by `backend/tests/unit/test_duplicate_resolution_service.py`.
+
+## Quickstart Verification Notes
+
+- Executed the verification subset documented in `quickstart.md` with `.venv/bin/python -m pytest` from `backend/`.
+- Result: `51 passed in 7.67s` for the combined UC-02 and shared-ingestion regression subset before adding the dedicated failed-outcome safety test.
+- Follow-up: added `backend/tests/integration/test_failed_outcome_safety.py` to give `AT-03` and `AT-05` an explicit dedicated safety test surface.
 
 ## Notes
 

@@ -1,0 +1,3 @@
+from app.core.auth import require_planner_or_manager
+
+require_operational_status_reader = require_planner_or_manager
