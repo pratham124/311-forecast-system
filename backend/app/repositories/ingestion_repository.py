@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.repositories.models import (
+from app.models import (
     CandidateDataset,
     CurrentDatasetMarker,
     DatasetRecord,

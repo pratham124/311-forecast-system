@@ -25,7 +25,7 @@ Use this guide to implement and verify UC-02 with the minimum backend components
    - `ValidationResult`
    - `DuplicateAnalysisResult`
    - `DuplicateGroup`
-   - `CleanedDatasetVersion`
+   - `CleanedDatasetVersion` via `dataset_versions` rows with `dataset_kind = cleaned`
    - `ReviewNeededRecord`
 4. Ensure orchestration follows this order:
    - Load the ingested dataset from the UC-01 lineage
@@ -60,6 +60,38 @@ Map implementation and tests directly to these acceptance scenarios:
 - Integration tests across validation runs, ingested dataset lookup, cleaned dataset storage, approved marker updates, and review-needed persistence
 - Contract tests for [validation-api.yaml](/root/311-forecast-system/specs/002-validate-deduplicate-data/contracts/validation-api.yaml)
 - Acceptance-style tests that mirror `docs/UC-02-AT.md`
+
+## Verification
+
+Run the backend regression subset that covers the new UC-02 implementation and the shared UC-01 ingestion paths:
+
+```bash
+cd backend
+.venv/bin/python -m pytest \
+  tests/contract/test_ingestion_api.py \
+  tests/contract/test_validation_run_status.py \
+  tests/contract/test_approved_dataset_status.py \
+  tests/contract/test_validation_status_errors.py \
+  tests/contract/test_review_needed_status.py \
+  tests/integration/test_ingestion_success.py \
+  tests/integration/test_no_partial_activation.py \
+  tests/integration/test_ingestion_no_new_records.py \
+  tests/integration/test_ingestion_source_failures.py \
+  tests/integration/test_ingestion_processing_failures.py \
+  tests/integration/test_validation_approval_flow.py \
+  tests/integration/test_validation_completion_timing.py \
+  tests/integration/test_schema_rejection_flow.py \
+  tests/integration/test_review_needed_flow.py \
+  tests/integration/test_operational_status_visibility.py \
+  tests/unit/test_query_and_scheduler_edges.py \
+  tests/unit/test_activation_rules.py \
+  tests/unit/test_repository_edges.py \
+  tests/unit/test_duplicate_resolution_service.py \
+  tests/unit/test_schema_validation_outcomes.py \
+  tests/unit/test_approval_marker_invariants.py
+```
+
+Expected result: all tests pass and the current dataset marker changes only for the approved cleaned dataset path.
 
 ## Exit Conditions
 

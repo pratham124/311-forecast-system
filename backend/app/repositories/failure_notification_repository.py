@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.repositories.models import FailureNotificationRecord
+from app.models import FailureNotificationRecord
 
 
 class FailureNotificationRepository:

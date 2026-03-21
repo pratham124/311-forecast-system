@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.core.logging import sanitize_mapping
 from app.repositories.failure_notification_repository import FailureNotificationRepository
-from app.repositories.models import FailureNotificationRecord
+from app.models import FailureNotificationRecord
 
 
 class FailureNotificationService:

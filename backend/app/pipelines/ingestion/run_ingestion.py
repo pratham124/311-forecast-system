@@ -10,6 +10,7 @@ from app.clients.edmonton_311 import (
     Edmonton311UnavailableError,
 )
 from app.core.config import get_settings
+from app.pipelines.ingestion.validation_pipeline import ValidationPipeline
 from app.repositories.cursor_repository import CursorRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.failure_notification_repository import FailureNotificationRepository
@@ -38,6 +39,7 @@ class IngestionPipeline:
         self.candidate_service = CandidateDatasetService(self.dataset_repository, self.validation_service)
         self.notification_service = FailureNotificationService(self.failure_repository)
         self.guard_service = ActivationGuardService()
+        self.validation_pipeline = ValidationPipeline(self.session)
 
     def start_run(self, trigger_type: str = "scheduled") -> tuple[str, str | None, object | None]:
         cursor = self.cursor_repository.get(self.settings.source_name)
@@ -53,30 +55,21 @@ class IngestionPipeline:
         existing_cursor: str | None = None,
         previous_marker=None,
     ) -> IngestionRunStatus:
-        print(f"[debug] pipeline.run entered trigger_type={trigger_type} existing_run_id={existing_run_id}")
         if existing_run_id is None:
             run_id, cursor_value, previous_marker = self.start_run(trigger_type=trigger_type)
         else:
             run_id, cursor_value = existing_run_id, existing_cursor
             if previous_marker is None:
                 previous_marker = self.dataset_repository.get_current(self.settings.source_name)
-        print(f"[debug] pipeline.run using run_id={run_id} cursor_value={cursor_value}")
 
         try:
             fetch_result = self.client.fetch_records(cursor_value)
-            print(
-                f"[debug] fetch completed run_id={run_id} result_type={fetch_result.result_type} "
-                f"records={len(fetch_result.records)} cursor_value={fetch_result.cursor_value}"
-            )
         except Edmonton311AuthError as exc:
-            print(f"[debug] auth failure run_id={run_id} error={exc}")
             return self._fail_run(run_id, "auth_failure", str(exc), previous_marker)
         except Edmonton311UnavailableError as exc:
-            print(f"[debug] source unavailable run_id={run_id} error={exc}")
             return self._fail_run(run_id, "source_unavailable", str(exc), previous_marker)
 
         if fetch_result.result_type == "no_new_records":
-            print(f"[debug] no_new_records run_id={run_id}")
             finalized = self.run_repository.finalize_run(
                 run_id,
                 status="success",
@@ -93,68 +86,64 @@ class IngestionPipeline:
                 current_dataset_version_id=previous_marker.dataset_version_id if previous_marker else None,
             )
             self.session.commit()
-            print(f"[debug] no_new_records finalized run_id={run_id}")
             return IngestionRunStatus.model_validate(finalized)
 
         records = fetch_result.records
-        print(f"[debug] creating candidate run_id={run_id} record_count={len(records)}")
         candidate = self.candidate_service.create_candidate(run_id, records)
-        candidate, validation_reason = self.candidate_service.validate_candidate(candidate.candidate_dataset_id, records)
-        if validation_reason:
-            print(f"[debug] validation failed run_id={run_id} reason={validation_reason}")
-            return self._fail_run(
-                run_id,
-                "validation_failure",
-                validation_reason,
-                previous_marker,
-                candidate_dataset_id=candidate.candidate_dataset_id if candidate else None,
-                records_received=len(records),
-            )
-
         if inject_storage_failure:
-            print(f"[debug] injected storage failure run_id={run_id}")
             return self._fail_run(
                 run_id,
                 "storage_failure",
                 "Injected storage failure",
                 previous_marker,
-                candidate_dataset_id=candidate.candidate_dataset_id if candidate else None,
+                candidate_dataset_id=candidate.candidate_dataset_id,
                 records_received=len(records),
             )
 
-        dataset_version = self.dataset_repository.create_dataset_version(
+        source_dataset = self.dataset_repository.create_dataset_version(
             source_name=self.settings.source_name,
             run_id=run_id,
-            candidate_id=candidate.candidate_dataset_id if candidate else None,
+            candidate_id=candidate.candidate_dataset_id,
             record_count=len(records),
             records=records,
+            validation_status="pending",
+            dataset_kind="source",
         )
-        print(f"[debug] stored dataset_version run_id={run_id} dataset_version_id={dataset_version.dataset_version_id}")
-        self.dataset_repository.activate_dataset(self.settings.source_name, dataset_version.dataset_version_id, run_id)
+        validation_run_id = self.validation_pipeline.run(run_id, source_dataset.dataset_version_id, records)
+
+        validation_run = self.validation_pipeline.validation_repository.get_run(validation_run_id)
+        candidate_status = validation_run.status if validation_run is not None else "failed"
+        self.dataset_repository.update_candidate_status(candidate.candidate_dataset_id, candidate_status)
+        if validation_run is not None:
+            source_dataset.validation_status = validation_run.status
+
         if fetch_result.cursor_value:
             self.cursor_repository.upsert(self.settings.source_name, fetch_result.cursor_value, run_id)
-            print(f"[debug] cursor advanced run_id={run_id} cursor_value={fetch_result.cursor_value}")
+
+        result_type = "new_data"
+        if validation_run is not None and validation_run.status != "approved":
+            result_type = validation_run.status
 
         finalized = self.run_repository.finalize_run(
             run_id,
             status="success",
-            result_type="new_data",
+            result_type=result_type,
             records_received=len(records),
-            candidate_dataset_id=candidate.candidate_dataset_id if candidate else None,
-            dataset_version_id=dataset_version.dataset_version_id,
+            candidate_dataset_id=candidate.candidate_dataset_id,
+            dataset_version_id=source_dataset.dataset_version_id,
             cursor_advanced=bool(fetch_result.cursor_value),
         )
         self.logging_service.log(
             "ingestion.completed",
             run_id=run_id,
-            result_type="new_data",
+            result_type=result_type,
             status="success",
-            dataset_version_id=dataset_version.dataset_version_id,
+            dataset_version_id=source_dataset.dataset_version_id,
+            validation_run_id=validation_run_id,
             records_received=len(records),
             cursor_advanced=bool(fetch_result.cursor_value),
         )
         self.session.commit()
-        print(f"[debug] success finalized run_id={run_id} result_type=new_data")
         return IngestionRunStatus.model_validate(finalized)
 
     def _fail_run(
@@ -166,7 +155,6 @@ class IngestionPipeline:
         candidate_dataset_id: str | None = None,
         records_received: int | None = None,
     ) -> IngestionRunStatus:
-        print(f"[debug] fail_run run_id={run_id} category={failure_category} reason={reason}")
         notification = self.notification_service.create_notification(run_id, failure_category, reason)
         finalized = self.run_repository.finalize_run(
             run_id,
@@ -190,5 +178,4 @@ class IngestionPipeline:
             current_dataset_version_id=previous_marker.dataset_version_id if previous_marker else None,
         )
         self.session.commit()
-        print(f"[debug] fail_run finalized run_id={run_id} notification_id={notification.notification_id}")
         return IngestionRunStatus.model_validate(finalized)
