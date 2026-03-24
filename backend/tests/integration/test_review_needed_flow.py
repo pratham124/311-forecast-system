@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import select
 
 from app.clients.edmonton_311 import Edmonton311Client
-from app.models import ReviewNeededRecord, ValidationRun
+from app.models import ForecastModelRun, ReviewNeededRecord, ValidationRun
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
 from app.repositories.dataset_repository import DatasetRepository
 from app.services.ingestion_logging_service import IngestionLoggingService
@@ -33,8 +33,10 @@ def test_excessive_duplicate_percentage_blocks_approval(seed_current_dataset, se
     current = DatasetRepository(session).get_current("edmonton_311")
     validation_run = session.scalars(select(ValidationRun).where(ValidationRun.ingestion_run_id == result.run_id)).one()
     review_record = session.scalars(select(ReviewNeededRecord)).one()
+    model_runs = session.scalars(select(ForecastModelRun)).all()
 
     assert result.result_type == "review_needed"
     assert validation_run.status == "review_needed"
     assert current.dataset_version_id == previous.dataset_version_id
     assert review_record.validation_run_id == validation_run.validation_run_id
+    assert model_runs == []

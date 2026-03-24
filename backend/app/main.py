@@ -5,11 +5,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.routes.approved_dataset_status import router as approved_dataset_router
+from app.api.routes.forecasts import router as forecast_router
 from app.api.routes.ingestion import router as ingestion_router
 from app.api.routes.review_needed_status import router as review_needed_router
 from app.api.routes.validation_run_status import router as validation_run_router
 from app.core.config import get_settings
 from app.core.db import get_session_factory, run_migrations
+from app.services.forecast_scheduler import build_forecast_job, build_forecast_training_job
 from app.services.scheduler_service import SchedulerService, build_ingestion_job
 
 
@@ -18,12 +20,32 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     scheduler_service = SchedulerService()
     app.state.scheduler_service = scheduler_service
-    if settings.scheduler_enabled:
+    ingestion_scheduler_enabled = getattr(settings, "scheduler_enabled", False)
+    ingestion_scheduler_cron = getattr(settings, "scheduler_cron", "0 0 * * 0")
+    forecast_model_scheduler_enabled = getattr(settings, "forecast_model_scheduler_enabled", False)
+    forecast_model_scheduler_cron = getattr(settings, "forecast_model_scheduler_cron", "15 0 * * *")
+    forecast_scheduler_enabled = getattr(settings, "forecast_scheduler_enabled", False)
+    forecast_scheduler_cron = getattr(settings, "forecast_scheduler_cron", "0 * * * *")
+
+    if ingestion_scheduler_enabled:
         scheduler_service.register_cron_job(
             'edmonton_311_ingestion',
             build_ingestion_job(app.state.session_factory),
-            settings.scheduler_cron,
+            ingestion_scheduler_cron,
         )
+    if forecast_model_scheduler_enabled:
+        scheduler_service.register_cron_job(
+            'daily_demand_forecast_model_training',
+            build_forecast_training_job(app.state.session_factory),
+            forecast_model_scheduler_cron,
+        )
+    if forecast_scheduler_enabled:
+        scheduler_service.register_cron_job(
+            'daily_demand_forecast',
+            build_forecast_job(app.state.session_factory),
+            forecast_scheduler_cron,
+        )
+    if ingestion_scheduler_enabled or forecast_model_scheduler_enabled or forecast_scheduler_enabled:
         scheduler_service.start()
     try:
         yield
@@ -39,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(validation_run_router)
     app.include_router(approved_dataset_router)
     app.include_router(review_needed_router)
+    app.include_router(forecast_router)
     return app
 
 

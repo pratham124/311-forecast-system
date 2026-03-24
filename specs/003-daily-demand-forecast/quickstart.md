@@ -85,3 +85,14 @@ Implementation is ready for task breakdown when:
 - Failed runs never replace the prior active forecast
 - Stored forecast versions and failed forecast-run records remain queryable as operational history
 - Current forecast read surfaces return the 24 hourly buckets and stored dimension scope required for acceptance verification
+
+
+## Implementation Notes
+
+- Backend implementation now lives in `backend/app/api/routes/forecasts.py`, `backend/app/services/forecast_service.py`, and the supporting repository/client/pipeline modules added for UC-03.
+- GeoMet station selection now defaults to discovering an Edmonton-area hourly station from the GeoMet stations API and then reusing that station's `CLIMATE_IDENTIFIER` for hourly observation requests.
+- Forecast persistence is backed by the `003_uc03_daily_forecast` migration in `backend/migrations/versions/003_uc03_daily_forecast.py`.
+- Test coverage for UC-03 lives in `backend/tests/unit/test_forecast_pipeline.py`, `backend/tests/contract/test_forecast_api.py`, and the three forecast integration suites.
+- Verification command used for this implementation: `.venv/bin/python -m pytest tests/unit/test_forecast_pipeline.py tests/contract/test_forecast_api.py tests/integration/test_forecast_generation.py tests/integration/test_forecast_reuse.py tests/integration/test_forecast_failures.py` from `backend/`.
+
+- GeoMet transport behavior is configurable through `GEOMET_CLIMATE_IDENTIFIER`, `GEOMET_STATION_SELECTOR`, and `GEOMET_TIMEOUT_SECONDS`. The default selector now discovers an Edmonton-area hourly station from the GeoMet stations API and reuses its climate identifier for hourly observation requests.

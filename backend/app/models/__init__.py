@@ -1,5 +1,15 @@
+from app.models.forecast_models import (
+    CurrentForecastMarker,
+    CurrentForecastModelMarker,
+    ForecastBucket,
+    ForecastModelArtifact,
+    ForecastModelRun,
+    ForecastRun,
+    ForecastVersion,
+)
 from app.models.ingestion_models import (
     CandidateDataset,
+    CleanedCurrentRecord,
     CurrentDatasetMarker,
     DatasetRecord,
     DatasetVersion,
@@ -17,12 +27,20 @@ from app.models.validation_models import (
 
 __all__ = [
     "CandidateDataset",
+    "CleanedCurrentRecord",
     "CurrentDatasetMarker",
+    "CurrentForecastMarker",
+    "CurrentForecastModelMarker",
     "DatasetRecord",
     "DatasetVersion",
     "DuplicateAnalysisResult",
     "DuplicateGroup",
     "FailureNotificationRecord",
+    "ForecastBucket",
+    "ForecastModelArtifact",
+    "ForecastModelRun",
+    "ForecastRun",
+    "ForecastVersion",
     "IngestionRun",
     "ReviewNeededRecord",
     "SuccessfulPullCursor",
