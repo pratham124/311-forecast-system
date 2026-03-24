@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import logging
+
 from app.repositories.validation_repository import ValidationRepository
 from app.services.cleaned_dataset_service import CleanedDatasetService
+from app.services.forecast_training_service import ForecastTrainingService
 
 
 class ApprovedPipeline:
@@ -9,9 +12,13 @@ class ApprovedPipeline:
         self,
         cleaned_dataset_service: CleanedDatasetService,
         validation_repository: ValidationRepository,
+        forecast_training_service: ForecastTrainingService | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         self.cleaned_dataset_service = cleaned_dataset_service
         self.validation_repository = validation_repository
+        self.forecast_training_service = forecast_training_service
+        self.logger = logger or logging.getLogger("validation.approval")
 
     def approve(
         self,
@@ -37,4 +44,14 @@ class ApprovedPipeline:
             approved_dataset_version_id=cleaned_version.dataset_version_id,
             summary="Validation and deduplication completed successfully.",
         )
+        self._trigger_forecast_model_training()
         return cleaned_version.dataset_version_id
+
+    def _trigger_forecast_model_training(self) -> None:
+        if self.forecast_training_service is None:
+            return
+        try:
+            run = self.forecast_training_service.start_run(trigger_type="approval")
+            self.forecast_training_service.execute_run(run.forecast_model_run_id)
+        except Exception:
+            self.logger.exception("forecast model training trigger failed after approval")

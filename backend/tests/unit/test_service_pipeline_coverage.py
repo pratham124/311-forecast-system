@@ -150,7 +150,16 @@ def test_cleaned_dataset_service_stores_and_activates_dataset():
         def activate_dataset(self, source_name, dataset_version_id, ingestion_run_id):
             self.activate_call = (source_name, dataset_version_id, ingestion_run_id)
 
-    service = CleanedDatasetService(DatasetRepo(), validation_repository=object())
+    class CleanedRepo:
+        def upsert_current_cleaned_records(self, **kwargs):
+            self.upsert_kwargs = kwargs
+
+        def count_current_cleaned_records(self, source_name):
+            self.count_source_name = source_name
+            return 7
+
+    cleaned_repo = CleanedRepo()
+    service = CleanedDatasetService(DatasetRepo(), validation_repository=object(), cleaned_dataset_repository=cleaned_repo)
     result = service.store_and_approve_cleaned_dataset(
         source_name="edmonton",
         ingestion_run_id="run-1",
@@ -160,9 +169,13 @@ def test_cleaned_dataset_service_stores_and_activates_dataset():
         duplicate_group_count=3,
     )
     assert result is dataset_version
-    assert service.dataset_repository.create_kwargs["record_count"] == 2
+    assert service.dataset_repository.create_kwargs["record_count"] == 0
+    assert service.dataset_repository.create_kwargs["records"] is None
     assert service.dataset_repository.create_kwargs["validation_status"] == "approved"
     assert service.dataset_repository.activate_call == ("edmonton", "dataset-1", "run-1")
+    assert cleaned_repo.upsert_kwargs["approved_dataset_version_id"] == "dataset-1"
+    assert cleaned_repo.count_source_name == "edmonton"
+    assert dataset_version.record_count == 7
 
 
 def test_dataset_validation_service_maps_schema_result(monkeypatch):
@@ -357,8 +370,14 @@ def test_uc02_pipelines_call_repositories_with_expected_payloads():
     )
     validation_calls = []
     validation_repository = RepoStub(finalize_run=lambda *args, **kwargs: validation_calls.append((args, kwargs)))
+    training_events = []
 
-    pipeline = ApprovedPipeline(cleaned_dataset_service, validation_repository)
+    training_service = RepoStub(
+        start_run=lambda **kwargs: training_events.append(("start", kwargs)) or SimpleNamespace(forecast_model_run_id="model-run-1"),
+        execute_run=lambda run_id: training_events.append(("execute", run_id)),
+    )
+
+    pipeline = ApprovedPipeline(cleaned_dataset_service, validation_repository, training_service)
     approved_id = pipeline.approve(
         source_name="edmonton",
         ingestion_run_id="run-1",
@@ -369,6 +388,35 @@ def test_uc02_pipelines_call_repositories_with_expected_payloads():
     )
     assert approved_id == "approved-1"
     assert validation_calls[0][1]["status"] == "approved"
+    assert training_events == [
+        ("start", {"trigger_type": "approval"}),
+        ("execute", "model-run-1"),
+    ]
+
+    pipeline_without_training = ApprovedPipeline(cleaned_dataset_service, validation_repository, None)
+    assert pipeline_without_training.approve(
+        source_name="edmonton",
+        ingestion_run_id="run-1",
+        source_dataset_version_id="source-1",
+        validation_run_id="validation-3",
+        cleaned_records=[{"id": 3}],
+        duplicate_group_count=1,
+    ) == "approved-1"
+
+    failing_training_events = []
+    failing_training_service = RepoStub(
+        start_run=lambda **kwargs: failing_training_events.append(("start", kwargs)) or (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+    pipeline_with_failed_training = ApprovedPipeline(cleaned_dataset_service, validation_repository, failing_training_service)
+    assert pipeline_with_failed_training.approve(
+        source_name="edmonton",
+        ingestion_run_id="run-1",
+        source_dataset_version_id="source-1",
+        validation_run_id="validation-2",
+        cleaned_records=[{"id": 2}],
+        duplicate_group_count=0,
+    ) == "approved-1"
+    assert failing_training_events == [("start", {"trigger_type": "approval"})]
 
     review_calls = []
     review_repo = RepoStub(create=lambda *args: review_calls.append(args))

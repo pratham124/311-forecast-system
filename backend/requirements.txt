@@ -8,3 +8,7 @@ alembic>=1.13,<2.0
 pytest>=8.2,<9.0
 pytest-cov>=5.0,<6.0
 apscheduler>=3.10,<4.0
+numpy>=1.26,<3.0
+lightgbm>=4.5,<5.0
+scikit-learn>=1.5,<2.0
+pandas>=2.2,<3.0

@@ -1,0 +1,4 @@
+from app.core.auth import require_operational_manager, require_planner_or_manager
+
+require_forecast_trigger = require_operational_manager
+require_forecast_reader = require_planner_or_manager

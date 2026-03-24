@@ -24,9 +24,9 @@
 
 **Purpose**: Create the UC-03 forecasting module skeleton and implementation scaffolding that all later work depends on.
 
-- [ ] T001 Create the UC-03 backend forecasting module skeleton in `backend/app/api/routes/forecasts.py`, `backend/app/clients/geomet_client.py`, `backend/app/clients/nager_date_client.py`, `backend/app/pipelines/forecasting/hourly_demand_pipeline.py`, `backend/app/repositories/forecast_repository.py`, `backend/app/repositories/forecast_run_repository.py`, `backend/app/schemas/forecast.py`, and `backend/app/services/forecast_service.py`
-- [ ] T002 Configure forecast-specific settings for scheduler timing, GeoMet, Nager.Date, and model parameters in `backend/app/core/config.py`
-- [ ] T003 [P] Add a forecasting test package scaffold in `backend/tests/contract/test_forecast_api.py`, `backend/tests/integration/test_forecast_generation.py`, `backend/tests/integration/test_forecast_reuse.py`, `backend/tests/integration/test_forecast_failures.py`, and `backend/tests/unit/test_forecast_pipeline.py`
+- [X] T001 Create the UC-03 backend forecasting module skeleton in `backend/app/api/routes/forecasts.py`, `backend/app/clients/geomet_client.py`, `backend/app/clients/nager_date_client.py`, `backend/app/pipelines/forecasting/hourly_demand_pipeline.py`, `backend/app/repositories/forecast_repository.py`, `backend/app/repositories/forecast_run_repository.py`, `backend/app/schemas/forecast.py`, and `backend/app/services/forecast_service.py`
+1- [X] T002 Configure forecast-specific settings for scheduler timing, GeoMet, Nager.Date, and model parameters in `backend/app/core/config.py`
+- [X] T003 [P] Add a forecasting test package scaffold in `backend/tests/contract/test_forecast_api.py`, `backend/tests/integration/test_forecast_generation.py`, `backend/tests/integration/test_forecast_reuse.py`, `backend/tests/integration/test_forecast_failures.py`, and `backend/tests/unit/test_forecast_pipeline.py`
 
 ---
 
@@ -36,16 +36,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Add migration-managed forecast lifecycle tables in `backend/alembic/versions/003_forecast_lifecycle.py`
-- [ ] T005 [P] Define repository-owned forecast lifecycle models for `ForecastRun`, `ForecastVersion`, `ForecastBucket`, and `CurrentForecastMarker` in `backend/app/repositories/models.py`
-- [ ] T006 [P] Define Pydantic request and response schemas for trigger, run-status, and current-forecast surfaces in `backend/app/schemas/forecast.py`
-- [ ] T007 [P] Implement repository methods for forecast runs, forecast versions, buckets, and current-marker persistence in `backend/app/repositories/forecast_run_repository.py` and `backend/app/repositories/forecast_repository.py`
-- [ ] T008 [P] Implement approved cleaned dataset lookup and shared lineage access for UC-03 in `backend/app/repositories/cleaned_dataset_repository.py`
-- [ ] T009 [P] Implement dedicated Government of Canada MSC GeoMet normalization in `backend/app/clients/geomet_client.py`
-- [ ] T010 [P] Implement dedicated Nager.Date Canada holiday normalization in `backend/app/clients/nager_date_client.py`
-- [ ] T011 [P] Implement JWT-authenticated RBAC dependencies for forecast trigger and read surfaces in `backend/app/api/dependencies/auth.py`
-- [ ] T012 [P] Implement structured forecast logging and failure classification helpers in `backend/app/core/logging.py`
-- [ ] T013 Wire the forecast router and dependency injection into the backend application in `backend/app/api/routes/forecasts.py` and `backend/app/main.py`
+- [X] T004 Add migration-managed forecast lifecycle tables in `backend/alembic/versions/003_forecast_lifecycle.py`
+- [X] T005 [P] Define repository-owned forecast lifecycle models for `ForecastRun`, `ForecastVersion`, `ForecastBucket`, and `CurrentForecastMarker` in `backend/app/repositories/models.py`
+- [X] T006 [P] Define Pydantic request and response schemas for trigger, run-status, and current-forecast surfaces in `backend/app/schemas/forecast.py`
+- [X] T007 [P] Implement repository methods for forecast runs, forecast versions, buckets, and current-marker persistence in `backend/app/repositories/forecast_run_repository.py` and `backend/app/repositories/forecast_repository.py`
+- [X] T008 [P] Implement approved cleaned dataset lookup and shared lineage access for UC-03 in `backend/app/repositories/cleaned_dataset_repository.py`
+- [X] T009 [P] Implement dedicated Government of Canada MSC GeoMet normalization in `backend/app/clients/geomet_client.py`
+- [X] T010 [P] Implement dedicated Nager.Date Canada holiday normalization in `backend/app/clients/nager_date_client.py`
+- [X] T011 [P] Implement JWT-authenticated RBAC dependencies for forecast trigger and read surfaces in `backend/app/api/dependencies/auth.py`
+- [X] T012 [P] Implement structured forecast logging and failure classification helpers in `backend/app/core/logging.py`
+- [X] T013 Wire the forecast router and dependency injection into the backend application in `backend/app/api/routes/forecasts.py` and `backend/app/main.py`
 
 **Checkpoint**: Forecast persistence, enrichment clients, auth, schemas, and routing foundations are in place.
 
@@ -59,19 +59,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Add contract coverage for `POST /api/v1/forecast-runs/1-day/trigger` and `GET /api/v1/forecasts/current` in `backend/tests/contract/test_forecast_api.py`
-- [ ] T015 [P] [US1] Add unit coverage for leakage-free feature assembly, quantile ordering, and hourly bucket materialization in `backend/tests/unit/test_forecast_pipeline.py`
-- [ ] T016 [P] [US1] Add integration coverage for successful on-demand and scheduled generation in `backend/tests/integration/test_forecast_generation.py`
+- [X] T014 [P] [US1] Add contract coverage for `POST /api/v1/forecast-runs/1-day/trigger` and `GET /api/v1/forecasts/current` in `backend/tests/contract/test_forecast_api.py`
+- [X] T015 [P] [US1] Add unit coverage for leakage-free feature assembly, quantile ordering, and hourly bucket materialization in `backend/tests/unit/test_forecast_pipeline.py`
+- [X] T016 [P] [US1] Add integration coverage for successful on-demand and scheduled generation in `backend/tests/integration/test_forecast_generation.py`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implement leakage-free feature preparation from the approved cleaned dataset plus GeoMet and Nager.Date enrichments in `backend/app/pipelines/forecasting/feature_preparation.py`
-- [ ] T018 [P] [US1] Implement the single global LightGBM forecast path with baseline comparator and `P10`/`P50`/`P90` outputs in `backend/app/pipelines/forecasting/hourly_demand_pipeline.py`
-- [ ] T019 [P] [US1] Implement hourly forecast bucket creation and geography-scope handling in `backend/app/services/forecast_bucket_service.py`
-- [ ] T020 [US1] Implement forecast orchestration for accepted generation requests and scheduled runs in `backend/app/services/forecast_service.py`
-- [ ] T021 [US1] Implement safe forecast persistence and post-store current-marker activation in `backend/app/services/forecast_activation_service.py`
-- [ ] T022 [US1] Implement the trigger endpoint and scheduler entrypoint using thin route handling in `backend/app/api/routes/forecasts.py` and `backend/app/services/forecast_scheduler.py`
-- [ ] T023 [US1] Implement the current-forecast read endpoint with typed responses and no model internals exposure in `backend/app/api/routes/forecasts.py`
+- [X] T017 [P] [US1] Implement leakage-free feature preparation from the approved cleaned dataset plus GeoMet and Nager.Date enrichments in `backend/app/pipelines/forecasting/feature_preparation.py`
+- [X] T018 [P] [US1] Implement the single global LightGBM forecast path with baseline comparator and `P10`/`P50`/`P90` outputs in `backend/app/pipelines/forecasting/hourly_demand_pipeline.py`
+- [X] T019 [P] [US1] Implement hourly forecast bucket creation and geography-scope handling in `backend/app/services/forecast_bucket_service.py`
+- [X] T020 [US1] Implement forecast orchestration for accepted generation requests and scheduled runs in `backend/app/services/forecast_service.py`
+- [X] T021 [US1] Implement safe forecast persistence and post-store current-marker activation in `backend/app/services/forecast_activation_service.py`
+- [X] T022 [US1] Implement the trigger endpoint and scheduler entrypoint using thin route handling in `backend/app/api/routes/forecasts.py` and `backend/app/services/forecast_scheduler.py`
+- [X] T023 [US1] Implement the current-forecast read endpoint with typed responses and no model internals exposure in `backend/app/api/routes/forecasts.py`
 
 **Checkpoint**: User Story 1 delivers a complete forecast-generation path and current-forecast read path for the 24-hour hourly product.
 
@@ -85,16 +85,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Add contract coverage for `GET /api/v1/forecast-runs/{forecastRunId}` success, 404, 422, and reuse reporting in `backend/tests/contract/test_forecast_api.py`
-- [ ] T025 [P] [US2] Add unit coverage for 24-hour horizon reuse eligibility rules in `backend/tests/unit/test_forecast_pipeline.py`
-- [ ] T026 [P] [US2] Add integration coverage for reuse of an already current forecast and rejection of partial-window reuse in `backend/tests/integration/test_forecast_reuse.py`
+- [X] T024 [P] [US2] Add contract coverage for `GET /api/v1/forecast-runs/{forecastRunId}` success, 404, 422, and reuse reporting in `backend/tests/contract/test_forecast_api.py`
+- [X] T025 [P] [US2] Add unit coverage for 24-hour horizon reuse eligibility rules in `backend/tests/unit/test_forecast_pipeline.py`
+- [X] T026 [P] [US2] Add integration coverage for reuse of an already current forecast and rejection of partial-window reuse in `backend/tests/integration/test_forecast_reuse.py`
 
 ### Implementation for User Story 2
 
-- [ ] T027 [P] [US2] Implement repository queries for exact-horizon current forecast lookup and served-current linkage in `backend/app/repositories/forecast_repository.py`
-- [ ] T028 [US2] Implement reuse decision logic that distinguishes exact-horizon reuse from regeneration in `backend/app/services/forecast_service.py`
-- [ ] T029 [US2] Implement forecast-run outcome recording for `served_current` responses in `backend/app/repositories/forecast_run_repository.py`
-- [ ] T030 [US2] Implement the full run-status endpoint, including status lookup, normal success responses, 404 handling, 422 handling, and reused-current response shaping in `backend/app/api/routes/forecasts.py`
+- [X] T027 [P] [US2] Implement repository queries for exact-horizon current forecast lookup and served-current linkage in `backend/app/repositories/forecast_repository.py`
+- [X] T028 [US2] Implement reuse decision logic that distinguishes exact-horizon reuse from regeneration in `backend/app/services/forecast_service.py`
+- [X] T029 [US2] Implement forecast-run outcome recording for `served_current` responses in `backend/app/repositories/forecast_run_repository.py`
+- [X] T030 [US2] Implement the full run-status endpoint, including status lookup, normal success responses, 404 handling, 422 handling, and reused-current response shaping in `backend/app/api/routes/forecasts.py`
 
 **Checkpoint**: User Story 2 adds reuse without changing User Story 1 generation behavior.
 
@@ -108,18 +108,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Add contract coverage for unauthorized, forbidden, missing-resource, and invalid-request responses in `backend/tests/contract/test_forecast_api.py`
-- [ ] T032 [P] [US3] Add unit coverage for activation guards, category-only fallback, and no-run creation on denied or invalid requests in `backend/tests/unit/test_forecast_pipeline.py`
-- [ ] T033 [P] [US3] Add integration coverage for missing data, category-only success, storage failure, and unchanged current-marker behavior in `backend/tests/integration/test_forecast_failures.py`
+- [X] T031 [P] [US3] Add contract coverage for unauthorized, forbidden, missing-resource, and invalid-request responses in `backend/tests/contract/test_forecast_api.py`
+- [X] T032 [P] [US3] Add unit coverage for activation guards, category-only fallback, and no-run creation on denied or invalid requests in `backend/tests/unit/test_forecast_pipeline.py`
+- [X] T033 [P] [US3] Add integration coverage for missing data, category-only success, storage failure, and unchanged current-marker behavior in `backend/tests/integration/test_forecast_failures.py`
 
 ### Implementation for User Story 3
 
-- [ ] T034 [P] [US3] Implement category-only fallback handling and geography omission recording in `backend/app/services/forecast_bucket_service.py`
-- [ ] T035 [P] [US3] Implement missing-input, enrichment-failure, and model-failure outcome classification in `backend/app/services/forecast_service.py`
-- [ ] T036 [P] [US3] Implement activation guards that preserve the prior current forecast on storage failure or partial persistence in `backend/app/services/forecast_activation_service.py`
-- [ ] T037 [US3] Implement read-surface missing-resource handling and invalid-request rejection in `backend/app/api/routes/forecasts.py`
-- [ ] T038 [US3] Implement auth-denial handling that blocks run creation for trigger and read surfaces in `backend/app/api/routes/forecasts.py` and `backend/app/api/dependencies/auth.py`
-- [ ] T039 [US3] Implement persisted run-history summaries and failure-safe observability without raw payload exposure in `backend/app/repositories/forecast_run_repository.py` and `backend/app/core/logging.py`
+- [X] T034 [P] [US3] Implement category-only fallback handling and geography omission recording in `backend/app/services/forecast_bucket_service.py`
+- [X] T035 [P] [US3] Implement missing-input, enrichment-failure, and model-failure outcome classification in `backend/app/services/forecast_service.py`
+- [X] T036 [P] [US3] Implement activation guards that preserve the prior current forecast on storage failure or partial persistence in `backend/app/services/forecast_activation_service.py`
+- [X] T037 [US3] Implement read-surface missing-resource handling and invalid-request rejection in `backend/app/api/routes/forecasts.py`
+- [X] T038 [US3] Implement auth-denial handling that blocks run creation for trigger and read surfaces in `backend/app/api/routes/forecasts.py` and `backend/app/api/dependencies/auth.py`
+- [X] T039 [US3] Implement persisted run-history summaries and failure-safe observability without raw payload exposure in `backend/app/repositories/forecast_run_repository.py` and `backend/app/core/logging.py`
 
 **Checkpoint**: User Story 3 completes last-known-good safety, category-only fallback, and access/error separation.
 
@@ -129,10 +129,10 @@
 
 **Purpose**: Finish cross-story verification, documentation, and implementation hardening without turning this task list into an execution log.
 
-- [ ] T040 [P] Update UC-03 implementation notes and artifact traceability in `specs/003-daily-demand-forecast/quickstart.md`
-- [ ] T041 [P] Add on-demand generation and category-only latency verification for SC-001 and SC-005 in `backend/tests/integration/test_forecast_generation.py` and `backend/tests/integration/test_forecast_failures.py`
-- [ ] T042 [P] Add current-forecast reuse latency verification for SC-003 in `backend/tests/integration/test_forecast_reuse.py`
-- [ ] T043 [P] Add scheduler and API usage examples for the forecast product in `specs/003-daily-demand-forecast/contracts/forecast-api.yaml`
+- [X] T040 [P] Update UC-03 implementation notes and artifact traceability in `specs/003-daily-demand-forecast/quickstart.md`
+- [X] T041 [P] Add on-demand generation and category-only latency verification for SC-001 and SC-005 in `backend/tests/integration/test_forecast_generation.py` and `backend/tests/integration/test_forecast_failures.py`
+- [X] T042 [P] Add current-forecast reuse latency verification for SC-003 in `backend/tests/integration/test_forecast_reuse.py`
+- [X] T043 [P] Add scheduler and API usage examples for the forecast product in `specs/003-daily-demand-forecast/contracts/forecast-api.yaml`
 
 ---
 

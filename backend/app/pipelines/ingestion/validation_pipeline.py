@@ -4,14 +4,19 @@ import logging
 
 from sqlalchemy.orm import Session
 
+from app.clients.geomet_client import GeoMetClient
+from app.clients.nager_date_client import NagerDateClient
 from app.core.config import get_settings
 from app.pipelines.ingestion.approved_pipeline import ApprovedPipeline
 from app.pipelines.ingestion.blocked_outcome_pipeline import BlockedOutcomePipeline
 from app.pipelines.ingestion.rejection_pipeline import RejectionPipeline
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
+from app.repositories.forecast_model_repository import ForecastModelRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.review_needed_repository import ReviewNeededRepository
 from app.repositories.validation_repository import ValidationRepository
 from app.services.cleaned_dataset_service import CleanedDatasetService
+from app.services.forecast_training_service import ForecastTrainingService
 from app.services.duplicate_analysis_service import DuplicateAnalysisService
 from app.services.duplicate_resolution_service import DuplicateResolutionService
 from app.services.schema_validation_service import SchemaValidationService
@@ -27,8 +32,26 @@ class ValidationPipeline:
         self.schema_validation_service = SchemaValidationService()
         self.duplicate_analysis_service = DuplicateAnalysisService()
         self.duplicate_resolution_service = DuplicateResolutionService()
-        self.cleaned_dataset_service = CleanedDatasetService(self.dataset_repository, self.validation_repository)
-        self.approved_pipeline = ApprovedPipeline(self.cleaned_dataset_service, self.validation_repository)
+        self.cleaned_dataset_repository = CleanedDatasetRepository(session)
+        self.cleaned_dataset_service = CleanedDatasetService(
+            self.dataset_repository,
+            self.validation_repository,
+            self.cleaned_dataset_repository,
+        )
+        self.forecast_training_service = ForecastTrainingService(
+            cleaned_dataset_repository=self.cleaned_dataset_repository,
+            forecast_model_repository=ForecastModelRepository(session),
+            geomet_client=GeoMetClient(),
+            nager_date_client=NagerDateClient(),
+            settings=self.settings,
+            logger=logging.getLogger("validation.forecast_training"),
+        )
+        self.approved_pipeline = ApprovedPipeline(
+            self.cleaned_dataset_service,
+            self.validation_repository,
+            self.forecast_training_service,
+            logging.getLogger("validation.approval"),
+        )
         self.rejection_pipeline = RejectionPipeline(self.validation_repository)
         self.blocked_pipeline = BlockedOutcomePipeline(self.validation_repository, self.review_needed_repository)
         self.logger = logging.getLogger("validation")

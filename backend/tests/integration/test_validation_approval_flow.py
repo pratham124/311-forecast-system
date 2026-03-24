@@ -7,8 +7,9 @@ from sqlalchemy import select
 
 from app.clients.edmonton_311 import Edmonton311Client
 from app.core.config import get_settings
-from app.models import DuplicateGroup, ValidationRun
+from app.models import CurrentForecastModelMarker, DuplicateGroup, ForecastModelArtifact, ForecastModelRun, ValidationRun
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.services.ingestion_logging_service import IngestionLoggingService
 from tests.conftest import FakeTransport
@@ -32,13 +33,23 @@ def test_clean_validation_flow_creates_cleaned_dataset_and_updates_marker(seed_c
     result = pipeline.run()
 
     current = DatasetRepository(session).get_current("edmonton_311")
-    current_records = DatasetRepository(session).list_dataset_records(current.dataset_version_id)
+    current_records = CleanedDatasetRepository(session).list_current_cleaned_records("edmonton_311")
     validation_run = session.scalars(select(ValidationRun).where(ValidationRun.ingestion_run_id == result.run_id)).one()
     groups = session.scalars(select(DuplicateGroup)).all()
+    model_run = session.scalars(select(ForecastModelRun).order_by(ForecastModelRun.started_at.desc())).first()
+    model_artifact = session.scalars(select(ForecastModelArtifact).order_by(ForecastModelArtifact.trained_at.desc())).first()
+    model_marker = session.get(CurrentForecastModelMarker, "daily_1_day_demand")
 
     assert result.status == "success"
     assert result.result_type == "new_data"
     assert current is not None
+    assert current.record_count == 2
     assert len(current_records) == 2
     assert validation_run.status == "approved"
     assert len(groups) == 1
+    assert model_run is not None
+    assert model_run.trigger_type == "approval"
+    assert model_run.status == "success"
+    assert model_artifact is not None
+    assert model_marker is not None
+    assert model_marker.forecast_model_artifact_id == model_artifact.forecast_model_artifact_id

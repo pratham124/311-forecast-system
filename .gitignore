@@ -27,3 +27,4 @@ build/
 *.log
 .env*
 .pytest_cache/
+backend/.artifacts/forecast_models/
