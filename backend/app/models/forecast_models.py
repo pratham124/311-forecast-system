@@ -104,6 +104,7 @@ class ForecastModelRun(Base):
     __tablename__ = "forecast_model_runs"
 
     forecast_model_run_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    forecast_product_name: Mapped[str] = mapped_column(String(64), nullable=False)
     trigger_type: Mapped[str] = mapped_column(String(32), nullable=False)
     source_cleaned_dataset_version_id: Mapped[str | None] = mapped_column(
         ForeignKey("dataset_versions.dataset_version_id"),
@@ -125,6 +126,7 @@ class ForecastModelArtifact(Base):
     __tablename__ = "forecast_model_artifacts"
 
     forecast_model_artifact_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    forecast_product_name: Mapped[str] = mapped_column(String(64), nullable=False)
     forecast_model_run_id: Mapped[str] = mapped_column(
         ForeignKey("forecast_model_runs.forecast_model_run_id"),
         nullable=False,

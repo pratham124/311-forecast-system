@@ -112,7 +112,7 @@ components:
         weekEndLocal:
           type: string
           format: date-time
-          description: Sunday 23:59 in local operational timezone.
+          description: Sunday 23:59:59 in local operational timezone.
         status:
           type: string
           enum: [running, success, failed]
@@ -138,6 +138,8 @@ components:
           type: string
           format: date-time
         failureReason:
+          type: string
+        summary:
           type: string
     CurrentWeeklyForecast:
       type: object
@@ -177,6 +179,8 @@ components:
           format: date-time
         updatedByRunId:
           type: string
+        summary:
+          type: string
         buckets:
           type: array
           items:
@@ -187,6 +191,10 @@ components:
         - forecastDateLocal
         - serviceCategory
         - pointForecast
+        - quantileP10
+        - quantileP50
+        - quantileP90
+        - baselineValue
       properties:
         forecastDateLocal:
           type: string
@@ -196,5 +204,17 @@ components:
         geographyKey:
           type: string
         pointForecast:
+          type: number
+          minimum: 0
+        quantileP10:
+          type: number
+          minimum: 0
+        quantileP50:
+          type: number
+          minimum: 0
+        quantileP90:
+          type: number
+          minimum: 0
+        baselineValue:
           type: number
           minimum: 0

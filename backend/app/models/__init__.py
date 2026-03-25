@@ -7,6 +7,12 @@ from app.models.forecast_models import (
     ForecastRun,
     ForecastVersion,
 )
+from app.models.weekly_forecast_models import (
+    CurrentWeeklyForecastMarker,
+    WeeklyForecastBucket,
+    WeeklyForecastRun,
+    WeeklyForecastVersion,
+)
 from app.models.ingestion_models import (
     CandidateDataset,
     CleanedCurrentRecord,
@@ -31,6 +37,7 @@ __all__ = [
     "CurrentDatasetMarker",
     "CurrentForecastMarker",
     "CurrentForecastModelMarker",
+    "CurrentWeeklyForecastMarker",
     "DatasetRecord",
     "DatasetVersion",
     "DuplicateAnalysisResult",
@@ -46,4 +53,7 @@ __all__ = [
     "SuccessfulPullCursor",
     "ValidationResultRecord",
     "ValidationRun",
+    "WeeklyForecastBucket",
+    "WeeklyForecastRun",
+    "WeeklyForecastVersion",
 ]

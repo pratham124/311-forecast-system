@@ -71,6 +71,7 @@ class ForecastTrainingService:
             f"approved_dataset_version_id={approved_dataset.dataset_version_id if approved_dataset is not None else 'none'}"
         )
         return self.forecast_model_repository.create_run(
+            forecast_product_name=self.settings.forecast_product_name,
             trigger_type=trigger_type,
             source_cleaned_dataset_version_id=approved_dataset.dataset_version_id if approved_dataset is not None else None,
             training_window_start=training_window_start,
@@ -153,6 +154,7 @@ class ForecastTrainingService:
             )
             self._store_artifact(artifact, artifact_path)
             stored_artifact = self.forecast_model_repository.create_artifact(
+                forecast_product_name=self.settings.forecast_product_name,
                 forecast_model_run_id=run.forecast_model_run_id,
                 source_cleaned_dataset_version_id=run.source_cleaned_dataset_version_id,
                 geography_scope=artifact.geography_scope,

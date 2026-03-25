@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from fastapi import BackgroundTasks, HTTPException
+from fastapi.testclient import TestClient
 import pytest
 
 from app.api.routes.forecasts import get_current_forecast, get_forecast_run, trigger_daily_forecast
 from app.clients.geomet_client import GeoMetClient
 from app.clients.nager_date_client import NagerDateClient
+from app.main import create_app
 from app.core.auth import get_current_claims, require_operational_manager, require_planner_or_manager
 from app.core.config import get_settings
 from app.repositories.dataset_repository import DatasetRepository
@@ -110,6 +112,36 @@ def test_forecast_routes_generate_and_read_current_forecast(session) -> None:
     assert accepted.status == "running"
     assert run_status.result_type in {"generated_new", "served_current"}
     assert current.bucket_count == 24
+
+
+@pytest.mark.contract
+def test_http_get_forecast_run_status_binds_path_parameter(session) -> None:
+    _seed_approved_cleaned_dataset(session)
+    _train_model(session)
+    background_tasks = BackgroundTasks()
+
+    accepted = trigger_daily_forecast(
+        background_tasks=background_tasks,
+        payload=None,
+        session=session,
+        geomet_client=GeoMetClient(object()),
+        nager_date_client=NagerDateClient(object()),
+        _claims={"roles": ["OperationalManager"]},
+    )
+    _run_background_tasks(background_tasks)
+    session.expire_all()
+
+    app = create_app()
+    client = TestClient(app)
+    response = client.get(
+        f"/api/v1/forecast-runs/{accepted.forecast_run_id}",
+        headers={"Authorization": f"Bearer {build_token(['CityPlanner'])}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["forecastRunId"] == accepted.forecast_run_id
+    assert payload["status"] in {"success", "running"}
 
 
 @pytest.mark.contract

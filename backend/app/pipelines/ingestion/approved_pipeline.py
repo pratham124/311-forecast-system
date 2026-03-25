@@ -5,6 +5,7 @@ import logging
 from app.repositories.validation_repository import ValidationRepository
 from app.services.cleaned_dataset_service import CleanedDatasetService
 from app.services.forecast_training_service import ForecastTrainingService
+from app.services.weekly_forecast_training_service import WeeklyForecastTrainingService
 
 
 class ApprovedPipeline:
@@ -13,11 +14,13 @@ class ApprovedPipeline:
         cleaned_dataset_service: CleanedDatasetService,
         validation_repository: ValidationRepository,
         forecast_training_service: ForecastTrainingService | None = None,
+        weekly_forecast_training_service: WeeklyForecastTrainingService | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         self.cleaned_dataset_service = cleaned_dataset_service
         self.validation_repository = validation_repository
         self.forecast_training_service = forecast_training_service
+        self.weekly_forecast_training_service = weekly_forecast_training_service
         self.logger = logger or logging.getLogger("validation.approval")
 
     def approve(
@@ -45,6 +48,7 @@ class ApprovedPipeline:
             summary="Validation and deduplication completed successfully.",
         )
         self._trigger_forecast_model_training()
+        self._trigger_weekly_forecast_model_training()
         return cleaned_version.dataset_version_id
 
     def _trigger_forecast_model_training(self) -> None:
@@ -55,3 +59,12 @@ class ApprovedPipeline:
             self.forecast_training_service.execute_run(run.forecast_model_run_id)
         except Exception:
             self.logger.exception("forecast model training trigger failed after approval")
+
+    def _trigger_weekly_forecast_model_training(self) -> None:
+        if self.weekly_forecast_training_service is None:
+            return
+        try:
+            run = self.weekly_forecast_training_service.start_run(trigger_type="approval")
+            self.weekly_forecast_training_service.execute_run(run.forecast_model_run_id)
+        except Exception:
+            self.logger.exception("weekly forecast model training trigger failed after approval")

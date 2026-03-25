@@ -20,6 +20,7 @@ from app.services.forecast_training_service import ForecastTrainingService
 from app.services.duplicate_analysis_service import DuplicateAnalysisService
 from app.services.duplicate_resolution_service import DuplicateResolutionService
 from app.services.schema_validation_service import SchemaValidationService
+from app.services.weekly_forecast_training_service import WeeklyForecastTrainingService
 
 
 class ValidationPipeline:
@@ -46,10 +47,19 @@ class ValidationPipeline:
             settings=self.settings,
             logger=logging.getLogger("validation.forecast_training"),
         )
+        self.weekly_forecast_training_service = WeeklyForecastTrainingService(
+            cleaned_dataset_repository=self.cleaned_dataset_repository,
+            forecast_model_repository=ForecastModelRepository(session),
+            geomet_client=GeoMetClient(),
+            nager_date_client=NagerDateClient(),
+            settings=self.settings,
+            logger=logging.getLogger("validation.weekly_forecast_training"),
+        )
         self.approved_pipeline = ApprovedPipeline(
             self.cleaned_dataset_service,
             self.validation_repository,
             self.forecast_training_service,
+            self.weekly_forecast_training_service,
             logging.getLogger("validation.approval"),
         )
         self.rejection_pipeline = RejectionPipeline(self.validation_repository)

@@ -11,6 +11,7 @@ class Settings:
     database_url: str
     source_name: str
     forecast_product_name: str
+    weekly_forecast_product_name: str
     edmonton_311_api_url: str
     edmonton_311_api_token: str | None
     jwt_secret: str
@@ -20,9 +21,16 @@ class Settings:
     scheduler_cron: str
     forecast_scheduler_enabled: bool
     forecast_scheduler_cron: str
+    weekly_forecast_scheduler_enabled: bool
+    weekly_forecast_scheduler_cron: str
+    weekly_forecast_daily_regeneration_enabled: bool
+    weekly_forecast_daily_regeneration_cron: str
     forecast_model_scheduler_enabled: bool
     forecast_model_scheduler_cron: str
     forecast_model_artifact_dir: str
+    weekly_forecast_model_scheduler_enabled: bool
+    weekly_forecast_model_scheduler_cron: str
+    weekly_forecast_model_artifact_dir: str
     edmonton_311_first_run_lookback_days: int
     edmonton_311_retry_attempts: int
     edmonton_311_retry_backoff_seconds: float
@@ -34,6 +42,8 @@ class Settings:
     nager_date_base_url: str
     forecast_model_family: str
     forecast_training_lookback_days: int
+    weekly_forecast_timezone: str
+    weekly_forecast_history_days: int
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
@@ -52,6 +62,7 @@ def get_settings() -> Settings:
         database_url=database_url,
         source_name=os.getenv("EDMONTON_311_SOURCE_NAME", "edmonton_311"),
         forecast_product_name=os.getenv("FORECAST_PRODUCT_NAME", "daily_1_day_demand"),
+        weekly_forecast_product_name=os.getenv("WEEKLY_FORECAST_PRODUCT_NAME", "weekly_7_day_demand"),
         edmonton_311_api_url=os.getenv(
             "EDMONTON_311_API_URL",
             "https://data.edmonton.ca/resource/q7ua-agfg.json",
@@ -64,9 +75,16 @@ def get_settings() -> Settings:
         scheduler_cron=os.getenv("SCHEDULER_CRON", "0 0 * * 0"),
         forecast_scheduler_enabled=_to_bool(os.getenv("FORECAST_SCHEDULER_ENABLED"), False),
         forecast_scheduler_cron=os.getenv("FORECAST_SCHEDULER_CRON", "0 * * * *"),
+        weekly_forecast_scheduler_enabled=_to_bool(os.getenv("WEEKLY_FORECAST_SCHEDULER_ENABLED"), False),
+        weekly_forecast_scheduler_cron=os.getenv("WEEKLY_FORECAST_SCHEDULER_CRON", "0 1 * * 1"),
+        weekly_forecast_daily_regeneration_enabled=_to_bool(os.getenv("WEEKLY_FORECAST_DAILY_REGENERATION_ENABLED"), False),
+        weekly_forecast_daily_regeneration_cron=os.getenv("WEEKLY_FORECAST_DAILY_REGENERATION_CRON", "0 2 * * *"),
         forecast_model_scheduler_enabled=_to_bool(os.getenv("FORECAST_MODEL_SCHEDULER_ENABLED"), False),
         forecast_model_scheduler_cron=os.getenv("FORECAST_MODEL_SCHEDULER_CRON", "15 0 * * 0"),
         forecast_model_artifact_dir=os.getenv("FORECAST_MODEL_ARTIFACT_DIR", "backend/.artifacts/forecast_models"),
+        weekly_forecast_model_scheduler_enabled=_to_bool(os.getenv("WEEKLY_FORECAST_MODEL_SCHEDULER_ENABLED"), False),
+        weekly_forecast_model_scheduler_cron=os.getenv("WEEKLY_FORECAST_MODEL_SCHEDULER_CRON", "30 0 * * 0"),
+        weekly_forecast_model_artifact_dir=os.getenv("WEEKLY_FORECAST_MODEL_ARTIFACT_DIR", "backend/.artifacts/weekly_forecast_models"),
         edmonton_311_first_run_lookback_days=int(os.getenv("EDMONTON_311_FIRST_RUN_LOOKBACK_DAYS", "60")),
         edmonton_311_retry_attempts=int(os.getenv("EDMONTON_311_RETRY_ATTEMPTS", "3")),
         edmonton_311_retry_backoff_seconds=float(os.getenv("EDMONTON_311_RETRY_BACKOFF_SECONDS", "0.5")),
@@ -78,4 +96,6 @@ def get_settings() -> Settings:
         nager_date_base_url=os.getenv("NAGER_DATE_BASE_URL", "https://date.nager.at"),
         forecast_model_family=os.getenv("FORECAST_MODEL_FAMILY", "lightgbm_global"),
         forecast_training_lookback_days=int(os.getenv("FORECAST_TRAINING_LOOKBACK_DAYS", "56")),
+        weekly_forecast_timezone=os.getenv("WEEKLY_FORECAST_TIMEZONE", "America/Edmonton"),
+        weekly_forecast_history_days=int(os.getenv("WEEKLY_FORECAST_HISTORY_DAYS", "56")),
     )

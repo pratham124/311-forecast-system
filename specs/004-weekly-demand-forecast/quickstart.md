@@ -24,30 +24,30 @@ Use this guide to implement and verify UC-04 backend forecasting behavior so ope
    - `CurrentWeeklyForecastMarker`
 9. Update current marker only after successful full storage.
 10. On missing input data, forecasting engine error, or storage failure:
-    - mark run failed
-    - retain prior current forecast
+   - mark run failed
+   - retain prior current forecast
 11. Expose and test contracts for:
-    - weekly trigger endpoint
-    - run-status endpoint
-    - current-weekly-forecast endpoint
+   - weekly trigger endpoint
+   - run-status endpoint
+   - current-weekly-forecast endpoint
 
 ## Acceptance Alignment
 
 Map implementation and tests directly to [UC-04-AT](/home/asiad/ece493/311-forecast-system/docs/UC-04-AT.md):
 
-- `AT-01`: On-demand request generates and activates new weekly forecast
-- `AT-02`: Scheduled run generates and activates new weekly forecast
-- `AT-03`: Existing current weekly forecast is served without rerun
-- `AT-04`: Missing required data fails run and preserves prior current forecast
-- `AT-05`: Forecast engine failure preserves prior current forecast
-- `AT-06`: Incomplete geography produces valid category-only forecast
-- `AT-07`: Storage failure blocks activation and preserves prior forecast
-- `AT-08`: No partial activation before successful storage
+- `AT-01`: `backend/tests/integration/test_weekly_forecast_generation.py::test_on_demand_generation_creates_current_weekly_forecast`
+- `AT-02`: `backend/tests/integration/test_weekly_forecast_generation.py::test_scheduled_and_daily_regeneration_jobs_share_same_workflow`
+- `AT-03`: `backend/tests/integration/test_weekly_forecast_reuse.py::test_current_week_reuse_serves_existing_forecast`
+- `AT-04`: `backend/tests/integration/test_weekly_forecast_failures.py::test_missing_input_data_fails_and_preserves_no_marker`
+- `AT-05`: `backend/tests/integration/test_weekly_forecast_failures.py::test_engine_and_storage_failures_preserve_prior_current_forecast`
+- `AT-06`: `backend/tests/integration/test_weekly_forecast_failures.py::test_category_only_fallback_succeeds_when_geography_incomplete`
+- `AT-07`: `backend/tests/integration/test_weekly_forecast_failures.py::test_engine_and_storage_failures_preserve_prior_current_forecast`
+- `AT-08`: `backend/tests/integration/test_weekly_forecast_failures.py::test_engine_and_storage_failures_preserve_prior_current_forecast`
 
 ## Suggested Test Layers
 
 - Unit tests for week-boundary calculation, reuse decision logic, and failure-safe activation guards
-- Integration tests across trigger path, dataset lookup, forecasting service/pipeline, persistence, and current marker updates
+- Integration tests across trigger path, dataset lookup, weekly forecasting service/pipeline, persistence, and current marker updates
 - Contract tests for [forecast-api.yaml](/home/asiad/ece493/311-forecast-system/specs/004-weekly-demand-forecast/contracts/forecast-api.yaml)
 - Acceptance tests mirroring UC-04-AT scenarios
 

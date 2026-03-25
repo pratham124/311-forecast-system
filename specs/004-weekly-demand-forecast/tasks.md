@@ -24,9 +24,9 @@
 
 **Purpose**: Create UC-04 module scaffolding and baseline configuration shared by all stories.
 
-- [ ] T001 Create UC-04 forecasting module scaffolding in `backend/app/api/routes/weekly_forecasts.py`, `backend/app/pipelines/forecasting/weekly_demand_pipeline.py`, `backend/app/services/weekly_forecast_service.py`, `backend/app/repositories/weekly_forecast_repository.py`, `backend/app/repositories/weekly_forecast_run_repository.py`, and `backend/app/schemas/weekly_forecast.py`
-- [ ] T002 Configure weekly forecast settings for scheduler timing, week-boundary timezone, and pipeline controls in `backend/app/core/config.py`
-- [ ] T003 [P] Create UC-04 test scaffolding in `backend/tests/contract/test_weekly_forecast_api.py`, `backend/tests/integration/test_weekly_forecast_generation.py`, `backend/tests/integration/test_weekly_forecast_reuse.py`, `backend/tests/integration/test_weekly_forecast_failures.py`, and `backend/tests/unit/test_weekly_forecast_service.py`
+- [X] T001 Create UC-04 forecasting module scaffolding in `backend/app/api/routes/weekly_forecasts.py`, `backend/app/pipelines/forecasting/weekly_demand_pipeline.py`, `backend/app/services/weekly_forecast_service.py`, `backend/app/repositories/weekly_forecast_repository.py`, `backend/app/repositories/weekly_forecast_run_repository.py`, and `backend/app/schemas/weekly_forecast.py`
+- [X] T002 Configure weekly forecast settings for scheduler timing, week-boundary timezone, and pipeline controls in `backend/app/core/config.py`
+- [X] T003 [P] Create UC-04 test scaffolding in `backend/tests/contract/test_weekly_forecast_api.py`, `backend/tests/integration/test_weekly_forecast_generation.py`, `backend/tests/integration/test_weekly_forecast_reuse.py`, `backend/tests/integration/test_weekly_forecast_failures.py`, and `backend/tests/unit/test_weekly_forecast_service.py`
 
 ---
 
@@ -36,16 +36,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Add migration-managed UC-04 tables for weekly forecast run/version/bucket/current-marker lifecycle including quantile and baseline fields in `backend/alembic/versions/004_weekly_forecast_lifecycle.py`
-- [ ] T005 [P] Define repository ORM models for `WeeklyForecastRun`, `WeeklyForecastVersion`, `WeeklyForecastBucket`, and `CurrentWeeklyForecastMarker` in `backend/app/repositories/models.py`
-- [ ] T006 [P] Define Pydantic schemas for trigger, run-status, and current-weekly response contracts including quantile/baseline outputs and in-progress dedupe context in `backend/app/schemas/weekly_forecast.py`
-- [ ] T007 [P] Implement repository methods for weekly run/version/bucket/current-marker persistence in `backend/app/repositories/weekly_forecast_repository.py` and `backend/app/repositories/weekly_forecast_run_repository.py`
-- [ ] T008 [P] Implement approved cleaned dataset lookup for UC-04 lineage reuse in `backend/app/repositories/cleaned_dataset_repository.py`
-- [ ] T009 [P] Implement week-boundary utility for Monday-start operational windows in `backend/app/services/week_window_service.py`
-- [ ] T010 [P] Implement authenticated role dependencies for weekly trigger and read surfaces in `backend/app/api/dependencies/auth.py`
-- [ ] T011 [P] Implement structured logging helpers for weekly run outcomes and failure classification in `backend/app/core/logging.py`
-- [ ] T012 Wire weekly forecast router registration in `backend/app/api/routes/weekly_forecasts.py` and `backend/app/main.py`
-- [ ] T013 Align OpenAPI contract examples and schema naming with implementation paths in `specs/004-weekly-demand-forecast/contracts/forecast-api.yaml`
+- [X] T004 Add migration-managed UC-04 tables for weekly forecast run/version/bucket/current-marker lifecycle including quantile and baseline fields in `backend/alembic/versions/004_weekly_forecast_lifecycle.py`
+- [X] T005 [P] Define repository ORM models for `WeeklyForecastRun`, `WeeklyForecastVersion`, `WeeklyForecastBucket`, and `CurrentWeeklyForecastMarker` in `backend/app/repositories/models.py`
+- [X] T006 [P] Define Pydantic schemas for trigger, run-status, and current-weekly response contracts including quantile/baseline outputs and in-progress dedupe context in `backend/app/schemas/weekly_forecast.py`
+- [X] T007 [P] Implement repository methods for weekly run/version/bucket/current-marker persistence in `backend/app/repositories/weekly_forecast_repository.py` and `backend/app/repositories/weekly_forecast_run_repository.py`
+- [X] T008 [P] Implement approved cleaned dataset lookup for UC-04 lineage reuse in `backend/app/repositories/cleaned_dataset_repository.py`
+- [X] T009 [P] Implement week-boundary utility for Monday-start operational windows in `backend/app/services/week_window_service.py`
+- [X] T010 [P] Implement authenticated role dependencies for weekly trigger and read surfaces in `backend/app/api/dependencies/auth.py`
+- [X] T011 [P] Implement structured logging helpers for weekly run outcomes and failure classification in `backend/app/core/logging.py`
+- [X] T012 Wire weekly forecast router registration in `backend/app/api/routes/weekly_forecasts.py` and `backend/app/main.py`
+- [X] T013 Align OpenAPI contract examples and schema naming with implementation paths in `specs/004-weekly-demand-forecast/contracts/forecast-api.yaml`
 
 **Checkpoint**: Foundations ready for independent user story implementation.
 
@@ -59,19 +59,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Add contract tests for `POST /api/v1/forecast-runs/7-day/trigger` and `GET /api/v1/forecasts/current-weekly` in `backend/tests/contract/test_weekly_forecast_api.py`
-- [ ] T015 [P] [US1] Add unit tests for week-window derivation, seven-day bucket construction, and quantile ordering in `backend/tests/unit/test_weekly_forecast_service.py`
-- [ ] T016 [P] [US1] Add integration tests for successful on-demand, scheduled weekly, and automated daily-regeneration generation paths in `backend/tests/integration/test_weekly_forecast_generation.py`
+- [X] T014 [P] [US1] Add contract tests for `POST /api/v1/forecast-runs/7-day/trigger` and `GET /api/v1/forecasts/current-weekly` in `backend/tests/contract/test_weekly_forecast_api.py`
+- [X] T015 [P] [US1] Add unit tests for week-window derivation, seven-day bucket construction, and quantile ordering in `backend/tests/unit/test_weekly_forecast_service.py`
+- [X] T016 [P] [US1] Add integration tests for successful on-demand, scheduled weekly, and automated daily-regeneration generation paths in `backend/tests/integration/test_weekly_forecast_generation.py`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implement leakage-safe weekly feature preparation from approved lineage and enrichments in `backend/app/pipelines/forecasting/weekly_feature_preparation.py`
-- [ ] T018 [P] [US1] Implement weekly forecasting pipeline producing seven daily category demand values plus `P10`/`P50`/`P90` and baseline comparator outputs in `backend/app/pipelines/forecasting/weekly_demand_pipeline.py`
-- [ ] T019 [P] [US1] Implement weekly bucket materialization and geography-scope tagging in `backend/app/services/weekly_forecast_bucket_service.py`
-- [ ] T020 [US1] Implement orchestration for accepted on-demand and scheduled generation in `backend/app/services/weekly_forecast_service.py`
-- [ ] T021 [US1] Implement safe persistence plus post-store current-marker activation in `backend/app/services/weekly_forecast_activation_service.py`
-- [ ] T022 [US1] Implement trigger endpoint and scheduler entrypoints for weekly and daily-regeneration runs using thin route handlers in `backend/app/api/routes/weekly_forecasts.py` and `backend/app/services/weekly_forecast_scheduler.py`
-- [ ] T023 [US1] Implement current-weekly-forecast read endpoint with typed responses in `backend/app/api/routes/weekly_forecasts.py`
+- [X] T017 [P] [US1] Implement leakage-safe weekly feature preparation from approved lineage and enrichments in `backend/app/pipelines/forecasting/weekly_feature_preparation.py`
+- [X] T018 [P] [US1] Implement weekly forecasting pipeline producing seven daily category demand values plus `P10`/`P50`/`P90` and baseline comparator outputs in `backend/app/pipelines/forecasting/weekly_demand_pipeline.py`
+- [X] T019 [P] [US1] Implement weekly bucket materialization and geography-scope tagging in `backend/app/services/weekly_forecast_bucket_service.py`
+- [X] T020 [US1] Implement orchestration for accepted on-demand and scheduled generation in `backend/app/services/weekly_forecast_service.py`
+- [X] T021 [US1] Implement safe persistence plus post-store current-marker activation in `backend/app/services/weekly_forecast_activation_service.py`
+- [X] T022 [US1] Implement trigger endpoint and scheduler entrypoints for weekly and daily-regeneration runs using thin route handlers in `backend/app/api/routes/weekly_forecasts.py` and `backend/app/services/weekly_forecast_scheduler.py`
+- [X] T023 [US1] Implement current-weekly-forecast read endpoint with typed responses in `backend/app/api/routes/weekly_forecasts.py`
 
 **Checkpoint**: US1 delivers end-to-end weekly forecast generation and retrieval.
 
@@ -85,16 +85,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Add contract tests for run-status reuse reporting and relevant 404/422 paths in `backend/tests/contract/test_weekly_forecast_api.py`
-- [ ] T025 [P] [US2] Add unit tests for same-week reuse eligibility, in-progress deduplication, and non-reuse boundaries in `backend/tests/unit/test_weekly_forecast_service.py`
-- [ ] T026 [P] [US2] Add integration tests for current-week reuse behavior (AT-03) and same-week in-progress dedupe behavior in `backend/tests/integration/test_weekly_forecast_reuse.py`
+- [X] T024 [P] [US2] Add contract tests for run-status reuse reporting and relevant 404/422 paths in `backend/tests/contract/test_weekly_forecast_api.py`
+- [X] T025 [P] [US2] Add unit tests for same-week reuse eligibility, in-progress deduplication, and non-reuse boundaries in `backend/tests/unit/test_weekly_forecast_service.py`
+- [X] T026 [P] [US2] Add integration tests for current-week reuse behavior (AT-03) and same-week in-progress dedupe behavior in `backend/tests/integration/test_weekly_forecast_reuse.py`
 
 ### Implementation for User Story 2
 
-- [ ] T027 [P] [US2] Implement repository queries for current-forecast lookup by operational week in `backend/app/repositories/weekly_forecast_repository.py`
-- [ ] T028 [US2] Implement reuse decision logic, served-current outcomes, and in-progress same-week dedupe handling in `backend/app/services/weekly_forecast_service.py`
-- [ ] T029 [US2] Implement persisted `served_current` run outcome recording in `backend/app/repositories/weekly_forecast_run_repository.py`
-- [ ] T030 [US2] Implement run-status endpoint response shaping for reuse outcomes in `backend/app/api/routes/weekly_forecasts.py`
+- [X] T027 [P] [US2] Implement repository queries for current-forecast lookup by operational week in `backend/app/repositories/weekly_forecast_repository.py`
+- [X] T028 [US2] Implement reuse decision logic, served-current outcomes, and in-progress same-week dedupe handling in `backend/app/services/weekly_forecast_service.py`
+- [X] T029 [US2] Implement persisted `served_current` run outcome recording in `backend/app/repositories/weekly_forecast_run_repository.py`
+- [X] T030 [US2] Implement run-status endpoint response shaping for reuse outcomes in `backend/app/api/routes/weekly_forecasts.py`
 
 **Checkpoint**: US2 adds deterministic reuse without changing US1 generation behavior.
 
@@ -108,18 +108,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Add contract tests for unauthorized, forbidden, and no-current-forecast responses in `backend/tests/contract/test_weekly_forecast_api.py`
-- [ ] T032 [P] [US3] Add unit tests for failure classification and activation guards in `backend/tests/unit/test_weekly_forecast_service.py`
-- [ ] T033 [P] [US3] Add integration tests for AT-04, AT-05, AT-06, AT-07, and AT-08 in `backend/tests/integration/test_weekly_forecast_failures.py`
+- [X] T031 [P] [US3] Add contract tests for unauthorized, forbidden, and no-current-forecast responses in `backend/tests/contract/test_weekly_forecast_api.py`
+- [X] T032 [P] [US3] Add unit tests for failure classification and activation guards in `backend/tests/unit/test_weekly_forecast_service.py`
+- [X] T033 [P] [US3] Add integration tests for AT-04, AT-05, AT-06, AT-07, and AT-08 in `backend/tests/integration/test_weekly_forecast_failures.py`
 
 ### Implementation for User Story 3
 
-- [ ] T034 [P] [US3] Implement missing-input-data and engine-failure classification in `backend/app/services/weekly_forecast_service.py`
-- [ ] T035 [P] [US3] Implement category-only fallback logic for incomplete geography in `backend/app/services/weekly_forecast_bucket_service.py`
-- [ ] T036 [P] [US3] Implement storage-failure handling that blocks activation in `backend/app/services/weekly_forecast_activation_service.py`
-- [ ] T037 [US3] Implement run-failure persistence with explicit failure reasons in `backend/app/repositories/weekly_forecast_run_repository.py`
-- [ ] T038 [US3] Implement no-partial-activation invariants in `backend/app/services/weekly_forecast_activation_service.py`
-- [ ] T039 [US3] Implement route-level handling for no-current-forecast reads and invalid requests in `backend/app/api/routes/weekly_forecasts.py`
+- [X] T034 [P] [US3] Implement missing-input-data and engine-failure classification in `backend/app/services/weekly_forecast_service.py`
+- [X] T035 [P] [US3] Implement category-only fallback logic for incomplete geography in `backend/app/services/weekly_forecast_bucket_service.py`
+- [X] T036 [P] [US3] Implement storage-failure handling that blocks activation in `backend/app/services/weekly_forecast_activation_service.py`
+- [X] T037 [US3] Implement run-failure persistence with explicit failure reasons in `backend/app/repositories/weekly_forecast_run_repository.py`
+- [X] T038 [US3] Implement no-partial-activation invariants in `backend/app/services/weekly_forecast_activation_service.py`
+- [X] T039 [US3] Implement route-level handling for no-current-forecast reads and invalid requests in `backend/app/api/routes/weekly_forecasts.py`
 
 **Checkpoint**: US3 completes failure-safe continuity and category-only fallback.
 
@@ -129,10 +129,10 @@
 
 **Purpose**: Finalize cross-story traceability, documentation, and operational readiness checks.
 
-- [ ] T040 [P] Map implemented tests to `docs/UC-04-AT.md` traceability notes in `specs/004-weekly-demand-forecast/quickstart.md`
-- [ ] T041 [P] Update checklist follow-up clarifications and requirement alignment notes in `specs/004-weekly-demand-forecast/spec.md` and `specs/004-weekly-demand-forecast/checklists/api-data-security-performance.md`
-- [ ] T042 [P] Add performance assertion scenarios for SC-002, SC-004, and SC-007 in `backend/tests/integration/test_weekly_forecast_generation.py` and `backend/tests/integration/test_weekly_forecast_reuse.py`
-- [ ] T043 [P] Add cross-cutting observability verification for success/reuse/failure paths in `backend/tests/integration/test_weekly_forecast_failures.py`
+- [X] T040 [P] Map implemented tests to `docs/UC-04-AT.md` traceability notes in `specs/004-weekly-demand-forecast/quickstart.md`
+- [X] T041 [P] Update checklist follow-up clarifications and requirement alignment notes in `specs/004-weekly-demand-forecast/spec.md` and `specs/004-weekly-demand-forecast/checklists/api-data-security-performance.md`
+- [X] T042 [P] Add performance assertion scenarios for SC-002, SC-004, and SC-007 in `backend/tests/integration/test_weekly_forecast_generation.py` and `backend/tests/integration/test_weekly_forecast_reuse.py`
+- [X] T043 [P] Add cross-cutting observability verification for success/reuse/failure paths in `backend/tests/integration/test_weekly_forecast_failures.py`
 
 ---
 

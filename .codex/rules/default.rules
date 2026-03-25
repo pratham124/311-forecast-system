@@ -55,3 +55,6 @@ prefix_rule(pattern=["test", "-f", "backend/app/pipelines/forecasting/hourly_dem
 prefix_rule(pattern=["test", "-f", "backend/app/services/forecast_service.py"], decision="allow")
 prefix_rule(pattern=["python3", "-m", "py_compile", "/root/311-forecast-system/backend/app/clients/geomet_client.py", "/root/311-forecast-system/backend/app/clients/nager_date_client.py"], decision="allow")
 prefix_rule(pattern=["backend/.venv/bin/python", "-m", "pytest", "--cov=app.clients.geomet_client", "--cov-report=term-missing", "backend/tests/unit/test_forecast_branch_coverage.py", "-k", "geomet"], decision="allow")
+prefix_rule(pattern=["/bin/bash", "-lc", "find specs/004-weekly-demand-forecast/checklists -maxdepth 1 -type f 2>/dev/null"], decision="allow")
+prefix_rule(pattern=["/bin/bash", "-lc", "ls -1a .gitignore .dockerignore .eslintignore .prettierignore .npmignore .terraformignore .helmignore 2>/dev/null"], decision="allow")
+prefix_rule(pattern=["backend/.venv/bin/python", "-m", "pytest"], decision="allow")

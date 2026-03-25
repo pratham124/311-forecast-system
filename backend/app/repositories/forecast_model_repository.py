@@ -15,12 +15,14 @@ class ForecastModelRepository:
     def create_run(
         self,
         *,
+        forecast_product_name: str,
         trigger_type: str,
         source_cleaned_dataset_version_id: str | None,
         training_window_start: datetime,
         training_window_end: datetime,
     ) -> ForecastModelRun:
         run = ForecastModelRun(
+            forecast_product_name=forecast_product_name,
             trigger_type=trigger_type,
             source_cleaned_dataset_version_id=source_cleaned_dataset_version_id,
             training_window_start=training_window_start,
@@ -37,6 +39,7 @@ class ForecastModelRepository:
     def create_artifact(
         self,
         *,
+        forecast_product_name: str,
         forecast_model_run_id: str,
         source_cleaned_dataset_version_id: str,
         geography_scope: str,
@@ -47,6 +50,7 @@ class ForecastModelRepository:
         summary: str,
     ) -> ForecastModelArtifact:
         artifact = ForecastModelArtifact(
+            forecast_product_name=forecast_product_name,
             forecast_model_run_id=forecast_model_run_id,
             source_cleaned_dataset_version_id=source_cleaned_dataset_version_id,
             geography_scope=geography_scope,
@@ -74,7 +78,10 @@ class ForecastModelRepository:
         geography_scope: str,
     ) -> CurrentForecastModelMarker:
         prior_artifacts = self.session.scalars(
-            select(ForecastModelArtifact).where(ForecastModelArtifact.is_current.is_(True))
+            select(ForecastModelArtifact).where(
+                ForecastModelArtifact.is_current.is_(True),
+                ForecastModelArtifact.forecast_product_name == forecast_product_name,
+            )
         ).all()
         for artifact in prior_artifacts:
             artifact.is_current = False
@@ -153,6 +160,8 @@ class ForecastModelRepository:
             return None
         artifact = self.get_artifact(marker.forecast_model_artifact_id)
         if artifact is None:
+            return None
+        if artifact.forecast_product_name != forecast_product_name:
             return None
         return artifact if artifact.storage_status == "stored" else None
 
