@@ -25,8 +25,8 @@
 
 **Purpose**: Create the UC-05 visualization scaffolding shared by all stories across backend and frontend.
 
-- [ ] T001 Create UC-05 backend and frontend scaffolding in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/repositories/visualization_repository.py`, `backend/app/schemas/forecast_visualization.py`, `backend/app/services/forecast_visualization_service.py`, `backend/app/services/visualization_snapshot_service.py`, `frontend/src/api/forecastVisualizations.ts`, `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx`, `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`, and `frontend/src/pages/ForecastVisualizationPage.tsx`
-- [ ] T002 Configure visualization-specific backend and frontend settings for fallback age, dashboard defaults, and render-event submission in `backend/app/core/config.py` and `frontend/src/config/env.ts`
+- [X] T001 Create UC-05 backend and frontend scaffolding in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/repositories/visualization_repository.py`, `backend/app/schemas/forecast_visualization.py`, `backend/app/services/forecast_visualization_service.py`, `backend/app/services/visualization_snapshot_service.py`, `frontend/src/api/forecastVisualizations.ts`, `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx`, `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`, and `frontend/src/pages/ForecastVisualizationPage.tsx`
+- [X] T002 Configure visualization-specific backend and frontend settings for fallback age, dashboard defaults, and render-event submission in `backend/app/core/config.py` and `frontend/src/config/env.ts`
 - [ ] T003 [P] Create UC-05 test scaffolding in `backend/tests/contract/test_forecast_visualization_api.py`, `backend/tests/integration/test_forecast_visualization_success.py`, `backend/tests/integration/test_forecast_visualization_degraded.py`, `backend/tests/integration/test_forecast_visualization_fallback.py`, `backend/tests/unit/test_forecast_visualization_service.py`, `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx`, and `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationChart.test.tsx`
 
 ---
@@ -37,16 +37,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Add migration-managed UC-05 tables for `VisualizationLoadRecord` and `VisualizationSnapshot` lifecycle state in `backend/alembic/versions/005_visualization_lifecycle.py`
-- [ ] T005 [P] Define repository ORM models for `VisualizationLoadRecord` and `VisualizationSnapshot` in `backend/app/repositories/models.py`
-- [ ] T006 [P] Define typed backend schemas for current-visualization responses and render-event requests in `backend/app/schemas/forecast_visualization.py`
-- [ ] T007 [P] Implement repository methods for visualization load records, eligible fallback snapshot lookup, snapshot persistence, and terminal outcome updates in `backend/app/repositories/visualization_repository.py`
+- [X] T004 Add migration-managed UC-05 tables for `VisualizationLoadRecord` and `VisualizationSnapshot` lifecycle state in `backend/alembic/versions/005_visualization_lifecycle.py`
+- [X] T005 [P] Define repository ORM models for `VisualizationLoadRecord` and `VisualizationSnapshot` in `backend/app/repositories/models.py`
+- [X] T006 [P] Define typed backend schemas for current-visualization responses and render-event requests in `backend/app/schemas/forecast_visualization.py`
+- [X] T007 [P] Implement repository methods for visualization load records, eligible fallback snapshot lookup, snapshot persistence, and terminal outcome updates in `backend/app/repositories/visualization_repository.py`
 - [ ] T008 [P] Implement approved cleaned dataset lookup and 7-day historical demand aggregation reuse for UC-05 in `backend/app/repositories/cleaned_dataset_repository.py`
-- [ ] T009 [P] Implement current daily and weekly forecast product normalization helpers in `backend/app/services/forecast_visualization_sources.py`
-- [ ] T010 [P] Implement authenticated dashboard access dependencies and role enforcement for visualization read/write routes in `backend/app/api/dependencies/auth.py`
-- [ ] T011 [P] Implement structured logging helpers for visualization load statuses, degradations, fallback use, and render failures in `backend/app/core/logging.py`
-- [ ] T012 [P] Implement shared frontend domain types, API client typing, and status-message models in `frontend/src/types/forecastVisualization.ts`, `frontend/src/api/forecastVisualizations.ts`, and `frontend/src/utils/statusMessages.ts`
-- [ ] T013 Wire the visualization router and dashboard page registration in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/main.py`, `frontend/src/pages/ForecastVisualizationPage.tsx`, and `frontend/src/App.tsx`
+- [X] T009 [P] Implement current daily and weekly forecast product normalization helpers in `backend/app/services/forecast_visualization_sources.py`
+- [X] T010 [P] Implement authenticated dashboard access dependencies and role enforcement for visualization read/write routes in `backend/app/api/dependencies/auth.py`
+- [X] T011 [P] Implement structured logging helpers for visualization load statuses, degradations, fallback use, and render failures in `backend/app/core/logging.py`
+- [X] T012 [P] Implement shared frontend domain types, API client typing, and status-message models in `frontend/src/types/forecastVisualization.ts`, `frontend/src/api/forecastVisualizations.ts`, and `frontend/src/utils/statusMessages.ts`
+- [X] T013 Wire the visualization router and dashboard page registration in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/main.py`, `frontend/src/pages/ForecastVisualizationPage.tsx`, and `frontend/src/App.tsx`
 
 **Checkpoint**: Visualization persistence, source normalization, auth, typed contracts, and route/page wiring are in place.
 
@@ -60,20 +60,20 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Add contract coverage for `GET /api/v1/forecast-visualizations/current` success, auth failure, and query validation in `backend/tests/contract/test_forecast_visualization_api.py`
-- [ ] T015 [P] [US1] Add backend unit coverage for 7-day history window selection, daily/weekly normalization, shared-axis alignment, and `P10`/`P50`/`P90` mapping in `backend/tests/unit/test_forecast_visualization_service.py`
-- [ ] T016 [P] [US1] Add integration coverage for successful current daily and weekly visualization assembly plus load-outcome recording in `backend/tests/integration/test_forecast_visualization_success.py`
-- [ ] T017 [P] [US1] Add frontend component and page interaction coverage for combined history/forecast/band rendering and boundary visibility in `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationChart.test.tsx` and `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx`
+- [X] T014 [P] [US1] Add contract coverage for `GET /api/v1/forecast-visualizations/current` success, auth failure, and query validation in `backend/tests/contract/test_forecast_visualization_api.py`
+- [X] T015 [P] [US1] Add backend unit coverage for 7-day history window selection, daily/weekly normalization, shared-axis alignment, and `P10`/`P50`/`P90` mapping in `backend/tests/unit/test_forecast_visualization_service.py`
+- [X] T016 [P] [US1] Add integration coverage for successful current daily and weekly visualization assembly plus load-outcome recording in `backend/tests/integration/test_forecast_visualization_success.py`
+- [X] T017 [P] [US1] Add frontend component and page interaction coverage for combined history/forecast/band rendering and boundary visibility in `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationChart.test.tsx` and `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Implement historical overlay assembly from the approved cleaned dataset with a strict 7-day context window in `backend/app/services/historical_demand_service.py`
-- [ ] T019 [P] [US1] Implement normalized daily and weekly forecast-series extraction with canonical `P10`/`P50`/`P90` output labels in `backend/app/services/forecast_visualization_sources.py`
-- [ ] T020 [P] [US1] Implement visualization response assembly for shared-axis chart data, last-updated metadata, category filter state, and success outcome creation in `backend/app/services/forecast_visualization_service.py`
-- [ ] T021 [P] [US1] Implement reusable chart primitives and typed series adapters for history, forecast, uncertainty, and forecast-boundary markers in `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx` and `frontend/src/features/forecast-visualization/utils/chartSeries.ts`
-- [ ] T022 [US1] Implement the current-visualization endpoint with thin request handling and typed responses in `backend/app/api/routes/forecast_visualizations.py`
-- [ ] T023 [US1] Implement the dashboard data hook and page composition for product selection, category filtering, alerts, pipeline status, and last-updated display in `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts` and `frontend/src/pages/ForecastVisualizationPage.tsx`
-- [ ] T024 [US1] Implement successful render-event submission and terminal outcome updates in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/services/forecast_visualization_service.py`, and `frontend/src/api/forecastVisualizations.ts`
+- [X] T018 [P] [US1] Implement historical overlay assembly from the approved cleaned dataset with a strict 7-day context window in `backend/app/services/historical_demand_service.py`
+- [X] T019 [P] [US1] Implement normalized daily and weekly forecast-series extraction with canonical `P10`/`P50`/`P90` output labels in `backend/app/services/forecast_visualization_sources.py`
+- [X] T020 [P] [US1] Implement visualization response assembly for shared-axis chart data, last-updated metadata, category filter state, and success outcome creation in `backend/app/services/forecast_visualization_service.py`
+- [X] T021 [P] [US1] Implement reusable chart primitives and typed series adapters for history, forecast, uncertainty, and forecast-boundary markers in `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx` and `frontend/src/features/forecast-visualization/utils/chartSeries.ts`
+- [X] T022 [US1] Implement the current-visualization endpoint with thin request handling and typed responses in `backend/app/api/routes/forecast_visualizations.py`
+- [X] T023 [US1] Implement the dashboard data hook and page composition for product selection, category filtering, alerts, pipeline status, and last-updated display in `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts` and `frontend/src/pages/ForecastVisualizationPage.tsx`
+- [X] T024 [US1] Implement successful render-event submission and terminal outcome updates in `backend/app/api/routes/forecast_visualizations.py`, `backend/app/services/forecast_visualization_service.py`, and `frontend/src/api/forecastVisualizations.ts`
 
 **Checkpoint**: User Story 1 delivers a complete current-visualization experience for daily and weekly products with successful-outcome recording.
 
@@ -94,11 +94,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T029 [P] [US2] Implement degradation detection for missing historical context and missing uncertainty metrics in `backend/app/services/forecast_visualization_service.py`
+- [X] T029 [P] [US2] Implement degradation detection for missing historical context and missing uncertainty metrics in `backend/app/services/forecast_visualization_service.py`
 - [ ] T030 [P] [US2] Implement degraded-state persistence, degradation-type recording, and status-summary generation in `backend/app/repositories/visualization_repository.py` and `backend/app/services/forecast_visualization_status_service.py`
-- [ ] T031 [P] [US2] Implement frontend status panels and empty-state treatments that distinguish omitted history from omitted uncertainty without implying zero values in `frontend/src/features/forecast-visualization/components/VisualizationStatusPanel.tsx` and `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx`
-- [ ] T032 [US2] Implement route and schema support for explicit degraded responses including `degradationType` and stable alerts/pipeline-status arrays in `backend/app/api/routes/forecast_visualizations.py` and `backend/app/schemas/forecast_visualization.py`
-- [ ] T033 [US2] Implement dashboard copy and filter-preserving degraded rendering behavior in `frontend/src/pages/ForecastVisualizationPage.tsx` and `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`
+- [X] T031 [P] [US2] Implement frontend status panels and empty-state treatments that distinguish omitted history from omitted uncertainty without implying zero values in `frontend/src/features/forecast-visualization/components/VisualizationStatusPanel.tsx` and `frontend/src/features/forecast-visualization/components/ForecastVisualizationChart.tsx`
+- [X] T032 [US2] Implement route and schema support for explicit degraded responses including `degradationType` and stable alerts/pipeline-status arrays in `backend/app/api/routes/forecast_visualizations.py` and `backend/app/schemas/forecast_visualization.py`
+- [X] T033 [US2] Implement dashboard copy and filter-preserving degraded rendering behavior in `frontend/src/pages/ForecastVisualizationPage.tsx` and `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`
 
 **Checkpoint**: User Story 2 adds graceful degraded behavior without changing User Story 1 success-path semantics.
 
@@ -114,15 +114,15 @@
 
 - [ ] T034 [P] [US3] Add contract coverage for fallback-shown, unavailable, render-event acceptance, missing-load, and invalid render-event responses in `backend/tests/contract/test_forecast_visualization_api.py`
 - [ ] T035 [P] [US3] Add backend unit coverage for 24-hour fallback eligibility, expired-snapshot rejection, and render-failure terminal transitions in `backend/tests/unit/test_forecast_visualization_service.py`
-- [ ] T036 [P] [US3] Add integration coverage for missing-current-forecast fallback, expired-fallback unavailable state, and persisted render-failure outcomes in `backend/tests/integration/test_forecast_visualization_fallback.py`
+- [X] T036 [P] [US3] Add integration coverage for missing-current-forecast fallback, expired-fallback unavailable state, and persisted render-failure outcomes in `backend/tests/integration/test_forecast_visualization_fallback.py`
 - [ ] T037 [P] [US3] Add frontend interaction coverage for fallback badges, unavailable states, and render-failure reporting in `frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T038 [P] [US3] Implement fallback snapshot creation, expiration enforcement, and eligible snapshot retrieval in `backend/app/services/visualization_snapshot_service.py` and `backend/app/repositories/visualization_repository.py`
-- [ ] T039 [P] [US3] Implement unavailable-state and fallback-shown selection logic for missing or invalid current forecast inputs in `backend/app/services/forecast_visualization_service.py`
-- [ ] T040 [P] [US3] Implement frontend fallback, unavailable, and explicit render-error views plus client render-failure reporting in `frontend/src/pages/ForecastVisualizationPage.tsx`, `frontend/src/features/forecast-visualization/components/VisualizationFallbackBanner.tsx`, and `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`
-- [ ] T041 [US3] Implement render-event endpoint handling, load-not-found validation, and terminal render-failure updates in `backend/app/api/routes/forecast_visualizations.py` and `backend/app/services/forecast_visualization_service.py`
+- [X] T038 [P] [US3] Implement fallback snapshot creation, expiration enforcement, and eligible snapshot retrieval in `backend/app/services/visualization_snapshot_service.py` and `backend/app/repositories/visualization_repository.py`
+- [X] T039 [P] [US3] Implement unavailable-state and fallback-shown selection logic for missing or invalid current forecast inputs in `backend/app/services/forecast_visualization_service.py`
+- [X] T040 [P] [US3] Implement frontend fallback, unavailable, and explicit render-error views plus client render-failure reporting in `frontend/src/pages/ForecastVisualizationPage.tsx`, `frontend/src/features/forecast-visualization/components/VisualizationFallbackBanner.tsx`, and `frontend/src/features/forecast-visualization/hooks/useForecastVisualization.ts`
+- [X] T041 [US3] Implement render-event endpoint handling, load-not-found validation, and terminal render-failure updates in `backend/app/api/routes/forecast_visualizations.py` and `backend/app/services/forecast_visualization_service.py`
 
 **Checkpoint**: User Story 3 completes fallback resilience, unavailable/error states, and render-failure observability.
 

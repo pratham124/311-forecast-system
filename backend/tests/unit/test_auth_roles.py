@@ -32,3 +32,10 @@ def test_city_planner_can_access_read_surfaces() -> None:
     claims = get_current_claims(Creds(build_token(["CityPlanner"])))
     resolved = require_planner_or_manager(claims)
     assert "CityPlanner" in resolved["roles"]
+
+
+@pytest.mark.unit
+def test_expired_token_is_rejected() -> None:
+    with pytest.raises(HTTPException) as exc:
+        get_current_claims(Creds(build_token(["OperationalManager"], expires_in_seconds=-60)))
+    assert exc.value.status_code == 401

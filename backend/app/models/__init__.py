@@ -30,9 +30,12 @@ from app.models.validation_models import (
     ValidationResultRecord,
     ValidationRun,
 )
+from app.models.visualization_models import VisualizationLoadRecord, VisualizationSnapshot
+from app.models.auth_models import RefreshSession, SignupAllowlistEntry, UserAccount
 
 __all__ = [
     "CandidateDataset",
+    "SignupAllowlistEntry",
     "CleanedCurrentRecord",
     "CurrentDatasetMarker",
     "CurrentForecastMarker",
@@ -47,12 +50,16 @@ __all__ = [
     "ForecastModelArtifact",
     "ForecastModelRun",
     "ForecastRun",
+    "RefreshSession",
     "ForecastVersion",
     "IngestionRun",
     "ReviewNeededRecord",
     "SuccessfulPullCursor",
+    "UserAccount",
     "ValidationResultRecord",
     "ValidationRun",
+    "VisualizationLoadRecord",
+    "VisualizationSnapshot",
     "WeeklyForecastBucket",
     "WeeklyForecastRun",
     "WeeklyForecastVersion",

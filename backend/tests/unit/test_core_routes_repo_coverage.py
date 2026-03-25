@@ -85,6 +85,12 @@ def test_config_and_db_modules_cover_remaining_paths(monkeypatch: pytest.MonkeyP
     closed: list[bool] = []
 
     class FakeSession:
+        def commit(self) -> None:
+            return None
+
+        def rollback(self) -> None:
+            return None
+
         def close(self) -> None:
             closed.append(True)
 
@@ -162,6 +168,20 @@ def test_reconcile_legacy_migration_state_skips_when_alembic_version_exists(monk
 
     db_module._engine = None
     db_module._session_factory = None
+
+
+@pytest.mark.unit
+def test_expand_local_frontend_origins_covers_127_alias() -> None:
+    assert main_module._expand_local_frontend_origins('http://127.0.0.1:5173') == [
+        'http://127.0.0.1:5173',
+        'http://localhost:5173',
+    ]
+
+@pytest.mark.unit
+def test_expand_local_frontend_origins_keeps_non_local_origin() -> None:
+    assert main_module._expand_local_frontend_origins('https://forecast.edmonton.ca') == [
+        'https://forecast.edmonton.ca',
+    ]
 
 
 @pytest.mark.unit
