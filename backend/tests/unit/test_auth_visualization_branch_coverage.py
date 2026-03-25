@@ -1034,6 +1034,17 @@ def test_visualization_source_service_covers_remaining_aggregate_and_uncertainty
     assert daily_aggregated[0]['p10'] is None
     assert daily_aggregated[0]['p50'] is None
     assert daily_aggregated[0]['p90'] is None
+    assert daily_aggregated[0]['point_forecast'] == 3.0
+
+    daily_aggregated_after_uncertainty_drop = _aggregate_daily([
+        SimpleNamespace(bucket_start=datetime(2026, 3, 25, tzinfo=timezone.utc), point_forecast=2.0, quantile_p10=None, quantile_p50=2.0, quantile_p90=3.0),
+        SimpleNamespace(bucket_start=datetime(2026, 3, 25, tzinfo=timezone.utc), point_forecast=4.0, quantile_p10=1.0, quantile_p50=2.0, quantile_p90=3.0),
+    ])
+    assert len(daily_aggregated_after_uncertainty_drop) == 1
+    assert daily_aggregated_after_uncertainty_drop[0]['point_forecast'] == 6.0
+    assert daily_aggregated_after_uncertainty_drop[0]['p10'] is None
+    assert daily_aggregated_after_uncertainty_drop[0]['p50'] is None
+    assert daily_aggregated_after_uncertainty_drop[0]['p90'] is None
 
     weekly_aggregated = _aggregate_weekly([
         SimpleNamespace(forecast_date_local='bad-date', point_forecast=2.0, quantile_p10=1.0, quantile_p50=2.0, quantile_p90=3.0),
@@ -1043,6 +1054,17 @@ def test_visualization_source_service_covers_remaining_aggregate_and_uncertainty
     assert weekly_aggregated[0]['p10'] is None
     assert weekly_aggregated[0]['p50'] is None
     assert weekly_aggregated[0]['p90'] is None
+    assert weekly_aggregated[0]['point_forecast'] == 5.0
+
+    weekly_aggregated_after_uncertainty_drop = _aggregate_weekly([
+        SimpleNamespace(forecast_date_local=date(2026, 3, 25), point_forecast=7.0, quantile_p10=None, quantile_p50=2.0, quantile_p90=3.0),
+        SimpleNamespace(forecast_date_local=date(2026, 3, 25), point_forecast=8.0, quantile_p10=1.0, quantile_p50=2.0, quantile_p90=3.0),
+    ])
+    assert len(weekly_aggregated_after_uncertainty_drop) == 1
+    assert weekly_aggregated_after_uncertainty_drop[0]['point_forecast'] == 15.0
+    assert weekly_aggregated_after_uncertainty_drop[0]['p10'] is None
+    assert weekly_aggregated_after_uncertainty_drop[0]['p50'] is None
+    assert weekly_aggregated_after_uncertainty_drop[0]['p90'] is None
 
     assert _coerce_float(object()) is None
     assert _coerce_timestamp('bad-timestamp') is None
