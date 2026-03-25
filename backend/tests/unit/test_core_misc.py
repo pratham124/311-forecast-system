@@ -31,6 +31,24 @@ def test_decode_jwt_payload_rejects_bad_structure() -> None:
 
 
 @pytest.mark.unit
+def test_decode_jwt_payload_rejects_invalid_signature() -> None:
+    from tests.conftest import build_token
+
+    with pytest.raises(HTTPException) as exc:
+        _decode_jwt_payload(build_token(["OperationalManager"], secret="wrong-secret-key-311-forecast-system-32b"))
+    assert exc.value.status_code == 401
+
+
+@pytest.mark.unit
+def test_decode_jwt_payload_rejects_wrong_audience() -> None:
+    from tests.conftest import build_token
+
+    with pytest.raises(HTTPException) as exc:
+        _decode_jwt_payload(build_token(["OperationalManager"], audience="wrong-audience"))
+    assert exc.value.status_code == 401
+
+
+@pytest.mark.unit
 def test_get_current_claims_requires_credentials() -> None:
     with pytest.raises(HTTPException) as exc:
         get_current_claims(None)
@@ -82,13 +100,36 @@ def test_get_engine_non_sqlite_branch(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.unit
-def test_get_db_session_closes_session() -> None:
+def test_get_db_session_commits_on_success_and_rolls_back_on_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    events: list[str] = []
+
+    class FakeSession:
+        is_active = True
+
+        def commit(self) -> None:
+            events.append('commit')
+
+        def rollback(self) -> None:
+            events.append('rollback')
+
+        def close(self) -> None:
+            events.append('close')
+
+    monkeypatch.setattr('app.core.db.get_session_factory', lambda: lambda: FakeSession())
+
     generator = get_db_session()
     session = next(generator)
     assert session.is_active is True
     with pytest.raises(StopIteration):
-        generator.close()
         next(generator)
+    assert events == ['commit', 'close']
+
+    events.clear()
+    generator = get_db_session()
+    next(generator)
+    with pytest.raises(RuntimeError):
+        generator.throw(RuntimeError('boom'))
+    assert events == ['rollback', 'close']
 
 
 @pytest.mark.unit

@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --page-bg: #f3f4f5;
+  --panel-strong: #ffffff;
+  --panel-soft: rgba(255, 255, 255, 0.9);
+  --line: #b6d0e2;
+  --history: #193a5a;
+  --forecast: #0081bc;
+  --band: rgba(244, 208, 67, 0.28);
+  --accent: #005087;
+  --accent-strong: #193a5a;
+  --highlight: #f4d043;
+  --warm: #e1853e;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply m-0 min-h-screen font-display text-ink antialiased;
+    background:
+      radial-gradient(circle at top left, rgba(0, 129, 188, 0.18), transparent 34%),
+      radial-gradient(circle at top right, rgba(244, 208, 67, 0.2), transparent 30%),
+      linear-gradient(180deg, #f7fafc 0%, var(--page-bg) 100%);
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply shadow-panel backdrop-blur-xl;
+    border: 1px solid rgba(25, 58, 90, 0.12);
+    background: var(--panel-soft);
+  }
+
+  .panel-input {
+    @apply rounded-2xl px-4 py-3 text-sm text-ink outline-none transition;
+    border: 1px solid rgba(25, 58, 90, 0.14);
+    background: var(--panel-strong);
+  }
+
+  .panel-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(0, 80, 135, 0.12);
+  }
+}

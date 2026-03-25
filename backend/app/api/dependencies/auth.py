@@ -2,3 +2,6 @@ from app.core.auth import require_operational_manager, require_planner_or_manage
 
 require_forecast_trigger = require_operational_manager
 require_forecast_reader = require_planner_or_manager
+
+require_visualization_reader = require_planner_or_manager
+require_visualization_writer = require_operational_manager

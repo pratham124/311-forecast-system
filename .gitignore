@@ -13,6 +13,7 @@ sessions/
 __pycache__/
 *.pyc
 .venv/
+node_modules/
 venv/
 dist/
 *.egg-info/

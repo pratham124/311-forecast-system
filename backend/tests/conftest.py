@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import base64
-import json
+from datetime import datetime, timedelta, timezone
 import os
 import tempfile
+
+import jwt
 from pathlib import Path
 from typing import Iterator
 from uuid import uuid4
@@ -46,10 +47,27 @@ class FakeTransport:
         return self.records
 
 
-def build_token(roles: list[str]) -> str:
-    header = base64.urlsafe_b64encode(json.dumps({"alg": "none", "typ": "JWT"}).encode()).decode().rstrip("=")
-    payload = base64.urlsafe_b64encode(json.dumps({"roles": roles}).encode()).decode().rstrip("=")
-    return f"{header}.{payload}.signature"
+def build_token(
+    roles: list[str],
+    *,
+    secret: str | None = None,
+    issuer: str | None = None,
+    audience: str | None = None,
+    expires_in_seconds: int = 3600,
+) -> str:
+    settings = config_module.get_settings()
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": "test-user",
+        "email": "test-user@example.com",
+        "roles": roles,
+        "iss": issuer or settings.jwt_issuer,
+        "aud": audience or settings.jwt_audience,
+        "iat": int(now.timestamp()),
+        "exp": int((now + timedelta(seconds=expires_in_seconds)).timestamp()),
+        "token_type": "access",
+    }
+    return jwt.encode(payload, secret or settings.jwt_secret, algorithm="HS256")
 
 
 @pytest.fixture(autouse=True)

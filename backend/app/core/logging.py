@@ -44,3 +44,7 @@ def summarize_status(message: str, **fields: Any) -> dict[str, Any]:
 def configure_logging() -> logging.Logger:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
     return logging.getLogger("forecast_system")
+
+
+def summarize_visualization_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
