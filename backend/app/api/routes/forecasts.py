@@ -71,7 +71,7 @@ def trigger_daily_forecast(
 
 @router.get("/forecast-runs/{forecast_run_id}", response_model=ForecastRunStatusRead)
 def get_forecast_run(
-    forecast_run_id: str = Path(min_length=1, alias="forecastRunId"),
+    forecast_run_id: str = Path(min_length=1),
     session: Session = Depends(get_db_session),
     geomet_client: GeoMetClient = Depends(get_geomet_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),

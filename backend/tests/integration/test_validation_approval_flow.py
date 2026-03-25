@@ -36,9 +36,10 @@ def test_clean_validation_flow_creates_cleaned_dataset_and_updates_marker(seed_c
     current_records = CleanedDatasetRepository(session).list_current_cleaned_records("edmonton_311")
     validation_run = session.scalars(select(ValidationRun).where(ValidationRun.ingestion_run_id == result.run_id)).one()
     groups = session.scalars(select(DuplicateGroup)).all()
-    model_run = session.scalars(select(ForecastModelRun).order_by(ForecastModelRun.started_at.desc())).first()
-    model_artifact = session.scalars(select(ForecastModelArtifact).order_by(ForecastModelArtifact.trained_at.desc())).first()
-    model_marker = session.get(CurrentForecastModelMarker, "daily_1_day_demand")
+    model_runs = session.scalars(select(ForecastModelRun).order_by(ForecastModelRun.started_at.desc())).all()
+    model_artifacts = session.scalars(select(ForecastModelArtifact).order_by(ForecastModelArtifact.trained_at.desc())).all()
+    hourly_model_marker = session.get(CurrentForecastModelMarker, "daily_1_day_demand")
+    weekly_model_marker = session.get(CurrentForecastModelMarker, "weekly_7_day_demand")
 
     assert result.status == "success"
     assert result.result_type == "new_data"
@@ -47,9 +48,16 @@ def test_clean_validation_flow_creates_cleaned_dataset_and_updates_marker(seed_c
     assert len(current_records) == 2
     assert validation_run.status == "approved"
     assert len(groups) == 1
-    assert model_run is not None
-    assert model_run.trigger_type == "approval"
-    assert model_run.status == "success"
-    assert model_artifact is not None
-    assert model_marker is not None
-    assert model_marker.forecast_model_artifact_id == model_artifact.forecast_model_artifact_id
+    assert len(model_runs) >= 2
+    hourly_model_run = next(run for run in model_runs if run.forecast_product_name == "daily_1_day_demand")
+    weekly_model_run = next(run for run in model_runs if run.forecast_product_name == "weekly_7_day_demand")
+    assert hourly_model_run.trigger_type == "approval"
+    assert weekly_model_run.trigger_type == "approval"
+    assert hourly_model_run.status == "success"
+    assert weekly_model_run.status == "success"
+    hourly_artifact = next(artifact for artifact in model_artifacts if artifact.forecast_product_name == "daily_1_day_demand")
+    weekly_artifact = next(artifact for artifact in model_artifacts if artifact.forecast_product_name == "weekly_7_day_demand")
+    assert hourly_model_marker is not None
+    assert weekly_model_marker is not None
+    assert hourly_model_marker.forecast_model_artifact_id == hourly_artifact.forecast_model_artifact_id
+    assert weekly_model_marker.forecast_model_artifact_id == weekly_artifact.forecast_model_artifact_id

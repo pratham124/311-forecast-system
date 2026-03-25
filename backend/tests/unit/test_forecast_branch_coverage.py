@@ -1669,12 +1669,14 @@ def test_forecast_model_repository_activation_and_failure_paths(session) -> None
     now = datetime(2026, 3, 22, tzinfo=timezone.utc)
 
     run_1 = repository.create_run(
+        forecast_product_name="daily_1_day_demand",
         trigger_type="scheduled",
         source_cleaned_dataset_version_id="dataset-1",
         training_window_start=now - timedelta(days=7),
         training_window_end=now,
     )
     artifact_1 = repository.create_artifact(
+        forecast_product_name="daily_1_day_demand",
         forecast_model_run_id=run_1.forecast_model_run_id,
         source_cleaned_dataset_version_id="dataset-1",
         geography_scope="category_only",
@@ -1695,12 +1697,14 @@ def test_forecast_model_repository_activation_and_failure_paths(session) -> None
     )
 
     run_2 = repository.create_run(
+        forecast_product_name="daily_1_day_demand",
         trigger_type="scheduled",
         source_cleaned_dataset_version_id="dataset-2",
         training_window_start=now - timedelta(days=14),
         training_window_end=now,
     )
     artifact_2 = repository.create_artifact(
+        forecast_product_name="daily_1_day_demand",
         forecast_model_run_id=run_2.forecast_model_run_id,
         source_cleaned_dataset_version_id="dataset-2",
         geography_scope="category_and_geography",
@@ -1753,6 +1757,78 @@ def test_forecast_model_repository_activation_and_failure_paths(session) -> None
 
     assert repository.find_current_model("daily_1_day_demand") is None
     assert repository.find_current_model("missing-artifact-product") is None
+
+
+@pytest.mark.unit
+def test_forecast_model_repository_scopes_current_artifacts_by_product(session) -> None:
+    from app.repositories.forecast_model_repository import ForecastModelRepository
+
+    repository = ForecastModelRepository(session)
+    now = datetime(2026, 3, 22, tzinfo=timezone.utc)
+
+    daily_run = repository.create_run(
+        forecast_product_name="daily_1_day_demand",
+        trigger_type="scheduled",
+        source_cleaned_dataset_version_id="dataset-daily",
+        training_window_start=now - timedelta(days=7),
+        training_window_end=now,
+    )
+    daily_artifact = repository.create_artifact(
+        forecast_product_name="daily_1_day_demand",
+        forecast_model_run_id=daily_run.forecast_model_run_id,
+        source_cleaned_dataset_version_id="dataset-daily",
+        geography_scope="category_only",
+        model_family="lightgbm_global",
+        baseline_method="historical_hourly_mean",
+        feature_schema_version="v1",
+        artifact_path="/tmp/daily-model.pkl",
+        summary="daily artifact",
+    )
+    repository.activate_artifact(
+        forecast_product_name="daily_1_day_demand",
+        forecast_model_artifact_id=daily_artifact.forecast_model_artifact_id,
+        source_cleaned_dataset_version_id="dataset-daily",
+        training_window_start=now - timedelta(days=7),
+        training_window_end=now,
+        updated_by_run_id=daily_run.forecast_model_run_id,
+        geography_scope="category_only",
+    )
+
+    weekly_run = repository.create_run(
+        forecast_product_name="weekly_7_day_demand",
+        trigger_type="scheduled",
+        source_cleaned_dataset_version_id="dataset-weekly",
+        training_window_start=now - timedelta(days=28),
+        training_window_end=now,
+    )
+    weekly_artifact = repository.create_artifact(
+        forecast_product_name="weekly_7_day_demand",
+        forecast_model_run_id=weekly_run.forecast_model_run_id,
+        source_cleaned_dataset_version_id="dataset-weekly",
+        geography_scope="category_only",
+        model_family="lightgbm_global",
+        baseline_method="historical_daily_mean",
+        feature_schema_version="v1-weekly",
+        artifact_path="/tmp/weekly-model.pkl",
+        summary="weekly artifact",
+    )
+    repository.activate_artifact(
+        forecast_product_name="weekly_7_day_demand",
+        forecast_model_artifact_id=weekly_artifact.forecast_model_artifact_id,
+        source_cleaned_dataset_version_id="dataset-weekly",
+        training_window_start=now - timedelta(days=28),
+        training_window_end=now,
+        updated_by_run_id=weekly_run.forecast_model_run_id,
+        geography_scope="category_only",
+    )
+    session.commit()
+
+    refreshed_daily = repository.get_artifact(daily_artifact.forecast_model_artifact_id)
+    refreshed_weekly = repository.get_artifact(weekly_artifact.forecast_model_artifact_id)
+    assert refreshed_daily is not None and refreshed_daily.is_current is True
+    assert refreshed_weekly is not None and refreshed_weekly.is_current is True
+    assert repository.find_current_model("daily_1_day_demand").forecast_model_artifact_id == daily_artifact.forecast_model_artifact_id
+    assert repository.find_current_model("weekly_7_day_demand").forecast_model_artifact_id == weekly_artifact.forecast_model_artifact_id
 
 
 @pytest.mark.unit
@@ -2204,3 +2280,78 @@ def test_geomet_client_explicit_historical_forecast_and_default_paths() -> None:
     default_client = object.__new__(GeoMetClient)
     default_client.transport = None
     assert len(default_client.fetch_forecast_hourly_conditions(start, end)) == 2
+
+
+@pytest.mark.unit
+def test_forecast_model_repository_helper_branches(session, tmp_path) -> None:
+    from app.repositories.forecast_model_repository import ForecastModelRepository
+
+    repository = ForecastModelRepository(session)
+
+    run = repository.create_run(
+        forecast_product_name="daily_1_day_demand",
+        trigger_type="scheduled",
+        source_cleaned_dataset_version_id="dataset-1",
+        training_window_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        training_window_end=datetime(2026, 3, 23, tzinfo=timezone.utc),
+    )
+    artifact = repository.create_artifact(
+        forecast_product_name="daily_1_day_demand",
+        forecast_model_run_id=run.forecast_model_run_id,
+        source_cleaned_dataset_version_id="dataset-1",
+        geography_scope="category_only",
+        model_family="lightgbm_global",
+        baseline_method="historical_mean",
+        feature_schema_version="hourly-v1",
+        artifact_path=str(tmp_path / "hourly.pkl"),
+        summary="stored artifact",
+    )
+
+    assert repository.get_current_marker("daily_1_day_demand") is None
+    assert repository.find_current_model("daily_1_day_demand") is None
+
+    repository.activate_artifact(
+        forecast_product_name="daily_1_day_demand",
+        forecast_model_artifact_id=artifact.forecast_model_artifact_id,
+        source_cleaned_dataset_version_id="dataset-1",
+        training_window_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        training_window_end=datetime(2026, 3, 23, tzinfo=timezone.utc),
+        updated_by_run_id=run.forecast_model_run_id,
+        geography_scope="category_only",
+    )
+    session.commit()
+
+    current = repository.find_current_model("daily_1_day_demand")
+    assert current is not None
+    assert current.forecast_model_artifact_id == artifact.forecast_model_artifact_id
+
+    artifact.storage_status = "pending"
+    session.commit()
+    assert repository.find_current_model("daily_1_day_demand") is None
+
+    with pytest.raises(ValueError, match="Forecast model run not found"):
+        repository.finalize_failed(
+            "missing-run",
+            result_type="engine_failure",
+            failure_reason="boom",
+            summary="failed",
+        )
+
+    with pytest.raises(ValueError, match="Forecast model run not found"):
+        repository.finalize_trained(
+            "missing-run",
+            forecast_model_artifact_id=artifact.forecast_model_artifact_id,
+            geography_scope="category_only",
+            summary="trained",
+        )
+
+    with pytest.raises(ValueError, match="Forecast model artifact not found"):
+        repository.activate_artifact(
+            forecast_product_name="daily_1_day_demand",
+            forecast_model_artifact_id="missing-artifact",
+            source_cleaned_dataset_version_id="dataset-1",
+            training_window_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+            training_window_end=datetime(2026, 3, 23, tzinfo=timezone.utc),
+            updated_by_run_id=run.forecast_model_run_id,
+            geography_scope="category_only",
+        )

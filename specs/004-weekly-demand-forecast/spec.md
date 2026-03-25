@@ -127,3 +127,11 @@ As an Operational Manager, I can rely on the last valid weekly forecast when for
 - The operational calendar week starts Monday at 00:00 and ends Sunday at 23:59 in local operational timezone.
 - Validated operational data from earlier pipeline stages is available before forecast generation starts.
 - Forecast accuracy thresholds are out of scope for this use case and will be defined in a separate model-governance specification.
+
+
+## Post-Implementation Alignment Notes
+
+- Weekly trigger, run-status, and current-weekly retrieval are implemented as backend-only FastAPI routes under `/api/v1`.
+- Weekly week boundaries are enforced as Monday 00:00 through Sunday 23:59:59 in the configured operational timezone.
+- Same-week reuse records `served_current`, and concurrent same-week trigger attempts deduplicate to the active run.
+- Category-only output remains valid when geography is incomplete; missing approved input, engine failure, and storage failure do not replace the active weekly forecast.
