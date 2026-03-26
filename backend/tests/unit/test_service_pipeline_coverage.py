@@ -278,6 +278,7 @@ def test_ingestion_query_service_covers_success_and_404_paths():
     service = IngestionQueryService(
         run_repository=RepoStub(get_run=lambda run_id: run),
         dataset_repository=RepoStub(get_current=lambda source_name: marker),
+        cleaned_dataset_repository=RepoStub(get_latest_current_requested_at=lambda source_name: now),
         failure_repository=RepoStub(list=lambda run_id=None: [notification]),
     )
     assert service.get_run_status("run-1").run_id == "run-1"
@@ -287,6 +288,7 @@ def test_ingestion_query_service_covers_success_and_404_paths():
     missing_run = IngestionQueryService(
         run_repository=RepoStub(get_run=lambda run_id: None),
         dataset_repository=RepoStub(get_current=lambda source_name: marker),
+        cleaned_dataset_repository=RepoStub(get_latest_current_requested_at=lambda source_name: now),
         failure_repository=RepoStub(list=lambda run_id=None: []),
     )
     with pytest.raises(HTTPException):
@@ -295,6 +297,7 @@ def test_ingestion_query_service_covers_success_and_404_paths():
     missing_dataset = IngestionQueryService(
         run_repository=RepoStub(get_run=lambda run_id: run),
         dataset_repository=RepoStub(get_current=lambda source_name: None),
+        cleaned_dataset_repository=RepoStub(get_latest_current_requested_at=lambda source_name: now),
         failure_repository=RepoStub(list=lambda run_id=None: []),
     )
     with pytest.raises(HTTPException):
@@ -373,11 +376,15 @@ def test_uc02_pipelines_call_repositories_with_expected_payloads():
     training_events = []
 
     training_service = RepoStub(
-        start_run=lambda **kwargs: training_events.append(("start", kwargs)) or SimpleNamespace(forecast_model_run_id="model-run-1"),
-        execute_run=lambda run_id: training_events.append(("execute", run_id)),
+        start_run=lambda **kwargs: training_events.append(("training_start", kwargs)) or SimpleNamespace(forecast_model_run_id="model-run-1"),
+        execute_run=lambda run_id: training_events.append(("training_execute", run_id)),
+    )
+    forecast_service = RepoStub(
+        start_run=lambda **kwargs: training_events.append(("forecast_start", kwargs)) or SimpleNamespace(forecast_run_id="forecast-run-1"),
+        execute_run=lambda run_id: training_events.append(("forecast_execute", run_id)),
     )
 
-    pipeline = ApprovedPipeline(cleaned_dataset_service, validation_repository, training_service)
+    pipeline = ApprovedPipeline(cleaned_dataset_service, validation_repository, training_service, None, forecast_service)
     approved_id = pipeline.approve(
         source_name="edmonton",
         ingestion_run_id="run-1",
@@ -389,8 +396,10 @@ def test_uc02_pipelines_call_repositories_with_expected_payloads():
     assert approved_id == "approved-1"
     assert validation_calls[0][1]["status"] == "approved"
     assert training_events == [
-        ("start", {"trigger_type": "approval"}),
-        ("execute", "model-run-1"),
+        ("training_start", {"trigger_type": "approval"}),
+        ("training_execute", "model-run-1"),
+        ("forecast_start", {"trigger_type": "approval"}),
+        ("forecast_execute", "forecast-run-1"),
     ]
 
     pipeline_without_training = ApprovedPipeline(cleaned_dataset_service, validation_repository, None)

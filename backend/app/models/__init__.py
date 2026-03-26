@@ -32,12 +32,20 @@ from app.models.validation_models import (
 )
 from app.models.visualization_models import VisualizationLoadRecord, VisualizationSnapshot
 from app.models.auth_models import RefreshSession, SignupAllowlistEntry, UserAccount
+from app.models.evaluation_models import (
+    CurrentEvaluationMarker,
+    EvaluationResult,
+    EvaluationRun,
+    EvaluationSegment,
+    MetricComparisonValue,
+)
 
 __all__ = [
     "CandidateDataset",
     "SignupAllowlistEntry",
     "CleanedCurrentRecord",
     "CurrentDatasetMarker",
+    "CurrentEvaluationMarker",
     "CurrentForecastMarker",
     "CurrentForecastModelMarker",
     "CurrentWeeklyForecastMarker",
@@ -45,6 +53,9 @@ __all__ = [
     "DatasetVersion",
     "DuplicateAnalysisResult",
     "DuplicateGroup",
+    "EvaluationResult",
+    "EvaluationRun",
+    "EvaluationSegment",
     "FailureNotificationRecord",
     "ForecastBucket",
     "ForecastModelArtifact",
@@ -53,6 +64,7 @@ __all__ = [
     "RefreshSession",
     "ForecastVersion",
     "IngestionRun",
+    "MetricComparisonValue",
     "ReviewNeededRecord",
     "SuccessfulPullCursor",
     "UserAccount",

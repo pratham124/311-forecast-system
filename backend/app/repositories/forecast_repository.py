@@ -135,6 +135,24 @@ class ForecastRepository:
         )
         return list(self.session.scalars(statement))
 
+    def find_latest_stored_version(self) -> ForecastVersion | None:
+        statement = (
+            select(ForecastVersion)
+            .where(ForecastVersion.storage_status == 'stored')
+            .order_by(ForecastVersion.horizon_end.desc(), ForecastVersion.stored_at.desc().nullslast(), ForecastVersion.forecast_version_id.desc())
+            .limit(1)
+        )
+        return self.session.scalar(statement)
+
+    def find_latest_stored_version_ending_by(self, cutoff: datetime) -> ForecastVersion | None:
+        statement = (
+            select(ForecastVersion)
+            .where(ForecastVersion.storage_status == 'stored', ForecastVersion.horizon_end <= cutoff)
+            .order_by(ForecastVersion.horizon_end.desc(), ForecastVersion.stored_at.desc().nullslast(), ForecastVersion.forecast_version_id.desc())
+            .limit(1)
+        )
+        return self.session.scalar(statement)
+
     def find_current_for_horizon(
         self,
         *,

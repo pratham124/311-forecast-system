@@ -6,11 +6,12 @@ type AuthMode = 'login' | 'register';
 type EntryPageProps = {
   onAuthenticate: (mode: AuthMode, email: string, password: string) => Promise<void>;
   onGuestView: () => void;
+  onModeChange?: () => void;
   isSubmitting: boolean;
   errorMessage: string | null;
 };
 
-export function EntryPage({ onAuthenticate, onGuestView, isSubmitting, errorMessage }: EntryPageProps) {
+export function EntryPage({ onAuthenticate, onGuestView, onModeChange, isSubmitting, errorMessage }: EntryPageProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +22,7 @@ export function EntryPage({ onAuthenticate, onGuestView, isSubmitting, errorMess
     setMode(nextMode);
     setEmail('');
     setPassword('');
+    onModeChange?.();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

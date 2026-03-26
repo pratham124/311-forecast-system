@@ -52,6 +52,10 @@ class Settings:
     weekly_forecast_timezone: str
     weekly_forecast_history_days: int
     visualization_fallback_age_hours: int
+    evaluation_forecast_products: str
+    evaluation_baseline_methods: str
+    evaluation_scheduler_enabled: bool
+    evaluation_scheduler_cron: str
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
@@ -114,4 +118,8 @@ def get_settings() -> Settings:
         weekly_forecast_timezone=os.getenv("WEEKLY_FORECAST_TIMEZONE", "America/Edmonton"),
         weekly_forecast_history_days=int(os.getenv("WEEKLY_FORECAST_HISTORY_DAYS", "112")),
         visualization_fallback_age_hours=int(os.getenv("VISUALIZATION_FALLBACK_AGE_HOURS", "24")),
+        evaluation_forecast_products=os.getenv("EVALUATION_FORECAST_PRODUCTS", "daily_1_day,weekly_7_day"),
+        evaluation_baseline_methods=os.getenv("EVALUATION_BASELINE_METHODS", "seasonal_naive,moving_average"),
+        evaluation_scheduler_enabled=_to_bool(os.getenv("EVALUATION_SCHEDULER_ENABLED"), False),
+        evaluation_scheduler_cron=os.getenv("EVALUATION_SCHEDULER_CRON", "0 3 * * *"),
     )

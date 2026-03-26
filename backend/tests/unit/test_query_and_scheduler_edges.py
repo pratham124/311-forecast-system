@@ -8,6 +8,7 @@ from fastapi import HTTPException
 import app.main as main_module
 from app.api.routes.ingestion import get_client
 from app.clients.edmonton_311 import Edmonton311Client, Edmonton311FetchResult
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.failure_notification_repository import FailureNotificationRepository
 from app.repositories.run_repository import RunRepository
@@ -35,7 +36,12 @@ def test_activation_guard_rejects_current_dataset_version() -> None:
 
 @pytest.mark.unit
 def test_query_service_raises_for_missing_run(session) -> None:
-    service = IngestionQueryService(RunRepository(session), DatasetRepository(session), FailureNotificationRepository(session))
+    service = IngestionQueryService(
+        RunRepository(session),
+        DatasetRepository(session),
+        CleanedDatasetRepository(session),
+        FailureNotificationRepository(session),
+    )
     with pytest.raises(HTTPException) as exc:
         service.get_run_status("missing")
     assert exc.value.status_code == 404
@@ -43,7 +49,12 @@ def test_query_service_raises_for_missing_run(session) -> None:
 
 @pytest.mark.unit
 def test_query_service_raises_for_missing_current_dataset(session) -> None:
-    service = IngestionQueryService(RunRepository(session), DatasetRepository(session), FailureNotificationRepository(session))
+    service = IngestionQueryService(
+        RunRepository(session),
+        DatasetRepository(session),
+        CleanedDatasetRepository(session),
+        FailureNotificationRepository(session),
+    )
     with pytest.raises(HTTPException) as exc:
         service.get_current_dataset("edmonton_311")
     assert exc.value.status_code == 404

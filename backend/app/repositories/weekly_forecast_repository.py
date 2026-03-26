@@ -124,6 +124,24 @@ class WeeklyForecastRepository:
         )
         return list(self.session.scalars(statement))
 
+    def find_latest_stored_version(self) -> WeeklyForecastVersion | None:
+        statement = (
+            select(WeeklyForecastVersion)
+            .where(WeeklyForecastVersion.storage_status == 'stored')
+            .order_by(WeeklyForecastVersion.week_end_local.desc(), WeeklyForecastVersion.stored_at.desc().nullslast(), WeeklyForecastVersion.weekly_forecast_version_id.desc())
+            .limit(1)
+        )
+        return self.session.scalar(statement)
+
+    def find_latest_stored_version_ending_by(self, cutoff: datetime) -> WeeklyForecastVersion | None:
+        statement = (
+            select(WeeklyForecastVersion)
+            .where(WeeklyForecastVersion.storage_status == 'stored', WeeklyForecastVersion.week_end_local <= cutoff)
+            .order_by(WeeklyForecastVersion.week_end_local.desc(), WeeklyForecastVersion.stored_at.desc().nullslast(), WeeklyForecastVersion.weekly_forecast_version_id.desc())
+            .limit(1)
+        )
+        return self.session.scalar(statement)
+
     def find_current_for_week(
         self,
         *,

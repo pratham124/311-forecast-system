@@ -611,7 +611,9 @@ def test_approved_pipeline_logs_weekly_training_failure() -> None:
             start_run=lambda trigger_type: SimpleNamespace(forecast_model_run_id="weekly-run"),
             execute_run=lambda run_id: (_ for _ in ()).throw(RuntimeError("weekly boom")),
         )
-        pipeline = ApprovedPipeline(service, validation_repo, hourly_training, weekly_training, logger)
+        hourly_forecast = SimpleNamespace(start_run=lambda trigger_type: SimpleNamespace(forecast_run_id="forecast-run"), execute_run=lambda run_id: None)
+        weekly_forecast = SimpleNamespace(start_run=lambda trigger_type: (SimpleNamespace(weekly_forecast_run_id="weekly-forecast-run"), True), execute_run=lambda run_id: None)
+        pipeline = ApprovedPipeline(service, validation_repo, hourly_training, weekly_training, hourly_forecast, weekly_forecast, logger)
 
         result = pipeline.approve(
             source_name="edmonton_311",
@@ -840,7 +842,7 @@ def test_approved_pipeline_skips_and_logs_hourly_training_paths() -> None:
         service = SimpleNamespace(store_and_approve_cleaned_dataset=lambda **kwargs: SimpleNamespace(dataset_version_id="dataset-1"))
         validation_repo = SimpleNamespace(finalize_run=lambda *args, **kwargs: None)
 
-        pipeline = ApprovedPipeline(service, validation_repo, None, None, logger)
+        pipeline = ApprovedPipeline(service, validation_repo, None, None, None, None, logger)
         assert pipeline.approve(
             source_name="edmonton_311",
             ingestion_run_id="ingestion-1",
@@ -855,7 +857,7 @@ def test_approved_pipeline_skips_and_logs_hourly_training_paths() -> None:
             start_run=lambda trigger_type: SimpleNamespace(forecast_model_run_id="hourly-run"),
             execute_run=lambda run_id: (_ for _ in ()).throw(RuntimeError("hourly boom")),
         )
-        pipeline = ApprovedPipeline(service, validation_repo, hourly_training, None, logger)
+        pipeline = ApprovedPipeline(service, validation_repo, hourly_training, None, None, None, logger)
         assert pipeline.approve(
             source_name="edmonton_311",
             ingestion_run_id="ingestion-2",
@@ -980,3 +982,81 @@ def test_weekly_training_service_handles_generic_failure_and_store_artifact_oser
     artifact = SimpleNamespace()
     with pytest.raises(ForecastModelStorageError, match="Unable to persist weekly forecast model artifact"):
         storage_service._store_artifact(artifact, BrokenPath())
+
+
+@pytest.mark.unit
+def test_approved_pipeline_logs_forecast_generation_failure_and_skips_weekly_execute() -> None:
+    logger = logging.getLogger("test.approved.forecast_generation")
+    captured: list[str] = []
+    weekly_execute_calls: list[str] = []
+
+    class Handler(logging.Handler):
+        def emit(self, record):
+            captured.append(record.getMessage())
+
+    handler = Handler()
+    logger.addHandler(handler)
+    logger.setLevel(logging.ERROR)
+    logger.propagate = False
+    try:
+        service = SimpleNamespace(store_and_approve_cleaned_dataset=lambda **kwargs: SimpleNamespace(dataset_version_id="dataset-1"))
+        validation_repo = SimpleNamespace(finalize_run=lambda *args, **kwargs: None)
+        hourly_forecast = SimpleNamespace(
+            start_run=lambda trigger_type: SimpleNamespace(forecast_run_id="forecast-run"),
+            execute_run=lambda run_id: (_ for _ in ()).throw(RuntimeError("forecast boom")),
+        )
+        weekly_forecast = SimpleNamespace(
+            start_run=lambda trigger_type: (SimpleNamespace(weekly_forecast_run_id="weekly-forecast-run"), False),
+            execute_run=lambda run_id: weekly_execute_calls.append(run_id),
+        )
+        pipeline = ApprovedPipeline(service, validation_repo, None, None, hourly_forecast, weekly_forecast, logger)
+
+        assert pipeline.approve(
+            source_name="edmonton_311",
+            ingestion_run_id="ingestion-1",
+            source_dataset_version_id="source-1",
+            validation_run_id="validation-1",
+            cleaned_records=[{"category": "Roads"}],
+            duplicate_group_count=0,
+        ) == "dataset-1"
+
+        assert weekly_execute_calls == []
+        assert any("forecast generation trigger failed after approval" in message for message in captured)
+    finally:
+        logger.removeHandler(handler)
+
+
+@pytest.mark.unit
+def test_approved_pipeline_logs_weekly_forecast_generation_failure() -> None:
+    logger = logging.getLogger("test.approved.weekly_generation")
+    captured: list[str] = []
+
+    class Handler(logging.Handler):
+        def emit(self, record):
+            captured.append(record.getMessage())
+
+    handler = Handler()
+    logger.addHandler(handler)
+    logger.setLevel(logging.ERROR)
+    logger.propagate = False
+    try:
+        service = SimpleNamespace(store_and_approve_cleaned_dataset=lambda **kwargs: SimpleNamespace(dataset_version_id="dataset-1"))
+        validation_repo = SimpleNamespace(finalize_run=lambda *args, **kwargs: None)
+        weekly_forecast = SimpleNamespace(
+            start_run=lambda trigger_type: (_ for _ in ()).throw(RuntimeError("weekly forecast boom")),
+            execute_run=lambda run_id: None,
+        )
+        pipeline = ApprovedPipeline(service, validation_repo, None, None, None, weekly_forecast, logger)
+
+        assert pipeline.approve(
+            source_name="edmonton_311",
+            ingestion_run_id="ingestion-2",
+            source_dataset_version_id="source-2",
+            validation_run_id="validation-2",
+            cleaned_records=[{"category": "Roads"}],
+            duplicate_group_count=0,
+        ) == "dataset-1"
+
+        assert any("weekly forecast generation trigger failed after approval" in message for message in captured)
+    finally:
+        logger.removeHandler(handler)

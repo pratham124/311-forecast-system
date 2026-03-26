@@ -64,6 +64,7 @@ def test_run_status_and_current_dataset_endpoints_are_readable(session, planner_
 
     assert run_response.run_id == trigger.run_id
     assert current_response.source_name == "edmonton_311"
+    assert current_response.latest_requested_at is not None
 
 
 @pytest.mark.contract

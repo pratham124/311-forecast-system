@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import HTTPException, status
 
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.failure_notification_repository import FailureNotificationRepository
 from app.repositories.run_repository import RunRepository
@@ -14,10 +15,12 @@ class IngestionQueryService:
         self,
         run_repository: RunRepository,
         dataset_repository: DatasetRepository,
+        cleaned_dataset_repository: CleanedDatasetRepository,
         failure_repository: FailureNotificationRepository,
     ) -> None:
         self.run_repository = run_repository
         self.dataset_repository = dataset_repository
+        self.cleaned_dataset_repository = cleaned_dataset_repository
         self.failure_repository = failure_repository
 
     def get_run_status(self, run_id: str) -> IngestionRunStatus:
@@ -36,6 +39,7 @@ class IngestionQueryService:
             updated_at=marker.updated_at,
             updated_by_run_id=marker.updated_by_run_id,
             record_count=marker.record_count,
+            latest_requested_at=self.cleaned_dataset_repository.get_latest_current_requested_at(source_name),
         )
 
     def list_failure_notifications(self, run_id: str | None = None) -> FailureNotificationList:

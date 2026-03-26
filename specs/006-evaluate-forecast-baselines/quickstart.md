@@ -47,9 +47,28 @@ Use this guide to implement and verify UC-06 as a backend evaluation workflow th
    - preserve the prior official evaluation on missing-data, missing-forecast, baseline-failure, and storage-failure paths
    - never let failed runs or raw partial artifacts replace the last known good result
 
+## Verification Steps
+
+Run the UC-06 verification slice from the repository root:
+
+```bash
+backend/.venv/bin/python -m pytest   backend/tests/unit/test_evaluation_service.py   backend/tests/contract/test_evaluation_api.py   backend/tests/integration/test_evaluation_success.py   backend/tests/integration/test_evaluation_partial.py   backend/tests/integration/test_evaluation_failures.py
+```
+
+Map the verification output directly to `docs/UC-06-AT.md`:
+
+- `AT-01`: `test_evaluation_trigger_and_current_daily_flow`, `test_on_demand_evaluation_stores_daily_result`
+- `AT-02`: `test_scheduled_evaluation_runs_for_both_products`
+- `AT-03`: `test_evaluation_service_fails_when_cleaned_dataset_missing`, `test_previous_result_is_retained_across_all_failure_paths` missing-input branch
+- `AT-04`: `test_failure_outcome_selection_for_missing_forecast_baseline_and_storage` missing-forecast branch, `test_missing_forecast_output_fails_without_current_replacement`
+- `AT-05`: `test_baseline_failure_is_recorded`, `test_failure_outcome_selection_for_missing_forecast_baseline_and_storage` baseline branch
+- `AT-06`: `test_segmented_current_evaluation_and_partial_payload_structure`, `test_partial_evaluation_marks_excluded_metrics`, `test_category_and_time_period_aggregation_and_exclusion_labels`
+- `AT-07`: `test_storage_failure_preserves_previous_current_marker`, `test_failure_outcome_selection_for_missing_forecast_baseline_and_storage` storage branch
+- `AT-08`: `test_segmented_current_evaluation_and_partial_payload_structure`, `test_partial_evaluation_marks_excluded_metrics`
+
 ## Acceptance Alignment
 
-Map implementation and tests directly to [UC-06-AT](/home/asiad/ece493/311-forecast-system/docs/UC-06-AT.md):
+Map implementation and tests directly to `docs/UC-06-AT.md`:
 
 - `AT-01`: On-demand evaluation completes and stores engine-vs-baseline results
 - `AT-02`: Scheduled evaluation completes and stores results
@@ -63,8 +82,8 @@ Map implementation and tests directly to [UC-06-AT](/home/asiad/ece493/311-forec
 ## Suggested Test Layers
 
 - Unit tests for comparison-window alignment, baseline generation orchestration, metric calculation, exclusion handling, and official-result promotion logic
-- Integration tests across approved-dataset lookup, current forecast lookup, evaluation result storage, current-marker updates, and last-known-good preservation
-- Contract tests for [evaluation-api.yaml](/home/asiad/ece493/311-forecast-system/specs/006-evaluate-forecast-baselines/contracts/evaluation-api.yaml)
+- Integration tests across approved-dataset lookup, current forecast lookup, evaluation result storage, current-marker updates, historical-result retrieval, and last-known-good preservation
+- Contract tests for `specs/006-evaluate-forecast-baselines/contracts/evaluation-api.yaml`
 - Acceptance-style tests mirroring `docs/UC-06-AT.md`
 
 ## Exit Conditions

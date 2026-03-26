@@ -6,6 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.clients.edmonton_311 import Edmonton311Client
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.core.auth import require_operational_manager, require_planner_or_manager
 from app.core.db import get_db_session
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
@@ -28,6 +29,7 @@ def _build_query_service(session: Session) -> IngestionQueryService:
     return IngestionQueryService(
         run_repository=RunRepository(session),
         dataset_repository=DatasetRepository(session),
+        cleaned_dataset_repository=CleanedDatasetRepository(session),
         failure_repository=FailureNotificationRepository(session),
     )
 
@@ -40,18 +42,15 @@ def trigger_ingestion(
     _claims: dict = Depends(require_operational_manager),
 ) -> IngestionRunAccepted:
     pipeline = IngestionPipeline(session, client, IngestionLoggingService(logging.getLogger("ingestion")))
-    run_id, cursor_used, previous_marker = pipeline.start_run(trigger_type="test_trigger")
-    print(f"[debug] trigger_ingestion accepted run_id={run_id} cursor_used={cursor_used}")
+    run_id, cursor_used, previous_marker = pipeline.start_run(trigger_type="on_demand")
 
     def execute() -> None:
-        print(f"[debug] background task starting run_id={run_id}")
         pipeline.run(
-            trigger_type="test_trigger",
+            trigger_type="on_demand",
             existing_run_id=run_id,
             existing_cursor=cursor_used,
             previous_marker=previous_marker,
         )
-        print(f"[debug] background task finished run_id={run_id}")
 
     background_tasks.add_task(execute)
     session.commit()

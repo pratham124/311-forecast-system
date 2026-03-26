@@ -29,3 +29,5 @@ build/
 .env*
 .pytest_cache/
 backend/.artifacts/forecast_models/
+backend/.artifacts/weekly_forecast_models/
+coverage/
