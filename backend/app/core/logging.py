@@ -48,3 +48,30 @@ def configure_logging() -> logging.Logger:
 
 def summarize_visualization_event(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_status(event, **fields)
+
+
+def _summarize_evaluation_outcome(event: str, *, outcome: str, **fields: Any) -> dict[str, Any]:
+    payload = dict(fields)
+    payload["outcome"] = outcome
+    return summarize_status(event, **payload)
+
+
+def summarize_evaluation_success(event: str, **fields: Any) -> dict[str, Any]:
+    return _summarize_evaluation_outcome(event, outcome="success", **fields)
+
+
+def summarize_evaluation_partial_success(event: str, **fields: Any) -> dict[str, Any]:
+    return _summarize_evaluation_outcome(event, outcome="partial_success", **fields)
+
+
+def summarize_evaluation_failure(event: str, **fields: Any) -> dict[str, Any]:
+    return _summarize_evaluation_outcome(event, outcome="failure", **fields)
+
+
+def summarize_evaluation_event(event: str, **fields: Any) -> dict[str, Any]:
+    outcome = str(fields.get("outcome") or "")
+    if outcome == "partial_success":
+        return summarize_evaluation_partial_success(event, **{k: v for k, v in fields.items() if k != "outcome"})
+    if outcome == "failure":
+        return summarize_evaluation_failure(event, **{k: v for k, v in fields.items() if k != "outcome"})
+    return summarize_evaluation_success(event, **{k: v for k, v in fields.items() if k != "outcome"})

@@ -20,7 +20,7 @@
 - [x] CHK007 Are UC-06-specific entities and their relationships defined clearly enough to distinguish evaluation runs, stored evaluation results, evaluation segments, metric values, and current evaluation markers? [Completeness, Spec §Key Entities; Data Model §EvaluationRun; Data Model §EvaluationResult; Data Model §EvaluationSegment; Data Model §MetricComparisonValue; Data Model §CurrentEvaluationMarker]
 - [x] CHK008 Are identity, exclusivity, and single-product-scope rules specified clearly enough to prevent one evaluation run or result from mixing daily and weekly forecast products? [Clarity, Spec §Clarifications; Spec §FR-003, FR-010; Data Model §EvaluationRun Validation Rules; Data Model §CurrentEvaluationMarker Validation Rules]
 - [x] CHK009 Are partial-result requirements specific enough to define how excluded metrics, excluded segments, and comparison-status values should be represented in stored results? [Clarity, Spec §FR-016, FR-019; Spec §SC-004; Data Model §EvaluationResult; Data Model §EvaluationSegment; Data Model §MetricComparisonValue]
-- [X] CHK010 Are baseline-method requirements complete enough to define which baseline methods must be represented in published results and how additional baseline methods would be named or differentiated? [Gap, Spec §FR-006, FR-019; Spec §Assumptions; Data Model §MetricComparisonValue]
+- [x] CHK010 Are baseline-method requirements complete enough to define which baseline methods must be represented in published results and how additional baseline methods would be named or differentiated? [Gap, Spec §FR-006, FR-019; Spec §Assumptions; Data Model §MetricComparisonValue]
 
 ## Security Requirements Quality
 
@@ -33,13 +33,14 @@
 ## Performance Requirements Quality
 
 - [x] CHK016 Are UC-06 performance requirements quantified with specific timing and completion thresholds rather than broad terms such as "timely" or "reviewable"? [Clarity, Spec §SC-001; Plan §Performance Goals]
-- [X] CHK017 Are measurable expectations defined for both complete and partial-success evaluation outcomes, or explicitly scoped out where only full-success timing matters? [Gap, Spec §SC-001-SC-004; Plan §Performance Goals]
-- [X] CHK018 Are scale and scope assumptions specific enough to clarify how many forecast products, segment types, and retained historical results the performance targets are expected to cover? [Completeness, Plan §Scale/Scope; Data Model §Relationships]
-- [X] CHK019 Are performance requirements for failure-safe behavior measurable enough to verify that failed runs never delay or block access to the previous official result? [Measurability, Spec §SC-005; Plan §Implementation Steps 7, 8]
-- [X] CHK020 Are degradation and exception-path timing expectations defined for missing-data, missing-forecast, baseline-failure, and storage-failure scenarios, or explicitly left for planning beyond the spec? [Gap, Spec §FR-013-FR-017; Spec §SC-005; Plan §Implementation Steps 7, 8]
+- [x] CHK017 Are measurable expectations defined for both complete and partial-success evaluation outcomes, or explicitly scoped out where only full-success timing matters? [Gap, Spec §SC-001-SC-004; Plan §Performance Goals]
+- [x] CHK018 Are scale and scope assumptions specific enough to clarify how many forecast products, segment types, and retained historical results the performance targets are expected to cover? [Completeness, Plan §Scale/Scope; Data Model §Relationships]
+- [x] CHK019 Are performance requirements for failure-safe behavior measurable enough to verify that failed runs never delay or block access to the previous official result? [Measurability, Spec §SC-005; Plan §Implementation Steps 7, 8]
+- [x] CHK020 Are degradation and exception-path timing expectations defined for missing-data, missing-forecast, baseline-failure, and storage-failure scenarios, or explicitly left for planning beyond the spec? [Gap, Spec §FR-013-FR-017; Spec §SC-005; Plan §Implementation Steps 7, 8]
 
 ## Notes
 
+- Checklist review normalized all completion markers to `[x]` and aligned the contract plus quickstart verification guidance to the implemented UC-06 behavior.
 - Check items off as completed: `[x]`
 - Add comments or findings inline
 - Link to relevant resources or documentation

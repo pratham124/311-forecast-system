@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes.approved_dataset_status import router as approved_dataset_router
 from app.api.routes.auth import router as auth_router
+from app.api.routes.evaluations import router as evaluation_router
 from app.api.routes.forecasts import router as forecast_router
 from app.api.routes.forecast_visualizations import router as forecast_visualization_router
 from app.api.routes.ingestion import router as ingestion_router
@@ -17,6 +18,7 @@ from app.core.config import get_settings
 from app.core.db import get_session_factory, run_migrations
 from app.repositories.auth_repository import AuthRepository
 from app.services.auth_service import AuthBootstrapService
+from app.services.evaluation_service import build_evaluation_job
 from app.services.forecast_scheduler import build_forecast_job, build_forecast_training_job
 from app.services.scheduler_service import SchedulerService, build_ingestion_job
 from app.services.weekly_forecast_scheduler import build_weekly_forecast_job, build_weekly_forecast_training_job, build_weekly_regeneration_job
@@ -73,6 +75,8 @@ async def lifespan(app: FastAPI):
     weekly_forecast_model_scheduler_cron = getattr(settings, "weekly_forecast_model_scheduler_cron", "30 0 * * 0")
     weekly_forecast_daily_regeneration_enabled = getattr(settings, "weekly_forecast_daily_regeneration_enabled", False)
     weekly_forecast_daily_regeneration_cron = getattr(settings, "weekly_forecast_daily_regeneration_cron", "0 2 * * *")
+    evaluation_scheduler_enabled = getattr(settings, "evaluation_scheduler_enabled", False)
+    evaluation_scheduler_cron = getattr(settings, "evaluation_scheduler_cron", "0 3 * * *")
 
     if ingestion_scheduler_enabled:
         scheduler_service.register_cron_job(
@@ -110,6 +114,12 @@ async def lifespan(app: FastAPI):
             build_weekly_regeneration_job(app.state.session_factory),
             weekly_forecast_daily_regeneration_cron,
         )
+    if evaluation_scheduler_enabled:
+        scheduler_service.register_cron_job(
+            'forecast_evaluation',
+            build_evaluation_job(app.state.session_factory),
+            evaluation_scheduler_cron,
+        )
     if (
         ingestion_scheduler_enabled
         or forecast_model_scheduler_enabled
@@ -117,6 +127,7 @@ async def lifespan(app: FastAPI):
         or weekly_forecast_model_scheduler_enabled
         or weekly_forecast_scheduler_enabled
         or weekly_forecast_daily_regeneration_enabled
+        or evaluation_scheduler_enabled
     ):
         scheduler_service.start()
     try:
@@ -144,6 +155,7 @@ def create_app() -> FastAPI:
     app.include_router(approved_dataset_router)
     app.include_router(review_needed_router)
     app.include_router(forecast_router)
+    app.include_router(evaluation_router)
     app.include_router(forecast_visualization_router)
     app.include_router(weekly_forecast_router)
     return app

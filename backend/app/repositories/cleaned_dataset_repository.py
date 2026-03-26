@@ -27,6 +27,27 @@ class CleanedDatasetRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def get_latest_current_requested_at(self, source_name: str) -> datetime | None:
+        latest = self.session.scalar(
+            select(func.max(CleanedCurrentRecord.requested_at)).where(CleanedCurrentRecord.source_name == source_name)
+        )
+        if latest:
+            return datetime.fromisoformat(str(latest).replace('Z', '+00:00')).astimezone(timezone.utc)
+
+        current_dataset = self.get_current_approved_dataset(source_name)
+        if current_dataset is None:
+            return None
+
+        latest_requested_at: datetime | None = None
+        for record in self.list_dataset_records(current_dataset.dataset_version_id):
+            raw_requested_at = str(record.get('requested_at') or '')
+            if not raw_requested_at:
+                continue
+            requested_at = datetime.fromisoformat(raw_requested_at.replace('Z', '+00:00')).astimezone(timezone.utc)
+            if latest_requested_at is None or requested_at > latest_requested_at:
+                latest_requested_at = requested_at
+        return latest_requested_at
+
     def get_current_approved_dataset(self, source_name: str) -> DatasetVersion | None:
         marker = self.session.get(CurrentDatasetMarker, source_name)
         if marker is None:

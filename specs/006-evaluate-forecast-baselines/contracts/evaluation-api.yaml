@@ -1,10 +1,11 @@
 openapi: 3.1.0
 info:
   title: UC-06 Evaluation Contract
-  version: 0.1.0
+  version: 0.3.0
   description: >
-    Minimal backend contract to trigger, observe, and retrieve UC-06 evaluation
-    results that compare forecasting-engine outputs against baseline methods.
+    Backend contract to trigger, observe, and retrieve UC-06 evaluation
+    results that compare forecasting-engine outputs against baseline methods
+    over a fair-comparison window.
 servers:
   - url: https://example.invalid
 paths:
@@ -18,6 +19,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EvaluationRunTrigger'
+            examples:
+              dailyTrigger:
+                value:
+                  forecastProduct: daily_1_day
+                  triggerType: on_demand
+              weeklyTrigger:
+                value:
+                  forecastProduct: weekly_7_day
+                  triggerType: on_demand
       responses:
         '202':
           description: Evaluation run accepted
@@ -25,6 +35,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EvaluationRunAccepted'
+              examples:
+                accepted:
+                  value:
+                    evaluationRunId: eval-run-123
+                    status: running
         '401':
           description: Unauthorized
         '403':
@@ -48,6 +63,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EvaluationRunStatus'
+              examples:
+                success:
+                  value:
+                    evaluationRunId: eval-run-123
+                    triggerType: on_demand
+                    forecastProduct: daily_1_day
+                    sourceCleanedDatasetVersionId: cleaned-123
+                    sourceForecastVersionId: forecast-123
+                    evaluationWindowStart: '2026-03-20T00:00:00Z'
+                    evaluationWindowEnd: '2026-03-20T03:00:00Z'
+                    status: success
+                    resultType: stored_complete
+                    evaluationResultId: eval-result-123
+                    startedAt: '2026-03-25T10:00:00Z'
+                    completedAt: '2026-03-25T10:05:00Z'
+                    summary: Evaluation stored for daily_1_day across 6 comparison rows
+                failed:
+                  value:
+                    evaluationRunId: eval-run-456
+                    triggerType: on_demand
+                    forecastProduct: daily_1_day
+                    evaluationWindowStart: '2026-03-20T00:00:00Z'
+                    evaluationWindowEnd: '2026-03-20T03:00:00Z'
+                    status: failed
+                    resultType: baseline_failure
+                    startedAt: '2026-03-25T11:00:00Z'
+                    completedAt: '2026-03-25T11:01:00Z'
+                    failureReason: No historical actuals are available for baseline generation
+                    summary: baseline generation failed
+                storageFailure:
+                  value:
+                    evaluationRunId: eval-run-789
+                    triggerType: on_demand
+                    forecastProduct: daily_1_day
+                    sourceCleanedDatasetVersionId: cleaned-123
+                    sourceForecastVersionId: forecast-123
+                    evaluationWindowStart: '2026-03-20T00:00:00Z'
+                    evaluationWindowEnd: '2026-03-20T03:00:00Z'
+                    status: failed
+                    resultType: storage_failure
+                    startedAt: '2026-03-25T12:00:00Z'
+                    completedAt: '2026-03-25T12:00:05Z'
+                    failureReason: disk full
+                    summary: evaluation result storage failed
         '401':
           description: Unauthorized
         '403':
@@ -74,6 +133,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentEvaluation'
+              examples:
+                partialDaily:
+                  value:
+                    evaluationResultId: eval-result-123
+                    forecastProduct: daily_1_day
+                    sourceCleanedDatasetVersionId: cleaned-123
+                    sourceForecastVersionId: forecast-123
+                    evaluationWindowStart: '2026-03-20T00:00:00Z'
+                    evaluationWindowEnd: '2026-03-20T03:00:00Z'
+                    comparisonStatus: partial
+                    baselineMethods: [seasonal_naive, moving_average]
+                    metricSet: [mae, rmse, mape]
+                    fairComparison:
+                      evaluationWindowStart: '2026-03-20T00:00:00Z'
+                      evaluationWindowEnd: '2026-03-20T03:00:00Z'
+                      productScope: daily_1_day
+                      segmentCoverage: [overall, Roads, Waste, '2026-03-20T00:00:00+00:00']
+                    updatedAt: '2026-03-25T10:05:00Z'
+                    updatedByRunId: eval-run-123
+                    summary: Evaluation stored for daily_1_day across 6 comparison rows
+                    comparisonSummary: The forecasting engine matched the strongest included baseline for the evaluated scope.
+                    segments:
+                      - segmentType: overall
+                        segmentKey: overall
+                        segmentStatus: partial
+                        comparisonRowCount: 6
+                        excludedMetricCount: 3
+                        notes: Some metrics were excluded because one or more comparison rows had zero actual demand.
+                        methodMetrics:
+                          - methodName: Forecast Engine
+                            metrics:
+                              - metricName: mae
+                                metricValue: 1.0
+                                isExcluded: false
+                              - metricName: rmse
+                                metricValue: 1.118
+                                isExcluded: false
+                              - metricName: mape
+                                isExcluded: true
+                                exclusionReason: MAPE cannot be computed when actual demand includes zero values
+                      - segmentType: service_category
+                        segmentKey: Roads
+                        segmentStatus: partial
+                        comparisonRowCount: 3
+                        excludedMetricCount: 3
+                        notes: Some metrics were excluded because one or more comparison rows had zero actual demand.
+                        methodMetrics:
+                          - methodName: Forecast Engine
+                            metrics:
+                              - metricName: mae
+                                metricValue: 1.0
+                                isExcluded: false
+                              - metricName: rmse
+                                metricValue: 1.291
+                                isExcluded: false
+                              - metricName: mape
+                                isExcluded: true
+                                exclusionReason: MAPE cannot be computed when actual demand includes zero values
+                completeWeekly:
+                  value:
+                    evaluationResultId: eval-result-222
+                    forecastProduct: weekly_7_day
+                    sourceCleanedDatasetVersionId: cleaned-222
+                    sourceWeeklyForecastVersionId: weekly-222
+                    evaluationWindowStart: '2026-03-23T00:00:00Z'
+                    evaluationWindowEnd: '2026-03-26T00:00:00Z'
+                    comparisonStatus: complete
+                    baselineMethods: [seasonal_naive, moving_average]
+                    metricSet: [mae, rmse, mape]
+                    fairComparison:
+                      evaluationWindowStart: '2026-03-23T00:00:00Z'
+                      evaluationWindowEnd: '2026-03-26T00:00:00Z'
+                      productScope: weekly_7_day
+                      segmentCoverage: [overall, Roads, Waste, '2026-03-23']
+                    updatedAt: '2026-03-25T13:00:00Z'
+                    updatedByRunId: eval-run-222
+                    summary: Evaluation stored for weekly_7_day across 6 comparison rows
+                    comparisonSummary: The forecasting engine outperformed the included baselines for the evaluated scope.
+                    segments:
+                      - segmentType: overall
+                        segmentKey: overall
+                        segmentStatus: complete
+                        comparisonRowCount: 6
+                        excludedMetricCount: 0
+                        methodMetrics:
+                          - methodName: Forecast Engine
+                            metrics:
+                              - metricName: mae
+                                metricValue: 0.5
+                                isExcluded: false
+                              - metricName: rmse
+                                metricValue: 0.7071
+                                isExcluded: false
+                              - metricName: mape
+                                metricValue: 8.5
+                                isExcluded: false
         '401':
           description: Unauthorized
         '403':
@@ -94,6 +249,10 @@ components:
         triggerType:
           type: string
           enum: [on_demand]
+      description: >
+        Exactly one forecast product is evaluated per run. The service must reuse
+        the current official forecast output for that product and compare engine,
+        baseline, and actual slices over the same aligned window.
     EvaluationRunAccepted:
       type: object
       required: [evaluationRunId, status]
@@ -169,6 +328,7 @@ components:
         - comparisonStatus
         - baselineMethods
         - metricSet
+        - fairComparison
         - segments
         - updatedAt
         - updatedByRunId
@@ -197,6 +357,7 @@ components:
           type: array
           items:
             type: string
+          description: Ordered list of baseline methods published for the result. Current UC-06 scope requires `seasonal_naive` and `moving_average`.
         metricSet:
           type: array
           items:
@@ -226,6 +387,7 @@ components:
         - evaluationWindowEnd
         - productScope
         - segmentCoverage
+      description: Documents the exact time window and segment keys used to align actuals, engine forecasts, and baselines for fair comparison validation.
       properties:
         evaluationWindowStart:
           type: string
@@ -240,6 +402,9 @@ components:
           type: array
           items:
             type: string
+          description: >
+            Combined segment identifiers that demonstrate the same comparison
+            slices were used for actuals, engine forecasts, and baseline outputs.
     EvaluationSegment:
       type: object
       required:

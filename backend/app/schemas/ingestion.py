@@ -32,3 +32,4 @@ class CurrentDataset(BaseModel):
     updated_at: datetime
     updated_by_run_id: str
     record_count: int
+    latest_requested_at: datetime | None = None

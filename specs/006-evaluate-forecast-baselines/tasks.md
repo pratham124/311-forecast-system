@@ -24,9 +24,9 @@
 
 **Purpose**: Create the UC-06 evaluation scaffolding shared by all stories.
 
-- [ ] T001 Create UC-06 backend scaffolding in `backend/app/api/routes/evaluations.py`, `backend/app/repositories/evaluation_repository.py`, `backend/app/schemas/evaluation.py`, `backend/app/services/evaluation_service.py`, `backend/app/services/baseline_service.py`, and `backend/app/services/evaluation_scope_service.py`
-- [ ] T002 Configure evaluation-specific settings for forecast-product defaults, baseline labels, and evaluation scheduling in `backend/app/core/config.py`
-- [ ] T003 [P] Create UC-06 test scaffolding in `backend/tests/contract/test_evaluation_api.py`, `backend/tests/integration/test_evaluation_success.py`, `backend/tests/integration/test_evaluation_failures.py`, `backend/tests/integration/test_evaluation_partial.py`, and `backend/tests/unit/test_evaluation_service.py`
+- [X] T001 Create UC-06 backend scaffolding in `backend/app/api/routes/evaluations.py`, `backend/app/repositories/evaluation_repository.py`, `backend/app/schemas/evaluation.py`, `backend/app/services/evaluation_service.py`, `backend/app/services/baseline_service.py`, and `backend/app/services/evaluation_scope_service.py`
+- [X] T002 Configure evaluation-specific settings for forecast-product defaults, baseline labels, and evaluation scheduling in `backend/app/core/config.py`
+- [X] T003 [P] Create UC-06 test scaffolding in `backend/tests/contract/test_evaluation_api.py`, `backend/tests/integration/test_evaluation_success.py`, `backend/tests/integration/test_evaluation_failures.py`, `backend/tests/integration/test_evaluation_partial.py`, and `backend/tests/unit/test_evaluation_service.py`
 
 ---
 
@@ -36,15 +36,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Add migration-managed UC-06 tables for `EvaluationRun`, `EvaluationResult`, `EvaluationSegment`, `MetricComparisonValue`, and `CurrentEvaluationMarker` in `backend/alembic/versions/006_evaluation_lifecycle.py`
-- [ ] T005 [P] Define repository ORM models for UC-06 evaluation entities in `backend/app/repositories/models.py`
-- [ ] T006 [P] Define typed backend schemas for evaluation-trigger, run-status, current-result, and segment payloads in `backend/app/schemas/evaluation.py`
-- [ ] T007 [P] Implement repository methods for evaluation runs, stored results, segment metrics, current-marker updates, and historical-result retrieval in `backend/app/repositories/evaluation_repository.py`
-- [ ] T008 [P] Implement forecast-product source resolution for UC-03 daily lineage and UC-04 weekly lineage in `backend/app/services/evaluation_scope_service.py`
-- [ ] T009 [P] Implement fair-comparison window and segment-alignment helpers in `backend/app/services/evaluation_scope_service.py`
-- [ ] T010 [P] Implement authenticated evaluation access dependencies and role enforcement in `backend/app/api/dependencies/auth.py`
-- [ ] T011 [P] Implement structured logging helpers for evaluation success, partial success, and failure outcomes in `backend/app/core/logging.py`
-- [ ] T012 Wire the evaluation router into the backend application in `backend/app/api/routes/evaluations.py` and `backend/app/main.py`
+- [X] T004 Add migration-managed UC-06 tables for `EvaluationRun`, `EvaluationResult`, `EvaluationSegment`, `MetricComparisonValue`, and `CurrentEvaluationMarker` in `backend/alembic/versions/006_evaluation_lifecycle.py`
+- [X] T005 [P] Define repository ORM models for UC-06 evaluation entities in `backend/app/repositories/models.py`
+- [X] T006 [P] Define typed backend schemas for evaluation-trigger, run-status, current-result, and segment payloads in `backend/app/schemas/evaluation.py`
+- [X] T007 [P] Implement repository methods for evaluation runs, stored results, segment metrics, current-marker updates, and historical-result retrieval in `backend/app/repositories/evaluation_repository.py`
+- [X] T008 [P] Implement forecast-product source resolution for UC-03 daily lineage and UC-04 weekly lineage in `backend/app/services/evaluation_scope_service.py`
+- [X] T009 [P] Implement fair-comparison window and segment-alignment helpers in `backend/app/services/evaluation_scope_service.py`
+- [X] T010 [P] Implement authenticated evaluation access dependencies and role enforcement in `backend/app/api/dependencies/auth.py`
+- [X] T011 [P] Implement structured logging helpers for evaluation success, partial success, and failure outcomes in `backend/app/core/logging.py`
+- [X] T012 Wire the evaluation router into the backend application in `backend/app/api/routes/evaluations.py` and `backend/app/main.py`
 
 **Checkpoint**: Evaluation persistence, source resolution, auth, typed contracts, and route wiring are in place.
 
@@ -58,18 +58,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Add contract coverage for `POST /api/v1/evaluation-runs/trigger`, `GET /api/v1/evaluation-runs/{evaluationRunId}`, and `GET /api/v1/evaluations/current` success, auth failure, and request-validation behavior in `backend/tests/contract/test_evaluation_api.py`
-- [ ] T014 [P] [US1] Add backend unit coverage for daily-vs-weekly source resolution, baseline generation orchestration, and MAE/RMSE/MAPE calculation in `backend/tests/unit/test_evaluation_service.py`
-- [ ] T015 [P] [US1] Add integration coverage for successful on-demand and scheduled evaluation runs with stored results in `backend/tests/integration/test_evaluation_success.py`
+- [X] T013 [P] [US1] Add contract coverage for `POST /api/v1/evaluation-runs/trigger`, `GET /api/v1/evaluation-runs/{evaluationRunId}`, and `GET /api/v1/evaluations/current` success, auth failure, and request-validation behavior in `backend/tests/contract/test_evaluation_api.py`
+- [X] T014 [P] [US1] Add backend unit coverage for daily-vs-weekly source resolution, baseline generation orchestration, and MAE/RMSE/MAPE calculation in `backend/tests/unit/test_evaluation_service.py`
+- [X] T015 [P] [US1] Add integration coverage for successful on-demand and scheduled evaluation runs with stored results in `backend/tests/integration/test_evaluation_success.py`
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Implement baseline generation for `seasonal_naive` and `moving_average` in `backend/app/services/baseline_service.py`
-- [ ] T017 [P] [US1] Implement metric-calculation utilities for MAE, RMSE, and MAPE in `backend/app/services/evaluation_metrics.py`
-- [ ] T018 [P] [US1] Implement evaluation-result assembly for overall metrics, baseline coverage, comparison-summary generation, and stored-result persistence in `backend/app/services/evaluation_service.py`
-- [ ] T019 [US1] Implement on-demand and scheduled evaluation orchestration for one forecast product at a time in `backend/app/services/evaluation_service.py`
-- [ ] T020 [US1] Implement trigger and run-status API handling with thin route logic in `backend/app/api/routes/evaluations.py`
-- [ ] T021 [US1] Implement current official evaluation retrieval with fair-comparison metadata and comparison-summary exposure in `backend/app/api/routes/evaluations.py`
+- [X] T016 [P] [US1] Implement baseline generation for `seasonal_naive` and `moving_average` in `backend/app/services/baseline_service.py`
+- [X] T017 [P] [US1] Implement metric-calculation utilities for MAE, RMSE, and MAPE in `backend/app/services/evaluation_metrics.py`
+- [X] T018 [P] [US1] Implement evaluation-result assembly for overall metrics, baseline coverage, comparison-summary generation, and stored-result persistence in `backend/app/services/evaluation_service.py`
+- [X] T019 [US1] Implement on-demand and scheduled evaluation orchestration for one forecast product at a time in `backend/app/services/evaluation_service.py`
+- [X] T020 [US1] Implement trigger and run-status API handling with thin route logic in `backend/app/api/routes/evaluations.py`
+- [X] T021 [US1] Implement current official evaluation retrieval with fair-comparison metadata and comparison-summary exposure in `backend/app/api/routes/evaluations.py`
 
 **Checkpoint**: User Story 1 delivers a complete evaluation workflow with reviewable stored results for one selected forecast product.
 
@@ -83,16 +83,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Add contract coverage for segmented current-evaluation responses and partial-result payload structure in `backend/tests/contract/test_evaluation_api.py`
-- [ ] T023 [P] [US2] Add backend unit coverage for category aggregation, time-period aggregation, and exclusion labeling in `backend/tests/unit/test_evaluation_service.py`
-- [ ] T024 [P] [US2] Add integration coverage for segmented evaluation results and metric-exclusion persistence in `backend/tests/integration/test_evaluation_partial.py`
+- [X] T022 [P] [US2] Add contract coverage for segmented current-evaluation responses and partial-result payload structure in `backend/tests/contract/test_evaluation_api.py`
+- [X] T023 [P] [US2] Add backend unit coverage for category aggregation, time-period aggregation, and exclusion labeling in `backend/tests/unit/test_evaluation_service.py`
+- [X] T024 [P] [US2] Add integration coverage for segmented evaluation results and metric-exclusion persistence in `backend/tests/integration/test_evaluation_partial.py`
 
 ### Implementation for User Story 2
 
-- [ ] T025 [P] [US2] Implement category and time-period segment construction in `backend/app/services/evaluation_segments.py`
-- [ ] T026 [P] [US2] Implement partial-result handling and exclusion-reason population for invalid metrics in `backend/app/services/evaluation_service.py`
-- [ ] T027 [P] [US2] Implement repository persistence for `EvaluationSegment` and `MetricComparisonValue` records in `backend/app/repositories/evaluation_repository.py`
-- [ ] T028 [US2] Extend current-evaluation response shaping to include segmented summaries and exclusion details in `backend/app/schemas/evaluation.py` and `backend/app/api/routes/evaluations.py`
+- [X] T025 [P] [US2] Implement category and time-period segment construction in `backend/app/services/evaluation_segments.py`
+- [X] T026 [P] [US2] Implement partial-result handling and exclusion-reason population for invalid metrics in `backend/app/services/evaluation_service.py`
+- [X] T027 [P] [US2] Implement repository persistence for `EvaluationSegment` and `MetricComparisonValue` records in `backend/app/repositories/evaluation_repository.py`
+- [X] T028 [US2] Extend current-evaluation response shaping to include segmented summaries and exclusion details in `backend/app/schemas/evaluation.py` and `backend/app/api/routes/evaluations.py`
 
 **Checkpoint**: User Story 2 adds category/time segmentation and partial-result visibility without changing User Story 1 success-path behavior.
 
@@ -106,16 +106,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T029 [P] [US3] Add contract coverage for failed run statuses, missing current evaluation, and access-denial separation from business failures in `backend/tests/contract/test_evaluation_api.py`
-- [ ] T030 [P] [US3] Add backend unit coverage for missing-input, missing-forecast, baseline-failure, and storage-failure outcome selection in `backend/tests/unit/test_evaluation_service.py`
-- [ ] T031 [P] [US3] Add integration coverage for previous-result retention across all UC-06 failure paths in `backend/tests/integration/test_evaluation_failures.py`
+- [X] T029 [P] [US3] Add contract coverage for failed run statuses, missing current evaluation, and access-denial separation from business failures in `backend/tests/contract/test_evaluation_api.py`
+- [X] T030 [P] [US3] Add backend unit coverage for missing-input, missing-forecast, baseline-failure, and storage-failure outcome selection in `backend/tests/unit/test_evaluation_service.py`
+- [X] T031 [P] [US3] Add integration coverage for previous-result retention across all UC-06 failure paths in `backend/tests/integration/test_evaluation_failures.py`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [P] [US3] Implement missing-data and missing-forecast guardrails that fail the run before publication in `backend/app/services/evaluation_scope_service.py` and `backend/app/services/evaluation_service.py`
-- [ ] T033 [P] [US3] Implement baseline-generation failure handling and failure-reason recording in `backend/app/services/baseline_service.py` and `backend/app/services/evaluation_service.py`
-- [ ] T034 [P] [US3] Implement storage-failure handling that preserves the prior `CurrentEvaluationMarker` in `backend/app/repositories/evaluation_repository.py`
-- [ ] T035 [US3] Implement last-known-good official-result activation rules and failure-safe current-marker preservation in `backend/app/services/evaluation_service.py`
+- [X] T032 [P] [US3] Implement missing-data and missing-forecast guardrails that fail the run before publication in `backend/app/services/evaluation_scope_service.py` and `backend/app/services/evaluation_service.py`
+- [X] T033 [P] [US3] Implement baseline-generation failure handling and failure-reason recording in `backend/app/services/baseline_service.py` and `backend/app/services/evaluation_service.py`
+- [X] T034 [P] [US3] Implement storage-failure handling that preserves the prior `CurrentEvaluationMarker` in `backend/app/repositories/evaluation_repository.py`
+- [X] T035 [US3] Implement last-known-good official-result activation rules and failure-safe current-marker preservation in `backend/app/services/evaluation_service.py`
 
 **Checkpoint**: User Story 3 completes failure-safe retention and official-result preservation across all defined failure classes.
 
@@ -125,10 +125,10 @@
 
 **Purpose**: Finish acceptance traceability, checklist-driven requirement cleanup, and cross-story verification support.
 
-- [ ] T036 [P] Align implementation verification steps with `docs/UC-06-AT.md` in `specs/006-evaluate-forecast-baselines/quickstart.md`
-- [ ] T037 [P] Add performance and official-result-retention assertions for SC-001 through SC-005 in `backend/tests/integration/test_evaluation_success.py`, `backend/tests/integration/test_evaluation_partial.py`, and `backend/tests/integration/test_evaluation_failures.py`
-- [ ] T038 [P] Align request/response examples and fair-comparison payload documentation in `specs/006-evaluate-forecast-baselines/contracts/evaluation-api.yaml`
-- [ ] T039 Review and resolve remaining unchecked requirement-quality items in `specs/006-evaluate-forecast-baselines/checklists/api-data-security-performance.md`
+- [X] T036 [P] Align implementation verification steps with `docs/UC-06-AT.md` in `specs/006-evaluate-forecast-baselines/quickstart.md`
+- [X] T037 [P] Add performance and official-result-retention assertions for SC-001 through SC-005 in `backend/tests/integration/test_evaluation_success.py`, `backend/tests/integration/test_evaluation_partial.py`, and `backend/tests/integration/test_evaluation_failures.py`
+- [X] T038 [P] Align request/response examples and fair-comparison payload documentation in `specs/006-evaluate-forecast-baselines/contracts/evaluation-api.yaml`
+- [X] T039 Review and resolve remaining unchecked requirement-quality items in `specs/006-evaluate-forecast-baselines/checklists/api-data-security-performance.md`
 
 ---
 

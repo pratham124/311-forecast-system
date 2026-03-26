@@ -1,24 +1,107 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { fetchCurrentUser, loginUser, logoutSession, refreshStoredSession, registerUser } from './api/auth';
 import { clearAuthSession, getStoredAuthSession, saveAuthSession } from './lib/authSession';
-import { EntryPage } from './pages/EntryPage';
-import { GuestPlaceholderPage } from './pages/GuestPlaceholderPage';
 import type { AuthSession } from './types/auth';
 
+type AuthMode = 'login' | 'register';
+
+const EntryPage = lazy(async () => {
+  const module = await import('./pages/EntryPage');
+  return { default: module.EntryPage };
+});
+const EvaluationPage = lazy(async () => {
+  const module = await import('./pages/EvaluationPage');
+  return { default: module.EvaluationPage };
+});
 const ForecastVisualizationPage = lazy(async () => {
   const module = await import('./pages/ForecastVisualizationPage');
   return { default: module.ForecastVisualizationPage };
 });
+const IngestionPage = lazy(async () => {
+  const module = await import('./pages/IngestionPage');
+  return { default: module.IngestionPage };
+});
+const GuestPlaceholderPage = lazy(async () => {
+  const module = await import('./pages/GuestPlaceholderPage');
+  return { default: module.GuestPlaceholderPage };
+});
 
-type AppView = 'entry' | 'internal' | 'guest';
-type AuthMode = 'login' | 'register';
+function RouteFallback() {
+  return <main className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-muted">Loading page...</main>;
+}
 
-export default function App() {
+function canReadInternalOperations(roles: string[]): boolean {
+  return roles.some((role) => role === 'CityPlanner' || role === 'OperationalManager');
+}
+
+function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout: () => Promise<void> }) {
+  const showEvaluationPage = canReadInternalOperations(session.user.roles);
+  const showIngestionPage = canReadInternalOperations(session.user.roles);
+
+  return (
+    <div className="min-h-screen bg-[#f3f4f5]">
+      <header className="border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-accent">Signed in</p>
+              <p className="text-sm text-ink">{session.user.email} · {session.user.roles.join(', ')}</p>
+            </div>
+            <nav className="flex items-center gap-2 pl-2" aria-label="internal navigation">
+              <NavLink
+                to="/app/forecasts"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Forecasts
+              </NavLink>
+              {showEvaluationPage ? (
+                <NavLink
+                  to="/app/evaluations"
+                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+                >
+                  Evaluations
+                </NavLink>
+              ) : null}
+              {showIngestionPage ? (
+                <NavLink
+                  to="/app/ingestion"
+                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+                >
+                  Ingestion
+                </NavLink>
+              ) : null}
+            </nav>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              void onLogout();
+            }}
+            className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
+          >
+            Log out
+          </button>
+        </div>
+      </header>
+      <Outlet />
+    </div>
+  );
+}
+
+function AppShell() {
   const [session, setSession] = useState<AuthSession | null>(() => getStoredAuthSession());
-  const [view, setView] = useState<AppView>(() => (getStoredAuthSession() ? 'internal' : 'entry'));
   const [isBootstrappingSession, setIsBootstrappingSession] = useState(Boolean(getStoredAuthSession()));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (session && location.pathname === '/') {
+      navigate('/app/forecasts', { replace: true });
+    }
+  }, [location.pathname, navigate, session]);
 
   useEffect(() => {
     const stored = getStoredAuthSession();
@@ -33,7 +116,6 @@ export default function App() {
         const nextSession = { accessToken: stored.accessToken, user };
         saveAuthSession(nextSession);
         setSession(nextSession);
-        setView('internal');
       })
       .catch(async () => {
         if (cancelled) return;
@@ -41,12 +123,11 @@ export default function App() {
           const nextSession = await refreshStoredSession();
           if (cancelled) return;
           setSession(nextSession);
-          setView('internal');
         } catch {
           if (cancelled) return;
           clearAuthSession();
           setSession(null);
-          setView('entry');
+          navigate('/', { replace: true });
         }
       })
       .finally(() => {
@@ -57,7 +138,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   const handleAuthenticate = async (mode: AuthMode, email: string, password: string) => {
     setIsSubmitting(true);
@@ -67,7 +148,6 @@ export default function App() {
       const nextSession = { accessToken: response.accessToken, user: response.user };
       saveAuthSession(nextSession);
       setSession(nextSession);
-      setView('internal');
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'Authentication failed');
     } finally {
@@ -84,43 +164,42 @@ export default function App() {
     clearAuthSession();
     setSession(null);
     setAuthError(null);
-    setView('entry');
+    navigate('/', { replace: true });
   };
 
   if (isBootstrappingSession) {
     return <main className="flex min-h-screen items-center justify-center text-sm font-medium text-muted">Checking your session...</main>;
   }
 
-  if (view === 'internal' && session) {
-    return (
-      <div className="min-h-screen bg-[#f3f4f5]">
-        <header className="border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-accent">Signed in</p>
-              <p className="text-sm text-ink">{session.user.email} · {session.user.roles.join(', ')}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                void handleLogout();
-              }}
-              className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
-            >
-              Log out
-            </button>
-          </div>
-        </header>
-        <Suspense fallback={<main className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-muted">Loading your dashboard...</main>}>
-          <ForecastVisualizationPage />
-        </Suspense>
-      </div>
-    );
-  }
+  const showEvaluationPage = session ? canReadInternalOperations(session.user.roles) : false;
+  const showIngestionPage = session ? canReadInternalOperations(session.user.roles) : false;
 
-  if (view === 'guest') {
-    return <GuestPlaceholderPage onBack={() => setView('entry')} />;
-  }
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route
+          path="/"
+          element={session ? <Navigate to="/app/forecasts" replace /> : <EntryPage onAuthenticate={handleAuthenticate} onGuestView={() => navigate('/guest')} onModeChange={() => setAuthError(null)} isSubmitting={isSubmitting} errorMessage={authError} />}
+        />
+        <Route path="/guest" element={<GuestPlaceholderPage onBack={() => navigate('/')} />} />
+        <Route path="/app" element={session ? <InternalLayout session={session} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
+          <Route index element={<Navigate to="forecasts" replace />} />
+          <Route path="forecasts" element={<ForecastVisualizationPage />} />
+          <Route
+            path="evaluations"
+            element={showEvaluationPage ? <EvaluationPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
+          />
+          <Route
+            path="ingestion"
+            element={showIngestionPage ? <IngestionPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
+          />
+        </Route>
+        <Route path="*" element={<Navigate to={session ? '/app/forecasts' : '/'} replace />} />
+      </Routes>
+    </Suspense>
+  );
+}
 
-  return <EntryPage onAuthenticate={handleAuthenticate} onGuestView={() => setView('guest')} isSubmitting={isSubmitting} errorMessage={authError} />;
+export default function App() {
+  return <AppShell />;
 }

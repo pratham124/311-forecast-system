@@ -12,14 +12,20 @@ from app.pipelines.ingestion.blocked_outcome_pipeline import BlockedOutcomePipel
 from app.pipelines.ingestion.rejection_pipeline import RejectionPipeline
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_model_repository import ForecastModelRepository
+from app.repositories.forecast_repository import ForecastRepository
+from app.repositories.forecast_run_repository import ForecastRunRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.review_needed_repository import ReviewNeededRepository
 from app.repositories.validation_repository import ValidationRepository
+from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
+from app.repositories.weekly_forecast_run_repository import WeeklyForecastRunRepository
 from app.services.cleaned_dataset_service import CleanedDatasetService
+from app.services.forecast_service import ForecastService
 from app.services.forecast_training_service import ForecastTrainingService
 from app.services.duplicate_analysis_service import DuplicateAnalysisService
 from app.services.duplicate_resolution_service import DuplicateResolutionService
 from app.services.schema_validation_service import SchemaValidationService
+from app.services.weekly_forecast_service import WeeklyForecastService
 from app.services.weekly_forecast_training_service import WeeklyForecastTrainingService
 
 
@@ -55,11 +61,33 @@ class ValidationPipeline:
             settings=self.settings,
             logger=logging.getLogger("validation.weekly_forecast_training"),
         )
+        self.forecast_service = ForecastService(
+            cleaned_dataset_repository=self.cleaned_dataset_repository,
+            forecast_run_repository=ForecastRunRepository(session),
+            forecast_repository=ForecastRepository(session),
+            forecast_model_repository=ForecastModelRepository(session),
+            geomet_client=GeoMetClient(),
+            nager_date_client=NagerDateClient(),
+            settings=self.settings,
+            logger=logging.getLogger("validation.forecast"),
+        )
+        self.weekly_forecast_service = WeeklyForecastService(
+            cleaned_dataset_repository=self.cleaned_dataset_repository,
+            weekly_forecast_run_repository=WeeklyForecastRunRepository(session),
+            weekly_forecast_repository=WeeklyForecastRepository(session),
+            forecast_model_repository=ForecastModelRepository(session),
+            geomet_client=GeoMetClient(),
+            nager_date_client=NagerDateClient(),
+            settings=self.settings,
+            logger=logging.getLogger("validation.weekly_forecast"),
+        )
         self.approved_pipeline = ApprovedPipeline(
             self.cleaned_dataset_service,
             self.validation_repository,
             self.forecast_training_service,
             self.weekly_forecast_training_service,
+            self.forecast_service,
+            self.weekly_forecast_service,
             logging.getLogger("validation.approval"),
         )
         self.rejection_pipeline = RejectionPipeline(self.validation_repository)
