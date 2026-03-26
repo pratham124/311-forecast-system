@@ -39,7 +39,7 @@ describe('IngestionPage', () => {
     expect(await screen.findByText(/current dataset version/i)).toBeInTheDocument();
     expect(screen.getByText(/dataset-1/i)).toBeInTheDocument();
     expect(screen.getByText(/latest 311 requested_at in stored data/i)).toBeInTheDocument();
-    expect(screen.getByText(/9:45:00 AM/i)).toBeInTheDocument();
+    expect(screen.getByText(new Date(currentDataset.latest_requested_at).toLocaleString())).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /trigger 311 ingestion/i })).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/datasets/current');
   });
