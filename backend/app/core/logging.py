@@ -75,3 +75,23 @@ def summarize_evaluation_event(event: str, **fields: Any) -> dict[str, Any]:
     if outcome == "failure":
         return summarize_evaluation_failure(event, **{k: v for k, v in fields.items() if k != "outcome"})
     return summarize_evaluation_success(event, **{k: v for k, v in fields.items() if k != "outcome"})
+
+
+def summarize_historical_demand_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_historical_demand_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_historical_demand_event(event, outcome="success", **fields)
+
+
+def summarize_historical_demand_warning(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_historical_demand_event(event, outcome="warning", **fields)
+
+
+def summarize_historical_demand_no_data(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_historical_demand_event(event, outcome="no_data", **fields)
+
+
+def summarize_historical_demand_failure(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_historical_demand_event(event, outcome="failure", **fields)

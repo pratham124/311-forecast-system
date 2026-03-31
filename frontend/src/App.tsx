@@ -18,6 +18,10 @@ const ForecastVisualizationPage = lazy(async () => {
   const module = await import('./pages/ForecastVisualizationPage');
   return { default: module.ForecastVisualizationPage };
 });
+const HistoricalDemandPage = lazy(async () => {
+  const module = await import('./pages/HistoricalDemandPage');
+  return { default: module.HistoricalDemandPage };
+});
 const IngestionPage = lazy(async () => {
   const module = await import('./pages/IngestionPage');
   return { default: module.IngestionPage };
@@ -54,6 +58,12 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
                 className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
               >
                 Forecasts
+              </NavLink>
+              <NavLink
+                to="/app/historical-demand"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Historical
               </NavLink>
               {showEvaluationPage ? (
                 <NavLink
@@ -185,6 +195,7 @@ function AppShell() {
         <Route path="/app" element={session ? <InternalLayout session={session} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
           <Route index element={<Navigate to="forecasts" replace />} />
           <Route path="forecasts" element={<ForecastVisualizationPage />} />
+          <Route path="historical-demand" element={<HistoricalDemandPage />} />
           <Route
             path="evaluations"
             element={showEvaluationPage ? <EvaluationPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}

@@ -30,6 +30,7 @@ Use this guide to implement and verify UC-07 as a typed historical-demand explor
 5. Keep route handlers thin:
    - `GET` available analysis context or filters if needed
    - `POST` historical analysis request
+   - `POST` render-event reporting when the client finishes rendering or fails to render
    - all business decisions in services
    - all persistence in repositories
 6. Implement a typed frontend analysis interface that:
