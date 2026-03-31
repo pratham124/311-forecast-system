@@ -117,8 +117,6 @@ class CleanedDatasetRepository:
         now = datetime.utcnow()
         for record in cleaned_records:
             service_request_id = str(record.get("service_request_id", "")).strip()
-            if not service_request_id:
-                continue
             payload = json.dumps(record, sort_keys=True)
             requested_at = str(record.get("requested_at", ""))
             category = str(record.get("category", ""))
