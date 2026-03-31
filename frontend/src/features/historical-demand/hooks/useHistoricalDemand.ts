@@ -12,9 +12,14 @@ import type {
 } from '../../../types/historicalDemand';
 
 function defaultDateRange(): Pick<HistoricalDemandFilters, 'timeRangeStart' | 'timeRangeEnd'> {
+  const now = new Date();
+  const end = now.toISOString();
+  const startDate = new Date(now);
+  startDate.setUTCDate(startDate.getUTCDate() - 30);
+  const start = startDate.toISOString();
   return {
-    timeRangeStart: '2026-03-01T00:00:00Z',
-    timeRangeEnd: '2026-03-31T23:59:59Z',
+    timeRangeStart: start,
+    timeRangeEnd: end,
   };
 }
 
@@ -74,7 +79,16 @@ export function useHistoricalDemand() {
     const key = `${response.analysisRequestId}:${payload.renderStatus}`;
     if (renderedEvents.current[key]) return;
     renderedEvents.current[key] = true;
-    await submitHistoricalDemandRenderEvent(response.analysisRequestId, payload);
+    try {
+      await submitHistoricalDemandRenderEvent(response.analysisRequestId, payload);
+    } catch (requestError) {
+      console.error('Failed to submit historical demand render event', requestError);
+    }
+  };
+
+  const clearResponse = () => {
+    setResponse(null);
+    setError(null);
   };
 
   return {
@@ -87,5 +101,6 @@ export function useHistoricalDemand() {
     error,
     submit,
     reportRenderEvent,
+    clearResponse,
   };
 }

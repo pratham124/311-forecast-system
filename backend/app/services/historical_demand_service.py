@@ -101,7 +101,11 @@ class HistoricalDemandAnalysisService:
             geographyValue=payload.geography_value,
         )
         self._ensure_supported_geography(payload.geography_level)
-        records = self.cleaned_dataset_repository.list_current_cleaned_records(self.source_name)
+        records = self.cleaned_dataset_repository.list_current_cleaned_records(
+            self.source_name,
+            start_time=payload.time_range_start,
+            end_time=payload.time_range_end,
+        )
         preview_records = self._filter_records(records, payload)
         warning = self.warning_service.evaluate(
             candidate_record_count=len(preview_records),
@@ -130,6 +134,7 @@ class HistoricalDemandAnalysisService:
                 message=warning.message,
                 summary="Historical demand warning shown before retrieval.",
             )
+        request = None
         try:
             dataset_version_id = self.context_service.require_approved_dataset_id()
             request = self.historical_demand_repository.create_request(
@@ -223,7 +228,7 @@ class HistoricalDemandAnalysisService:
                 summary="Historical demand data prepared for visualization.",
             )
         except Exception as exc:
-            return self._build_failure_response(filters, warning, str(exc))
+            return self._build_failure_response(filters, warning, str(exc), existing_request=request)
 
     def record_render_event(self, analysis_request_id: str, payload: HistoricalDemandRenderEvent) -> None:
         request = self.historical_demand_repository.require_request(analysis_request_id)
@@ -262,17 +267,20 @@ class HistoricalDemandAnalysisService:
             ),
         )
 
-    def _build_failure_response(self, filters: SelectedFiltersRead, warning, failure_reason: str) -> HistoricalDemandResponseRead:
-        request = self.historical_demand_repository.create_request(
-            requested_by_actor="city_planner",
-            source_cleaned_dataset_version_id=None,
-            service_category_filter=filters.service_category,
-            time_range_start=filters.time_range_start,
-            time_range_end=filters.time_range_end,
-            geography_filter_type=filters.geography_level,
-            geography_filter_value=filters.geography_value,
-            warning_status="acknowledged" if warning and warning.acknowledged else "not_needed",
-        )
+    def _build_failure_response(self, filters: SelectedFiltersRead, warning, failure_reason: str, existing_request=None) -> HistoricalDemandResponseRead:
+        if existing_request is not None:
+            request = existing_request
+        else:
+            request = self.historical_demand_repository.create_request(
+                requested_by_actor="city_planner",
+                source_cleaned_dataset_version_id=None,
+                service_category_filter=filters.service_category,
+                time_range_start=filters.time_range_start,
+                time_range_end=filters.time_range_end,
+                geography_filter_type=filters.geography_level,
+                geography_filter_value=filters.geography_value,
+                warning_status="acknowledged" if warning and warning.acknowledged else "not_needed",
+            )
         self.historical_demand_repository.finalize_request(
             request.analysis_request_id,
             status="retrieval_failed",

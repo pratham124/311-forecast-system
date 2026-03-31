@@ -15,7 +15,7 @@ class StubCleanedDatasetRepository:
         self.records = records
         self.dataset_version_id = dataset_version_id
 
-    def list_current_cleaned_records(self, source_name: str):
+    def list_current_cleaned_records(self, source_name: str, *, start_time=None, end_time=None):
         return list(self.records)
 
     def get_current_approved_dataset(self, source_name: str):

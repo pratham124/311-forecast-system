@@ -41,6 +41,10 @@ class HistoricalDemandQueryRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_filters(self) -> "HistoricalDemandQueryRequest":
+        if self.time_range_start.tzinfo is None:
+            raise ValueError("timeRangeStart must be timezone-aware (e.g. use a UTC offset or Z suffix)")
+        if self.time_range_end.tzinfo is None:
+            raise ValueError("timeRangeEnd must be timezone-aware (e.g. use a UTC offset or Z suffix)")
         if self.time_range_end < self.time_range_start:
             raise ValueError("timeRangeEnd must not be earlier than timeRangeStart")
         if self.geography_value and not self.geography_level:

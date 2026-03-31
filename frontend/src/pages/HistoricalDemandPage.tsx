@@ -7,7 +7,17 @@ import { HistoricalDemandStatus } from '../features/historical-demand/components
 import { useHistoricalDemand } from '../features/historical-demand/hooks/useHistoricalDemand';
 
 function toApiDateTime(value: string): string {
-  return value.endsWith('Z') ? value : `${value}Z`;
+  if (!value) {
+    return value;
+  }
+  if (value.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(value)) {
+    return value;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toISOString();
 }
 
 export function HistoricalDemandPage() {
@@ -21,6 +31,7 @@ export function HistoricalDemandPage() {
     error,
     submit,
     reportRenderEvent,
+    clearResponse,
   } = useHistoricalDemand();
 
   useEffect(() => {
@@ -72,7 +83,7 @@ export function HistoricalDemandPage() {
             void submit(normalizedFilters, true);
           }}
           onDecline={() => {
-            setFilters({ ...filters });
+            clearResponse();
           }}
         />
       </div>

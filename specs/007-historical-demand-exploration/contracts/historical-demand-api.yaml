@@ -191,3 +191,11 @@ components:
         failureReason:
           type: string
           description: Required when renderStatus is render_failed.
+      allOf:
+        - if:
+            properties:
+              renderStatus:
+                const: render_failed
+          then:
+            required:
+              - failureReason
