@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 import logging
 import uuid
 
@@ -322,9 +322,9 @@ class HistoricalDemandAnalysisService:
             timestamp = HistoricalDemandService._parse_timestamp(str(record.get("requested_at", "")))
             if timestamp is None:
                 continue
-            if timestamp < payload.time_range_start.astimezone(UTC):
+            if timestamp < payload.time_range_start.astimezone(timezone.utc):
                 continue
-            if timestamp > payload.time_range_end.astimezone(UTC):
+            if timestamp > payload.time_range_end.astimezone(timezone.utc):
                 continue
             category = str(record.get("category", "")).strip()
             if payload.service_category and category != payload.service_category:
