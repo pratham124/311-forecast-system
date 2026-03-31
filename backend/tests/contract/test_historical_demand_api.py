@@ -107,6 +107,55 @@ def test_create_historical_demand_query_no_data(app_client, planner_headers, ses
 
 
 @pytest.mark.contract
+def test_create_historical_demand_query_unsupported_geography_returns_422(app_client, planner_headers, session):
+    _seed_historical_dataset(session)
+    response = app_client.post(
+        "/api/v1/historical-demand/queries",
+        headers=planner_headers,
+        json={
+            "serviceCategory": "Roads",
+            "timeRangeStart": "2026-03-01T00:00:00Z",
+            "timeRangeEnd": "2026-03-31T23:59:59Z",
+            "geographyLevel": "neighbourhood",
+            "geographyValue": "Any",
+        },
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.contract
+def test_record_historical_render_event_unknown_request_returns_404(app_client, planner_headers, session):
+    _seed_historical_dataset(session)
+    response = app_client.post(
+        "/api/v1/historical-demand/queries/00000000-0000-0000-0000-000000000000/render-events",
+        headers=planner_headers,
+        json={"renderStatus": "rendered"},
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.contract
+def test_record_historical_render_success(app_client, planner_headers, session):
+    _seed_historical_dataset(session)
+    created = app_client.post(
+        "/api/v1/historical-demand/queries",
+        headers=planner_headers,
+        json={
+            "serviceCategory": "Roads",
+            "timeRangeStart": "2026-03-01T00:00:00Z",
+            "timeRangeEnd": "2026-03-31T23:59:59Z",
+        },
+    )
+    analysis_request_id = created.json()["analysisRequestId"]
+    response = app_client.post(
+        f"/api/v1/historical-demand/queries/{analysis_request_id}/render-events",
+        headers=planner_headers,
+        json={"renderStatus": "rendered"},
+    )
+    assert response.status_code == 202
+
+
+@pytest.mark.contract
 def test_record_historical_render_failure(app_client, planner_headers, session):
     _seed_historical_dataset(session)
     created = app_client.post(

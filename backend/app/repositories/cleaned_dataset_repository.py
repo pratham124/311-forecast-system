@@ -89,6 +89,15 @@ class CleanedDatasetRepository:
         approved_by_validation_run_id: str,
         cleaned_records: list[dict[str, object]],
     ) -> None:
+        # Last wins: duplicate service_request_id in one batch must not produce two INSERTs
+        # (PK is service_request_id; pending adds are not visible to a second pass over the list).
+        deduped: dict[str, dict[str, object]] = {}
+        for record in cleaned_records:
+            sid = str(record.get("service_request_id", "")).strip()
+            if sid:
+                deduped[sid] = record
+        cleaned_records = list(deduped.values())
+
         service_request_ids = [
             str(record.get("service_request_id", "")).strip()
             for record in cleaned_records
@@ -116,23 +125,23 @@ class CleanedDatasetRepository:
             geography_key = _extract_geography_key(record)
             existing = existing_rows.get(service_request_id)
             if existing is None:
-                self.session.add(
-                    CleanedCurrentRecord(
-                        service_request_id=service_request_id,
-                        source_name=source_name,
-                        requested_at=requested_at,
-                        category=category,
-                        geography_key=geography_key,
-                        record_payload=payload,
-                        first_seen_ingestion_run_id=ingestion_run_id,
-                        last_updated_ingestion_run_id=ingestion_run_id,
-                        source_dataset_version_id=source_dataset_version_id,
-                        approved_by_validation_run_id=approved_by_validation_run_id,
-                        last_approved_dataset_version_id=approved_dataset_version_id,
-                        created_at=now,
-                        updated_at=now,
-                    )
+                new_row = CleanedCurrentRecord(
+                    service_request_id=service_request_id,
+                    source_name=source_name,
+                    requested_at=requested_at,
+                    category=category,
+                    geography_key=geography_key,
+                    record_payload=payload,
+                    first_seen_ingestion_run_id=ingestion_run_id,
+                    last_updated_ingestion_run_id=ingestion_run_id,
+                    source_dataset_version_id=source_dataset_version_id,
+                    approved_by_validation_run_id=approved_by_validation_run_id,
+                    last_approved_dataset_version_id=approved_dataset_version_id,
+                    created_at=now,
+                    updated_at=now,
                 )
+                self.session.add(new_row)
+                existing_rows[service_request_id] = new_row
                 continue
             existing.source_name = source_name
             existing.requested_at = requested_at
