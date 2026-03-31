@@ -8,10 +8,12 @@ import pytest
 
 
 def _seed_success_records(session) -> None:
+    # Include a second ward so supported_geography_levels() treats "ward" as reliable (needs ≥2 distinct values).
     records = [
         {"service_request_id": "roads-1", "requested_at": "2026-03-05T10:00:00Z", "category": "Roads", "ward": "Ward 1"},
         {"service_request_id": "roads-2", "requested_at": "2026-03-12T10:00:00Z", "category": "Roads", "ward": "Ward 1"},
         {"service_request_id": "roads-3", "requested_at": "2026-03-19T10:00:00Z", "category": "Roads", "ward": "Ward 1"},
+        {"service_request_id": "roads-4", "requested_at": "2026-03-20T10:00:00Z", "category": "Roads", "ward": "Ward 2"},
     ]
     version = DatasetRepository(session).create_dataset_version(
         source_name="edmonton_311",

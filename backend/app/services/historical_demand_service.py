@@ -350,11 +350,11 @@ class HistoricalDemandAnalysisService:
         for (bucket_start, category, geography_key), count in sorted(grouped.items(), key=lambda item: item[0]):
             points.append(
                 {
-                    "bucketStart": bucket_start,
-                    "bucketEnd": self._bucket_end(bucket_start, granularity),
-                    "serviceCategory": category,
-                    "geographyKey": geography_key,
-                    "demandCount": count,
+                    "bucket_start": bucket_start,
+                    "bucket_end": self._bucket_end(bucket_start, granularity),
+                    "service_category": category,
+                    "geography_key": geography_key,
+                    "demand_count": count,
                 }
             )
         return points

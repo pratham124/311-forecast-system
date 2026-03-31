@@ -90,6 +90,7 @@ def test_analysis_service_aggregates_successful_summary():
     records = [
         {"requested_at": "2026-03-05T10:00:00Z", "category": "Roads", "ward": "Ward 1"},
         {"requested_at": "2026-03-06T10:00:00Z", "category": "Roads", "ward": "Ward 1"},
+        {"requested_at": "2026-03-07T10:00:00Z", "category": "Roads", "ward": "Ward 2"},
     ]
     cleaned_repository = StubCleanedDatasetRepository(records)
     repository = StubHistoricalDemandRepository()

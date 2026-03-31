@@ -116,4 +116,4 @@ describe('HistoricalDemandPage', () => {
     expect(await screen.findByText(/no data found/i)).toBeInTheDocument();
     expect(screen.queryByText(/summary table/i)).not.toBeInTheDocument();
   });
-}
+});
