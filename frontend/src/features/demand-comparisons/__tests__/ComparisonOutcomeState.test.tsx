@@ -23,7 +23,7 @@ describe('ComparisonOutcomeState', () => {
   it('renders warning_required state', () => {
     const onProceed = vi.fn();
     const onDecline = vi.fn();
-    const response: DemandComparisonResponse = { outcomeStatus: 'warning_required', message: 'Proceed?', series: [] };
+    const response = { outcomeStatus: 'warning_required', message: 'Proceed?', series: [] } as unknown as DemandComparisonResponse;
     render(<ComparisonOutcomeState isLoading={false} error={null} response={response} onProceed={onProceed} onDecline={onDecline} />);
 
     expect(screen.getByText('Large request warning')).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('ComparisonOutcomeState', () => {
 
   it('renders failure states', () => {
     ['historical_retrieval_failed', 'forecast_retrieval_failed', 'alignment_failed'].forEach((status) => {
-      const response = { outcomeStatus: status as any, message: `Failed: ${status}`, series: [] };
+      const response = { outcomeStatus: status, message: `Failed: ${status}`, series: [] } as unknown as DemandComparisonResponse;
       const { unmount } = render(<ComparisonOutcomeState isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
       expect(screen.getByText(`Failed: ${status}`)).toBeInTheDocument();
       unmount();
@@ -46,7 +46,7 @@ describe('ComparisonOutcomeState', () => {
   });
 
   it('renders standard response message for success', () => {
-    const response: DemandComparisonResponse = { outcomeStatus: 'success', message: 'Success message', series: [] };
+    const response = { outcomeStatus: 'success', message: 'Success message', series: [] } as unknown as DemandComparisonResponse;
     render(<ComparisonOutcomeState isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
     expect(screen.getByText('Success message')).toBeInTheDocument();
   });

@@ -51,7 +51,7 @@ describe('useDemandComparisons', () => {
   it('handles abort properly on unmount during fetch', async () => {
     vi.mocked(api.fetchDemandComparisonContext).mockImplementation((signal) => {
       return new Promise((_, reject) => {
-         signal.addEventListener('abort', () => reject(new Error('AbortError')));
+         signal?.addEventListener('abort', () => reject(new Error('AbortError')));
       });
     });
     const { result, unmount } = renderHook(() => useDemandComparisons());

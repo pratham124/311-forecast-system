@@ -10,11 +10,11 @@ describe('ComparisonResultView', () => {
   });
 
   it('renders basic summary and handles undefined optional fields', () => {
-    const response: DemandComparisonResponse = {
+    const response = {
       outcomeStatus: 'success',
       message: 'Done'
-    };
-    render(<ComparisonResultView response={response} />);
+    } as unknown as DemandComparisonResponse;
+    render(<ComparisonResultView response={response as any} />);
     expect(screen.getByText('Comparison summary')).toBeInTheDocument();
     expect(screen.getByText('success')).toBeInTheDocument();
     expect(screen.getByText('daily')).toBeInTheDocument(); // fallback when missing
@@ -23,13 +23,13 @@ describe('ComparisonResultView', () => {
   });
 
   it('renders with full data', () => {
-    const response: DemandComparisonResponse = {
+    const response = {
       outcomeStatus: 'success',
       comparisonGranularity: 'weekly',
       message: 'Done',
       missingCombinations: [
-        { serviceCategory: 'Miss1', geographyKey: 'geo1', message: 'Err1' },
-         { serviceCategory: 'Miss2', geographyKey: undefined, message: 'Err2' }
+        { serviceCategory: 'Miss1', geographyKey: 'geo1', message: 'Err1', missingSource: 'forecast' },
+         { serviceCategory: 'Miss2', geographyKey: undefined, message: 'Err2', missingSource: 'forecast' }
       ],
       series: [
         {
@@ -46,7 +46,7 @@ describe('ComparisonResultView', () => {
         }
       ]
     };
-    render(<ComparisonResultView response={response} />);
+    render(<ComparisonResultView response={response as any} />);
     expect(screen.getByText('weekly')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument(); // series length
 
