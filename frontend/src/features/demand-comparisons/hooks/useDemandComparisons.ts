@@ -67,25 +67,32 @@ export function useDemandComparisons() {
     setError(null);
     setResponse(null);
     const requestToken = ++lastRequestToken.current;
+    
+    let nextResponse: DemandComparisonResponse | null = null;
+    let requestError: unknown = null;
+    
     try {
-      const nextResponse = await submitDemandComparisonQuery(
+      nextResponse = await submitDemandComparisonQuery(
         { ...nextFilters, proceedAfterWarning: proceedAfterWarning || undefined },
       );
-      if (requestToken === lastRequestToken.current) {
-        setResponse(nextResponse);
-      }
-      return nextResponse;
-    } catch (requestError) {
+    } catch (err) {
+      requestError = err;
+    } 
+    
+    if (requestError) {
       if (requestToken === lastRequestToken.current) {
         setError(requestError instanceof Error ? requestError.message : 'Unable to compare demand.');
         setResponse(null);
-      }
-      return null;
-    } finally {
-      if (requestToken === lastRequestToken.current) {
         setIsSubmitting(false);
       }
+      return null;
     }
+    
+    if (requestToken === lastRequestToken.current) {
+      setResponse(nextResponse);
+      setIsSubmitting(false);
+    }
+    return nextResponse;
   };
 
   const reportRenderEvent = async (payload: DemandComparisonRenderEvent) => {
