@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: forecast_user
       POSTGRES_PASSWORD: forecast_pass
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - forecast_postgres_data:/var/lib/postgresql/data
     healthcheck:

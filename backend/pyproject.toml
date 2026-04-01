@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "forecast-system-backend"
 version = "0.1.0"
 description = "UC-01 Edmonton 311 ingestion backend"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
   "apscheduler>=3.10,<4.0",
   "fastapi>=0.111,<1.0",

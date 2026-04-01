@@ -39,6 +39,12 @@ from app.models.evaluation_models import (
     EvaluationSegment,
     MetricComparisonValue,
 )
+from app.models.historical_analysis_models import (
+    HistoricalAnalysisOutcomeRecord,
+    HistoricalDemandAnalysisRequest,
+    HistoricalDemandAnalysisResult,
+    HistoricalDemandSummaryPoint,
+)
 
 __all__ = [
     "CandidateDataset",
@@ -64,6 +70,10 @@ __all__ = [
     "RefreshSession",
     "ForecastVersion",
     "IngestionRun",
+    "HistoricalAnalysisOutcomeRecord",
+    "HistoricalDemandAnalysisRequest",
+    "HistoricalDemandAnalysisResult",
+    "HistoricalDemandSummaryPoint",
     "MetricComparisonValue",
     "ReviewNeededRecord",
     "SuccessfulPullCursor",
