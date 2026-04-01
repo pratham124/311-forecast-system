@@ -18,6 +18,10 @@ const ForecastVisualizationPage = lazy(async () => {
   const module = await import('./pages/ForecastVisualizationPage');
   return { default: module.ForecastVisualizationPage };
 });
+const DemandComparisonPage = lazy(async () => {
+  const module = await import('./pages/DemandComparisonPage');
+  return { default: module.DemandComparisonPage };
+});
 const HistoricalDemandPage = lazy(async () => {
   const module = await import('./pages/HistoricalDemandPage');
   return { default: module.HistoricalDemandPage };
@@ -58,6 +62,12 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
                 className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
               >
                 Forecasts
+              </NavLink>
+              <NavLink
+                to="/app/demand-comparisons"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Comparisons
               </NavLink>
               <NavLink
                 to="/app/historical-demand"
@@ -195,6 +205,7 @@ function AppShell() {
         <Route path="/app" element={session ? <InternalLayout session={session} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
           <Route index element={<Navigate to="forecasts" replace />} />
           <Route path="forecasts" element={<ForecastVisualizationPage />} />
+          <Route path="demand-comparisons" element={<DemandComparisonPage />} />
           <Route path="historical-demand" element={<HistoricalDemandPage />} />
           <Route
             path="evaluations"

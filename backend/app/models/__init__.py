@@ -45,6 +45,13 @@ from app.models.historical_analysis_models import (
     HistoricalDemandAnalysisResult,
     HistoricalDemandSummaryPoint,
 )
+from app.models.demand_comparison_models import (
+    ComparisonMissingCombination,
+    DemandComparisonOutcomeRecord,
+    DemandComparisonRequest,
+    DemandComparisonResult,
+    DemandComparisonSeriesPoint,
+)
 
 __all__ = [
     "CandidateDataset",
@@ -55,8 +62,13 @@ __all__ = [
     "CurrentForecastMarker",
     "CurrentForecastModelMarker",
     "CurrentWeeklyForecastMarker",
+    "ComparisonMissingCombination",
     "DatasetRecord",
     "DatasetVersion",
+    "DemandComparisonOutcomeRecord",
+    "DemandComparisonRequest",
+    "DemandComparisonResult",
+    "DemandComparisonSeriesPoint",
     "DuplicateAnalysisResult",
     "DuplicateGroup",
     "EvaluationResult",
