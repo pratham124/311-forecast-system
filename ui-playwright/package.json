@@ -1,0 +1,16 @@
+{
+  "name": "311-forecast-ui-playwright",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local Playwright smoke tests for 311 Forecast System (separate from frontend Vitest).",
+  "scripts": {
+    "test": "playwright test",
+    "test:with-eval": "playwright test && npm run evaluate",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "evaluate": "node scripts/evaluate-run.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

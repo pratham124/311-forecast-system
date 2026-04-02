@@ -8,14 +8,24 @@ import { useDemandComparisons } from '../features/demand-comparisons/hooks/useDe
 
 export function DemandComparisonPage() {
   const {
-    context,
+    availability,
     filters,
     setFilters,
+    availableGeographyLevels,
+    availableGeographyValues,
+    dateWindowStart,
+    dateWindowEnd,
+    datePresets,
+    dateRangeError,
     response,
-    isLoadingContext,
+    isLoadingAvailability,
     isSubmitting,
+    isAutoSelecting,
+    autoSelectProgress,
     error,
     submit,
+    autoSelectForecastBackedCombination,
+    applyDatePreset,
     reportRenderEvent,
     clearResponse,
   } = useDemandComparisons();
@@ -42,17 +52,29 @@ export function DemandComparisonPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
-          {isLoadingContext ? (
+          {isLoadingAvailability ? (
             <Alert><AlertDescription>Loading comparison filters...</AlertDescription></Alert>
           ) : (
             <ComparisonFilters
-              context={context}
+              availability={availability}
               filters={filters}
+              availableGeographyLevels={availableGeographyLevels}
+              availableGeographyValues={availableGeographyValues}
+              dateWindowStart={dateWindowStart}
+              dateWindowEnd={dateWindowEnd}
+              datePresets={datePresets}
+              dateRangeError={dateRangeError}
               onChange={setFilters}
+              onApplyDatePreset={applyDatePreset}
               onSubmit={() => {
                 void submit();
               }}
-              disabled={isSubmitting}
+              onAutoSelect={() => {
+                void autoSelectForecastBackedCombination();
+              }}
+              isAutoSelecting={isAutoSelecting}
+              autoSelectProgress={autoSelectProgress}
+              disabled={isSubmitting || isAutoSelecting}
             />
           )}
         </CardContent>
@@ -61,7 +83,7 @@ export function DemandComparisonPage() {
       <div className="mt-5">
         <ComparisonOutcomeState
           error={error}
-          isLoading={isSubmitting}
+          isLoading={isSubmitting && !isAutoSelecting}
           response={response}
           onProceed={() => {
             void submit(undefined, true);
@@ -70,7 +92,7 @@ export function DemandComparisonPage() {
         />
       </div>
 
-      {response && response.outcomeStatus !== 'warning_required' && response.outcomeStatus !== 'historical_retrieval_failed' && response.outcomeStatus !== 'forecast_retrieval_failed' && response.outcomeStatus !== 'alignment_failed' ? (
+      {response && ['success', 'partial_forecast_missing', 'historical_only', 'forecast_only'].includes(response.outcomeStatus) ? (
         <div className="mt-5">
           <ComparisonResultView response={response} />
         </div>

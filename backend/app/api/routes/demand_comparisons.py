@@ -15,11 +15,13 @@ from app.repositories.demand_lineage_repository import DemandLineageRepository
 from app.repositories.forecast_repository import ForecastRepository
 from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
 from app.schemas.demand_comparison_api import (
+    DemandComparisonAvailability,
     DemandComparisonContext,
     DemandComparisonQueryRequest,
     DemandComparisonRenderEvent,
     DemandComparisonRenderEventResponse,
 )
+from app.services.demand_comparison_availability_service import DemandComparisonAvailabilityService
 from app.services.demand_comparison_context_service import DemandComparisonContextService
 from app.services.demand_comparison_render_service import DemandComparisonRenderService
 from app.services.demand_comparison_result_builder import DemandComparisonResultBuilder
@@ -62,6 +64,22 @@ def build_render_service(session: Session) -> DemandComparisonRenderService:
         DemandComparisonRepository(session),
         logger=logging.getLogger("demand_comparison.api"),
     )
+
+
+@router.get("/availability", response_model=DemandComparisonAvailability)
+def get_demand_comparison_availability(
+    session: Session = Depends(get_db_session),
+    _claims: dict = Depends(require_demand_comparison_reader),
+) -> DemandComparisonAvailability:
+    settings = get_settings()
+    return DemandComparisonAvailabilityService(
+        cleaned_dataset_repository=CleanedDatasetRepository(session),
+        forecast_repository=ForecastRepository(session),
+        weekly_forecast_repository=WeeklyForecastRepository(session),
+        source_name=settings.source_name,
+        daily_forecast_product_name=settings.forecast_product_name,
+        weekly_forecast_product_name=settings.weekly_forecast_product_name,
+    ).get_availability()
 
 
 @router.get("/context", response_model=DemandComparisonContext)

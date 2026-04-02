@@ -15,16 +15,22 @@ class DemandComparisonContextService:
 
     def get_context(self) -> DemandComparisonContext:
         records = self.cleaned_dataset_repository.list_current_cleaned_records(self.source_name)
-        categories = sorted({str(record.get("category", "")).strip() for record in records if str(record.get("category", "")).strip()})
+
+        categories: set[str] = set()
         geography_options: dict[str, set[str]] = defaultdict(set)
         for record in records:
+            category = str(record.get("category", "")).strip()
+            if category:
+                categories.add(category)
             for level in self.SUPPORTED_LEVELS:
                 value = self.extract_geography_value(record, level)
                 if value:
                     geography_options[level].add(value)
-        levels = sorted(geography_options)
+
+        levels = sorted(geography_options.keys())
+
         return DemandComparisonContext(
-            serviceCategories=categories,
+            serviceCategories=sorted(categories),
             geographyLevels=levels,
             geographyOptions={level: sorted(values) for level, values in geography_options.items()},
             summary="Comparison filters are sourced from the approved cleaned dataset lineage.",
@@ -45,3 +51,4 @@ class DemandComparisonContextService:
             if isinstance(value, str) and value.strip():
                 return value.strip()
         return None
+

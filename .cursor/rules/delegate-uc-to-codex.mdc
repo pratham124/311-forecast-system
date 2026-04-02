@@ -1,0 +1,36 @@
+---
+description: If the user pastes UC implementation prompts, Cursor runs Codex only—no repo survey
+alwaysApply: true
+---
+
+# UC-07–UC-12: Cursor must not “implement” when the Codex prompt is pasted
+
+## Hard stop — detect Codex-sized prompts in **user** messages
+
+If the user’s **latest message** contains **any** of these, they intend **Codex** to own the repo work, **not** Cursor Agent:
+
+- The substring **`You are implementing UC-`** (digits `07`–`12` after `UC-`)
+- Or a case-insensitive match for **`implementing UC-`** followed by two digits in `07`–`12` (covers UI titles like “Implementing UC-08 per specs”)
+- Or they say to use **`codex-uc-exec`** / **`./scripts/codex-uc-exec.sh`**
+
+Then you **must not**:
+
+- `read_file`, `grep`, `glob_file_search`, `semantic_search` / `codebase_search`, `list_dir`, or `apply_patch` / write tools **to implement, continue, or “survey” that use case**
+- Start “Implementing uc-08” style exploration of `tasks.md`, `specs/`, or `backend/` **for that UC**
+
+You **must**:
+
+1. Run from the **repository root** (311-forecast-system): `./scripts/codex-uc-exec.sh NN` where `NN` is `07`–`12` matching the UC in their message (e.g. `08` for UC-08). Use the **terminal** tool; wait for completion.
+2. Report **exit code** and surface errors from the terminal.
+3. **Optional:** read **`/tmp/codex-uc<NN>-last-message.txt`** only to summarize Codex’s last message—**do not** then open the repo to “finish” the implementation yourself.
+
+If `codex` is missing or the script fails before Codex runs, say so and stop—still without implementing the UC in Cursor unless the user **explicitly** opts out below.
+
+## When you *may* use repo tools
+
+- Questions like “explain UC-08” **without** the `You are implementing UC-` boilerplate: normal read/explain is OK.
+- The user **explicitly** says to implement UC-07–UC-12 **in Cursor** / **without Codex** / **bypass Codex**: then you may use repo tools.
+
+## Reference
+
+Full module lists and completion loop: `docs/CURSOR_UC08_UC12_PROMPTS.md` (for Codex to read inside its run, not for Cursor to drive implementation after a paste).

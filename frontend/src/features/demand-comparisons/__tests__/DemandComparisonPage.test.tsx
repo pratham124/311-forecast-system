@@ -1,12 +1,32 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DemandComparisonPage } from '../../../pages/DemandComparisonPage';
 
-const contextPayload = {
+const availabilityPayload = {
   serviceCategories: ['Roads', 'Waste'],
-  geographyLevels: ['ward'],
-  geographyOptions: { ward: ['Ward 1', 'Ward 2'] },
-  summary: 'Comparison context ready.',
+  byCategoryGeography: {
+    Roads: {
+      geographyLevels: ['ward'],
+      geographyOptions: { ward: ['Ward 1'] },
+    },
+    Waste: {
+      geographyLevels: ['ward'],
+      geographyOptions: { ward: ['Ward 1'] },
+    },
+  },
+  dateConstraints: {
+    overlapStart: '2026-03-02T00:00:00Z',
+    overlapEnd: '2026-03-05T00:00:00Z',
+  },
+  presets: [
+    {
+      label: 'Overlap window',
+      timeRangeStart: '2026-03-02T00:00:00Z',
+      timeRangeEnd: '2026-03-05T00:00:00Z',
+    },
+  ],
+  forecastProduct: 'daily_1_day',
 };
 
 const successPayload = {
@@ -15,8 +35,8 @@ const successPayload = {
     serviceCategories: ['Roads'],
     geographyLevel: 'ward',
     geographyValues: ['Ward 1'],
-    timeRangeStart: '2026-03-01T00:00:00Z',
-    timeRangeEnd: '2026-03-02T00:00:00Z',
+    timeRangeStart: '2026-03-02T00:00:00Z',
+    timeRangeEnd: '2026-03-03T00:00:00Z',
   },
   outcomeStatus: 'success',
   resultMode: 'chart_and_table',
@@ -30,7 +50,7 @@ const successPayload = {
       seriesType: 'historical',
       serviceCategory: 'Roads',
       geographyKey: 'Ward 1',
-      points: [{ bucketStart: '2026-03-01T00:00:00Z', bucketEnd: '2026-03-02T00:00:00Z', value: 2 }],
+      points: [{ bucketStart: '2026-03-02T00:00:00Z', bucketEnd: '2026-03-03T00:00:00Z', value: 2 }],
     },
   ],
   message: 'Historical and forecast demand were aligned successfully.',
@@ -49,15 +69,19 @@ describe('DemandComparisonPage', () => {
     fetchMock.mockReset();
   });
 
-  it('loads context, submits a request, and renders replacement results', async () => {
+  it('loads availability, submits a request, and renders results', async () => {
+    const user = userEvent.setup();
     fetchMock
-      .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(availabilityPayload), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(successPayload), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ comparisonRequestId: 'comparison-1', recordedOutcomeStatus: 'rendered' }), { status: 202 }));
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ comparisonRequestId: 'comparison-1', recordedOutcomeStatus: 'rendered' }), { status: 202 }),
+      );
 
     render(<DemandComparisonPage />);
 
-    await screen.findByRole('button', { name: /roads/i });
+    await screen.findByLabelText('Service categories');
+    await user.selectOptions(screen.getByLabelText('Service categories'), ['Roads']);
     fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
 
     expect(await screen.findByText(/comparison summary/i)).toBeInTheDocument();
@@ -65,8 +89,9 @@ describe('DemandComparisonPage', () => {
   });
 
   it('shows warning flow and proceeds after acknowledgement', async () => {
+    const user = userEvent.setup();
     fetchMock
-      .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(availabilityPayload), { status: 200 }))
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -80,12 +105,16 @@ describe('DemandComparisonPage', () => {
         ),
       )
       .mockResolvedValueOnce(new Response(JSON.stringify(successPayload), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ comparisonRequestId: 'comparison-1', recordedOutcomeStatus: 'rendered' }), { status: 202 }));
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ comparisonRequestId: 'comparison-1', recordedOutcomeStatus: 'rendered' }), { status: 202 }),
+      );
 
     render(<DemandComparisonPage />);
 
-    await screen.findByRole('button', { name: /compare demand/i });
+    await screen.findByLabelText('Service categories');
+    await user.selectOptions(screen.getByLabelText('Service categories'), ['Roads']);
     fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
+
     expect(await screen.findByText(/large request warning/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /proceed/i }));

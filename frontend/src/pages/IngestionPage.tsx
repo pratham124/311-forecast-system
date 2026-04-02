@@ -7,27 +7,27 @@ import type { CurrentDataset, IngestionRunStatus } from '../types/ingestion';
 const READER_ROLES = new Set(['CityPlanner', 'OperationalManager']);
 const TRIGGER_ROLES = new Set(['OperationalManager']);
 
-function canReadIngestion(roles: string[]): boolean {
+export function canReadIngestion(roles: string[]): boolean {
   return roles.some((role) => READER_ROLES.has(role));
 }
 
-function canTriggerIngestion(roles: string[]): boolean {
+export function canTriggerIngestion(roles: string[]): boolean {
   return roles.some((role) => TRIGGER_ROLES.has(role));
 }
 
-function formatDateTime(value?: string | null): string {
+export function formatDateTime(value?: string | null): string {
   if (!value) return 'Not available';
   return new Date(value).toLocaleString();
 }
 
-function describeRunStatus(status: IngestionRunStatus | null): string {
+export function describeRunStatus(status: IngestionRunStatus | null): string {
   if (!status) return 'No run started in this session.';
   if (status.status === 'running') return '311 ingestion is running.';
   if (status.status === 'failed') return status.failureReason || '311 ingestion failed.';
   return '311 ingestion completed.';
 }
 
-async function wait(ms: number): Promise<void> {
+export async function wait(ms: number): Promise<void> {
   await new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 

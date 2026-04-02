@@ -2,6 +2,7 @@ import { env } from '../config/env';
 import { getAccessToken } from '../lib/authSession';
 import { refreshStoredSession } from './auth';
 import type {
+  DemandComparisonAvailability,
   DemandComparisonContext,
   DemandComparisonFilters,
   DemandComparisonRenderEvent,
@@ -29,6 +30,14 @@ async function fetchWithAuthRetry(input: string, init: RequestInit = {}): Promis
   await refreshStoredSession();
   response = await fetch(input, { ...init, headers: buildHeaders(init.body ? 'application/json' : undefined) });
   return response;
+}
+
+export async function fetchDemandComparisonAvailability(signal?: AbortSignal): Promise<DemandComparisonAvailability> {
+  const response = await fetchWithAuthRetry(`${env.apiBaseUrl}/api/v1/demand-comparisons/availability`, { signal });
+  if (!response.ok) {
+    throw new Error(`Demand comparison availability request failed with status ${response.status}`);
+  }
+  return response.json() as Promise<DemandComparisonAvailability>;
 }
 
 export async function fetchDemandComparisonContext(signal?: AbortSignal): Promise<DemandComparisonContext> {

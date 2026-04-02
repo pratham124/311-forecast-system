@@ -64,13 +64,13 @@ export function useHistoricalDemand() {
     try {
       const nextResponse = await submitHistoricalDemandQuery({ ...nextFilters, proceedAfterWarning: proceedAfterWarning || undefined });
       setResponse(nextResponse);
+      setIsSubmitting(false);
       return nextResponse;
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to load historical demand data.');
       setResponse(null);
-      return null;
-    } finally {
       setIsSubmitting(false);
+      return null;
     }
   };
 

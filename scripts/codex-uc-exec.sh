@@ -11,10 +11,17 @@
 # Codex rejects using both). That lets the agent use git without sandbox blocking .git. Risky:
 # only use on repos you trust. Set CODEX_SANDBOXED=1 for --full-auto + workspace-write sandbox only.
 #
-# All UC prompts instruct Codex to: from repo root run `make test` and `make coverage`, then fix
-# failures until green and branch coverage meets requirements for new/changed code; limit scope to
-# the target UC. UC-08–UC-12 also: spec branch; local CI parity (venv + sqlite DB + pytest + npm ci
-# / test / build like .github/workflows/ci.yml); commit and push; launch API + Vite in background.
+# All UC prompts instruct Codex to: read docs/CURSOR_UC08_UC12_PROMPTS.md (companion checklist:
+# completion loop, PATH remapping, UC-scoped 100% line+branch module lists). From repo root run
+# `make test` and `make coverage`, then loop fixes until **100% branch AND line** on every
+# in-scope backend Python module for that UC (see companion doc); limit scope to the target UC.
+# UC-08–UC-12 also: spec branch; local CI parity (venv + sqlite DB + pytest + npm ci / test / build
+# like .github/workflows/ci.yml); commit and push; launch API + Vite in background. All work must be
+# completed inside the Codex session—no partial handoff until coverage gates pass.
+#
+# Cursor vs Codex: Cursor Agent must ONLY run this script (or equivalent `codex exec`) for UC-07–12
+# implementation—not read/edit the repo for that work. Codex alone performs every repository read,
+# write, search, and edit for those use cases (see docs/CURSOR_UC08_UC12_PROMPTS.md).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -93,6 +100,18 @@ case "$UC" in
   run_codex_uc <<'EOF'
 You are implementing UC-07 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
 
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-07 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md` from the repository root. It defines the **completion loop**, PATH remapping reminders, and **UC-07** / UC-08–12 scoped **100% line and branch** Python targets. Align this run with that doc; it extends this prompt where details are abbreviated.
+
+All work in Codex (mandatory):
+- You must implement, test, and verify **entirely within this Codex session** until every gate below passes. Do not stop after a single failing `make coverage`; iterate on code and tests until done.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- For UC-07, achieve **100% branch** and **100% line** coverage on every in-scope module listed under UC-07 in `docs/CURSOR_UC08_UC12_PROMPTS.md`, plus any **new** `app/` modules you add for this UC per `tasks.md` (after PATH remapping). From `backend/`, run targeted `pytest` with `--cov=<module>` `--cov-branch` `--cov-report=term-missing` until **no missing lines and no missing branches** appear for those paths.
+- Then run `make coverage` from the repo root. **Loop:** fix → targeted coverage → full `make coverage` → repeat until scoped modules are 100% and the full report is clean for your changes. Do not declare completion until this is satisfied.
+
 PATH REMAPPING (mandatory):
 - All backend application code lives under backend/app/ (import package app). New modules go next to existing routes, services, repositories, schemas, models, pipelines, clients, core.
 - Alembic migrations live under backend/migrations/versions/ (not backend/alembic). Follow existing revision naming and upgrade pattern from backend/migrations/env.py and backend/app/core/db.py.
@@ -113,7 +132,7 @@ Engineering constraints:
 Post-implementation verification (mandatory — from the repository root, the directory that contains the top-level Makefile):
 - **Makefile alignment:** The root Makefile defines `test` as `backend-test` then `frontend-test` (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `coverage` is an alias of `backend-coverage` only (`cd backend && .venv/bin/pytest --cov=app --cov-branch --cov-report=term-missing`); it does not run frontend coverage. If `make test` fails because the venv or deps are missing, run `make install` (or `make backend-venv`, `make backend-install`, `make frontend-install` per `make help`). For the same build check the Makefile uses for frontend release, run `make frontend-build` (sets `VITE_API_BASE_URL` like local dev).
 1. Run `make test`. All backend and frontend tests must pass.
-2. Run `make coverage`. If any tests fail, or branch coverage for new/changed code does not meet project or lab requirements (e.g. 100% branch on new code where required), fix the code or tests—by editing directly or by a follow-up Codex run with specific instructions—until both `make test` and `make coverage` are satisfactory.
+2. Run `make coverage`. Then verify **100% branch and 100% line** on UC-07 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md` using targeted `pytest --cov ... --cov-branch --cov-report=term-missing` from `backend/`. Fix code or tests and **loop** until there are **zero** missing branches and **zero** missing lines on that scope and `make coverage` is fully green.
 3. Treat docs/UC-07-AT.md as the acceptance source of truth; implement those scenarios and keep automated coverage aligned with them.
 
 Cross-use-case scope:
@@ -122,12 +141,23 @@ Cross-use-case scope:
 Feature scope (UC-07):
 Explore Historical 311 Demand Data. Implement historical filter context and query endpoints, persistence for HistoricalDemandAnalysisRequest/Result/SummaryPoint/AnalysisOutcomeRecord per data-model.md. historical_context_service must resolve approved cleaned dataset from UC-02 lineage and expose only geography levels that are reliable in stored data. historical_warning_service handles high-volume warnings with proceed/decline semantics. Terminal outcomes: no_data, retrieval_failed, render_failed; preserve filter context. Extend frontend with HistoricalDemandPage and feature folder historical-demand. Note: an existing HistoricalDemandService in app/services/historical_demand_service.py serves forecast visualization; either extend carefully without breaking UC-05 or introduce clearly named UC-07 services/modules to avoid conflating responsibilities—choose the approach that keeps UC-05 tests green.
 
-Deliverables: Full implementation per tasks.md phases, with migrations, API, services, repositories, frontend UI, and tests. End with a short summary of what changed and how to run tests.
+Deliverables: Full implementation per tasks.md phases, with migrations, API, services, repositories, frontend UI, and tests. End with a short summary listing **confirmation of 100% line and branch** on UC-07 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md`, plus how you ran tests and coverage.
 EOF
   ;;
 08)
   run_codex_uc <<'EOF'
 You are implementing UC-08 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
+
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-08 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md`. It lists every UC-08 module (`demand_comparison_*`, `demand_lineage_repository`, etc.) that must reach **100% line and 100% branch**, plus the full completion loop. Follow it alongside this prompt.
+
+All work in Codex (mandatory):
+- Implement, test, and verify **entirely in this Codex run** until every gate passes—including **100% branch and line** on every module named for UC-08 in that doc. Loop fixes until coverage is complete; do not hand off partial work.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- From `backend/`, run targeted `pytest` with `--cov-branch` and `--cov-report=term-missing` over each UC-08 module path listed in `docs/CURSOR_UC08_UC12_PROMPTS.md` until **no missing lines and no missing branches** remain. Then `make coverage` from repo root must pass. **Loop** until satisfied before commit/push.
 
 Git workflow (mandatory — do this first, before any file edits or commits):
 - Create and switch to a new git branch named exactly `008-compare-demand-forecasts` (the spec feature branch). From your current HEAD run `git checkout -b 008-compare-demand-forecasts`. If that branch already exists locally, run `git checkout 008-compare-demand-forecasts` instead. Do all implementation work only on that branch; do not commit on main (or whatever you started from) for this work.
@@ -161,10 +191,10 @@ Local CI parity — mandatory before `git commit` and `git push` (must mirror `.
 
 Repo-root verification (mandatory — lab-style aggregate checks):
 - **Makefile alignment:** Root `make test` runs backend then frontend tests exactly as in the top-level Makefile (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `make coverage` is backend-only (`backend-coverage`). Ensure `make install` (or individual `make backend-venv` / `make backend-install` / `make frontend-install`) has been run so those targets succeed. Use `make frontend-build` for the Makefile’s frontend production build step (with `VITE_API_BASE_URL`).
-- From the repository root: run `make test`, then `make coverage`. If either fails, or branch coverage for new/changed code misses requirements (e.g. 100% branch on new code where required), fix implementation or tests until both are green.
+- From the repository root: run `make test`, then `make coverage`. If either fails, or **any** UC-08 scoped module (per `docs/CURSOR_UC08_UC12_PROMPTS.md`) still shows missing **line or branch** in `term-missing`, fix and **loop** until **100% line and 100% branch** on that full scoped set and full suite green.
 - Do not change behavior or structure intended for other use cases; unrelated tests must keep passing.
 
-Git publish (mandatory when there are changes to commit):
+Git publish (mandatory when there are changes to commit — only after coverage gates pass):
 - On branch `008-compare-demand-forecasts`, stage all intended files, commit with a clear message (e.g. `feat(uc-08): demand comparison`), then run `git push -u origin 008-compare-demand-forecasts`. If push fails (e.g. non-fast-forward), report the error and stop; do not force-push unless the user explicitly asked. If there is nothing to commit, say so and skip push.
 
 Launch app for manual verification (mandatory **last** step — after tests and after commit/push attempt, so the user can see the implementation in a browser):
@@ -179,12 +209,23 @@ Launch app for manual verification (mandatory **last** step — after tests and 
 Feature scope (UC-08):
 Compare historical demand (UC-02 approved lineage) with forecast demand (active UC-03 or UC-04) for selected categories, optional geographies, and one continuous time range. Implement deterministic forecast source selection and one allowable comparison granularity per plan/spec. Use a single outcome vocabulary; expose render_failed only via the render-event path, not the initial comparison response. Add backend services demand_comparison_* and demand_lineage_repository as in tasks; frontend feature demand-comparisons and DemandComparisonPage. Include warning_required flow for large requests (US2) and missing combination / failure handling per spec.
 
-Deliverables: Full implementation per tasks.md phases; green local CI parity; commit + push when applicable; app launched in background; end with summary, exact URLs, and how you ran CI-parity commands.
+Deliverables: Full implementation per tasks.md phases; green local CI parity; **100% line and branch** on all UC-08 modules listed in `docs/CURSOR_UC08_UC12_PROMPTS.md` (state how you verified); commit + push when applicable; app launched in background; end with summary, exact URLs, and how you ran CI-parity and coverage commands.
 EOF
   ;;
 09)
   run_codex_uc <<'EOF'
 You are implementing UC-09 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
+
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-09 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md` for the completion loop and UC-09 **100% line and 100% branch** scope (weather overlay modules / patterns). Follow it alongside this prompt.
+
+All work in Codex (mandatory):
+- Complete implementation, tests, and verification **in this Codex session** until every gate passes, including **100% branch and line** on all UC-09-scoped `app/` modules. Loop until coverage is complete.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- From `backend/`, use targeted `pytest --cov ... --cov-branch --cov-report=term-missing` on every UC-09 module described in the companion doc until **no missing lines or branches**. Then `make coverage` from repo root must pass. **Loop** before commit/push.
 
 Git workflow (mandatory — do this first, before any file edits or commits):
 - Create and switch to a new git branch named exactly `009-add-weather-overlay` (the spec feature branch). From your current HEAD run `git checkout -b 009-add-weather-overlay`. If that branch already exists locally, run `git checkout 009-add-weather-overlay` instead. Do all implementation work only on that branch; do not commit on main (or whatever you started from) for this work.
@@ -209,13 +250,13 @@ Local CI parity — mandatory before `git commit` and `git push` (mirror `.githu
 
 Repo-root verification (mandatory — lab-style aggregate checks):
 - **Makefile alignment:** Root `make test` runs backend then frontend tests exactly as in the top-level Makefile (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `make coverage` is backend-only (`backend-coverage`). Ensure `make install` (or individual `make backend-venv` / `make backend-install` / `make frontend-install`) has been run so those targets succeed. Use `make frontend-build` for the Makefile’s frontend production build step (with `VITE_API_BASE_URL`).
-- From the repository root: run `make test`, then `make coverage`. Fix failures or insufficient branch coverage on new/changed code until both are green.
+- From the repository root: run `make test`, then `make coverage`. **Loop** fixes until UC-09 scoped modules (companion doc) have **100% line and 100% branch** and the full suite is green.
 - Do not change behavior intended for other use cases; unrelated tests must stay passing.
 
 Feature scope (UC-09):
 Optional weather overlay on the forecast explorer view. Map the spec's ForecastExplorerPage to the existing ForecastVisualizationPage and forecast visualization chart stack. Add weather_overlay_service, alignment rules, routes per contract (GET overlay + POST render-events). Persist operational / observability records per data-model.md. Implement non-visible states (unavailable, retrieval-failed, misaligned, failed-to-render) without breaking the base chart. Frontend: weather-overlay feature module (controls, layer, status) integrated into ForecastVisualizationPage.
 
-Git publish (mandatory when there are changes to commit):
+Git publish (mandatory when there are changes to commit — only after coverage gates pass):
 - On branch `009-add-weather-overlay`, stage all intended files, commit with a clear message (e.g. `feat(uc-09): weather overlay on forecast visualization`), then run `git push -u origin 009-add-weather-overlay`. If push fails (e.g. non-fast-forward), report the error and stop; do not force-push unless the user explicitly asked. If there is nothing to commit, say so and skip push.
 
 Launch app for manual verification (mandatory **last** step):
@@ -223,12 +264,23 @@ Launch app for manual verification (mandatory **last** step):
 - From `frontend/`: `nohup npm run dev -- --host 127.0.0.1 --port 5173 > /tmp/codex-uc09-vite.log 2>&1 &` (after `npm ci` if needed).
 - If ports are busy, use others and report them. Final summary must include **UI** URL (default http://127.0.0.1:5173/), **API docs** (http://127.0.0.1:8000/docs), and log paths.
 
-Deliverables: Full implementation per tasks.md phases; green local CI parity; commit + push; app launched; summary with URLs and exact CI commands you ran.
+Deliverables: Full implementation per tasks.md phases; green local CI parity; **100% line and branch** on UC-09 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md` (state how you verified); commit + push; app launched; summary with URLs and exact CI/coverage commands you ran.
 EOF
   ;;
 10)
   run_codex_uc <<'EOF'
 You are implementing UC-10 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
+
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-10 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md` for the completion loop and UC-10 **100% line and 100% branch** scope (threshold / forecast-alerts modules). Follow it alongside this prompt.
+
+All work in Codex (mandatory):
+- Finish implementation, tests, and verification **in this Codex session** until every gate passes, including **100% branch and line** on all UC-10-scoped `app/` modules per the companion doc.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- From `backend/`, targeted `pytest --cov ... --cov-branch --cov-report=term-missing` on every UC-10 module in the companion doc until **no missing lines or branches**; then `make coverage` from repo root passes. **Loop** before commit/push.
 
 Git workflow (mandatory — do this first, before any file edits or commits):
 - Create and switch to a new git branch named exactly `010-demand-threshold-alerts` (the spec feature branch). From your current HEAD run `git checkout -b 010-demand-threshold-alerts`. If that branch already exists locally, run `git checkout 010-demand-threshold-alerts` instead. Do all implementation work only on that branch; do not commit on main (or whatever you started from) for this work.
@@ -253,13 +305,13 @@ Local CI parity — mandatory before `git commit` and `git push` (mirror `.githu
 
 Repo-root verification (mandatory — lab-style aggregate checks):
 - **Makefile alignment:** Root `make test` runs backend then frontend tests exactly as in the top-level Makefile (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `make coverage` is backend-only (`backend-coverage`). Ensure `make install` (or individual `make backend-venv` / `make backend-install` / `make frontend-install`) has been run so those targets succeed. Use `make frontend-build` for the Makefile’s frontend production build step (with `VITE_API_BASE_URL`).
-- From the repository root: run `make test`, then `make coverage`. Fix failures or insufficient branch coverage on new/changed code until both are green.
+- From the repository root: run `make test`, then `make coverage`. **Loop** until UC-10 scoped modules (companion doc) show **100% line and 100% branch** and the full suite is green.
 - Do not change behavior intended for other use cases; unrelated tests must stay passing.
 
 Feature scope (UC-10):
 Threshold-based forecast alerts: configuration, evaluation runs, per-scope outcomes, threshold state, notification events, channel attempts per data-model. Frontend alert review surfaces per tasks.
 
-Git publish (mandatory when there are changes to commit):
+Git publish (mandatory when there are changes to commit — only after coverage gates pass):
 - On branch `010-demand-threshold-alerts`, stage all intended files, commit with a clear message (e.g. `feat(uc-10): demand threshold alerts`), then run `git push -u origin 010-demand-threshold-alerts`. If push fails (e.g. non-fast-forward), report the error and stop; do not force-push unless the user explicitly asked. If there is nothing to commit, say so and skip push.
 
 Launch app for manual verification (mandatory **last** step):
@@ -267,12 +319,23 @@ Launch app for manual verification (mandatory **last** step):
 - Frontend: `nohup npm run dev -- --host 127.0.0.1 --port 5173 > /tmp/codex-uc10-vite.log 2>&1 &`.
 - Final summary: UI URL, `/docs` URL, log paths; alternate ports if needed.
 
-Deliverables: Full implementation per tasks.md phases; green local CI parity; commit + push; app launched; summary with URLs and CI commands.
+Deliverables: Full implementation per tasks.md phases; green local CI parity; **100% line and branch** on UC-10 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md` (state how you verified); commit + push; app launched; summary with URLs and CI/coverage commands.
 EOF
   ;;
 11)
   run_codex_uc <<'EOF'
 You are implementing UC-11 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
+
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-11 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md` for the completion loop and UC-11 **100% line and 100% branch** scope (surge modules / patterns). Follow it alongside this prompt.
+
+All work in Codex (mandatory):
+- Complete all work **in this Codex session** until gates pass, including **100% branch and line** on UC-11-scoped `app/` modules per the companion doc.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- From `backend/`, targeted `pytest --cov ... --cov-branch --cov-report=term-missing` until **no missing lines or branches** on that scope; then `make coverage` from repo root passes. **Loop** before commit/push.
 
 Git workflow (mandatory — do this first, before any file edits or commits):
 - Create and switch to a new git branch named exactly `011-abnormal-demand-surge-notifications` (the spec feature branch). From your current HEAD run `git checkout -b 011-abnormal-demand-surge-notifications`. If that branch already exists locally, run `git checkout 011-abnormal-demand-surge-notifications` instead. Do all implementation work only on that branch; do not commit on main (or whatever you started from) for this work.
@@ -296,13 +359,13 @@ Local CI parity — mandatory before `git commit` and `git push` (mirror `.githu
 
 Repo-root verification (mandatory — lab-style aggregate checks):
 - **Makefile alignment:** Root `make test` runs backend then frontend tests exactly as in the top-level Makefile (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `make coverage` is backend-only (`backend-coverage`). Ensure `make install` (or individual `make backend-venv` / `make backend-install` / `make frontend-install`) has been run so those targets succeed. Use `make frontend-build` for the Makefile’s frontend production build step (with `VITE_API_BASE_URL`).
-- From the repository root: run `make test`, then `make coverage`. Fix failures or insufficient branch coverage on new/changed code until both are green.
+- From the repository root: run `make test`, then `make coverage`. **Loop** until UC-11 scoped modules (companion doc) have **100% line and 100% branch** and the full suite is green.
 - Do not change behavior intended for other use cases; unrelated tests must stay passing.
 
 Feature scope (UC-11):
 Surge detection using residual vs active forecast (daily/weekly), z-score and percent-above-forecast confirmation, surge state machine, notification events and channel attempts. Manual replay API per contract. Frontend surge review UI per tasks.
 
-Git publish (mandatory when there are changes to commit):
+Git publish (mandatory when there are changes to commit — only after coverage gates pass):
 - On branch `011-abnormal-demand-surge-notifications`, stage all intended files, commit with a clear message (e.g. `feat(uc-11): abnormal demand surge notifications`), then run `git push -u origin 011-abnormal-demand-surge-notifications`. If push fails (e.g. non-fast-forward), report the error and stop; do not force-push unless the user explicitly asked. If there is nothing to commit, say so and skip push.
 
 Launch app for manual verification (mandatory **last** step):
@@ -310,12 +373,23 @@ Launch app for manual verification (mandatory **last** step):
 - Frontend: `nohup npm run dev -- --host 127.0.0.1 --port 5173 > /tmp/codex-uc11-vite.log 2>&1 &`.
 - Final summary: UI URL, `/docs` URL, log paths; alternate ports if needed.
 
-Deliverables: Full implementation per tasks.md phases; green local CI parity; commit + push; app launched; summary with URLs and CI commands.
+Deliverables: Full implementation per tasks.md phases; green local CI parity; **100% line and branch** on UC-11 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md` (state how you verified); commit + push; app launched; summary with URLs and CI/coverage commands.
 EOF
   ;;
 12)
   run_codex_uc <<'EOF'
 You are implementing UC-12 in the 311-forecast-system monorepo. Work only inside the real tree; do not create backend/src or a top-level tests directory.
+
+Exclusive repository I/O: You alone perform every read, write, search, replace, create, and delete in this repository for UC-12 (docs/, specs/, backend/, frontend/, ui-playwright/, etc.). The Cursor host only starts `codex exec`; it does not edit the repo for this task. Read specs and code from disk yourself in this session; never assume another agent will patch files for you.
+
+Companion document (mandatory — read and follow):
+- Open `docs/CURSOR_UC08_UC12_PROMPTS.md` for the completion loop and UC-12 **100% line and 100% branch** scope (alert detail / drill-down modules). Follow it alongside this prompt.
+
+All work in Codex (mandatory):
+- Complete all work **in this Codex session** until gates pass, including **100% branch and line** on UC-12-scoped `app/` modules per the companion doc.
+
+100% branch and line coverage (mandatory — non-negotiable):
+- From `backend/`, targeted `pytest --cov ... --cov-branch --cov-report=term-missing` until **no missing lines or branches** on that scope; then `make coverage` from repo root passes. **Loop** before commit/push.
 
 Git workflow (mandatory — do this first, before any file edits or commits):
 - Create and switch to a new git branch named exactly `012-uc-12-drill-alert-details` (the spec feature branch). From your current HEAD run `git checkout -b 012-uc-12-drill-alert-details`. If that branch already exists locally, run `git checkout 012-uc-12-drill-alert-details` instead. Do all implementation work only on that branch; do not commit on main (or whatever you started from) for this work.
@@ -338,13 +412,13 @@ Local CI parity — mandatory before `git commit` and `git push` (mirror `.githu
 
 Repo-root verification (mandatory — lab-style aggregate checks):
 - **Makefile alignment:** Root `make test` runs backend then frontend tests exactly as in the top-level Makefile (`cd backend && .venv/bin/pytest`, then `cd frontend && npm test`). `make coverage` is backend-only (`backend-coverage`). Ensure `make install` (or individual `make backend-venv` / `make backend-install` / `make frontend-install`) has been run so those targets succeed. Use `make frontend-build` for the Makefile’s frontend production build step (with `VITE_API_BASE_URL`).
-- From the repository root: run `make test`, then `make coverage`. Fix failures or insufficient branch coverage on new/changed code until both are green.
+- From the repository root: run `make test`, then `make coverage`. **Loop** until UC-12 scoped modules (companion doc) have **100% line and 100% branch** and the full suite is green.
 - Do not change behavior intended for other use cases; unrelated tests must stay passing.
 
 Feature scope (UC-12):
 Authenticated drill-down: forecast distribution, top-5 drivers, 7-day anomaly context; partial and error states; render-event reporting; correlated observability per data-model.
 
-Git publish (mandatory when there are changes to commit):
+Git publish (mandatory when there are changes to commit — only after coverage gates pass):
 - On branch `012-uc-12-drill-alert-details`, stage all intended files, commit with a clear message (e.g. `feat(uc-12): drill alert details and context`), then run `git push -u origin 012-uc-12-drill-alert-details`. If push fails (e.g. non-fast-forward), report the error and stop; do not force-push unless the user explicitly asked. If there is nothing to commit, say so and skip push.
 
 Launch app for manual verification (mandatory **last** step):
@@ -352,7 +426,7 @@ Launch app for manual verification (mandatory **last** step):
 - Frontend: `nohup npm run dev -- --host 127.0.0.1 --port 5173 > /tmp/codex-uc12-vite.log 2>&1 &`.
 - Final summary: UI URL, `/docs` URL, log paths; alternate ports if needed.
 
-Deliverables: Full implementation per tasks.md phases; green local CI parity; commit + push; app launched; summary with URLs and CI commands.
+Deliverables: Full implementation per tasks.md phases; green local CI parity; **100% line and branch** on UC-12 scoped modules per `docs/CURSOR_UC08_UC12_PROMPTS.md` (state how you verified); commit + push; app launched; summary with URLs and CI/coverage commands.
 EOF
   ;;
 esac

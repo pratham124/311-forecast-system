@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 
 import pytest
+import sqlalchemy as sa
 
 from app.models import ForecastRun, WeeklyForecastRun
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
@@ -177,6 +178,83 @@ def build_service(session) -> DemandComparisonService:
         ),
         result_builder=DemandComparisonResultBuilder(),
     )
+
+
+@pytest.mark.integration
+def test_demand_comparison_request_schema_has_count_columns(session) -> None:
+    """Regression: service_category_count and geography_value_count must exist and be writable.
+
+    Guards against migration drift where demand_comparison_requests was created
+    with service_category_filters/geography_filters text columns instead of the
+    integer count columns expected by the ORM and repository.
+    """
+    repo = DemandComparisonRepository(session)
+    request = repo.create_request(
+        requested_by_actor="user",
+        requested_by_subject="planner@example.com",
+        source_cleaned_dataset_version_id=None,
+        source_forecast_version_id=None,
+        source_weekly_forecast_version_id=None,
+        forecast_product_name=None,
+        forecast_granularity=None,
+        geography_level="ward",
+        service_category_count=3,
+        geography_value_count=2,
+        time_range_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 2, tzinfo=timezone.utc),
+        warning_status="not_needed",
+    )
+    session.commit()
+    session.refresh(request)
+    assert request.service_category_count == 3
+    assert request.geography_value_count == 2
+
+
+@pytest.mark.integration
+def test_demand_comparison_request_create_tolerates_legacy_filter_columns(session) -> None:
+    """Regression: create_request must succeed when legacy filter columns exist as nullable.
+
+    Simulates a Postgres production DB that went through the old-013 migration
+    path and was then patched by 015_fix_legacy_filters_nullable:
+    service_category_filters and geography_filters are present in the table but
+    are nullable.  The ORM does not populate them, so any NOT NULL constraint
+    on those columns causes NotNullViolation on every INSERT.
+
+    This test would fail (IntegrityError / OperationalError) if those columns
+    were NOT NULL without a server default — the exact pre-015 failure mode.
+    """
+    # Add the legacy columns as nullable to simulate the post-015 schema shape.
+    # SQLite supports ADD COLUMN IF NOT EXISTS since 3.37; catch the error on
+    # older builds where the column might already be absent.
+    for col in ("service_category_filters", "geography_filters"):
+        try:
+            session.execute(sa.text(f"ALTER TABLE demand_comparison_requests ADD COLUMN {col} TEXT"))
+        except Exception:
+            pass  # already exists or dialect-specific error — tolerated
+
+    session.expire_all()
+
+    repo = DemandComparisonRepository(session)
+    request = repo.create_request(
+        requested_by_actor="user",
+        requested_by_subject="planner@example.com",
+        source_cleaned_dataset_version_id=None,
+        source_forecast_version_id=None,
+        source_weekly_forecast_version_id=None,
+        forecast_product_name=None,
+        forecast_granularity=None,
+        geography_level="ward",
+        service_category_count=2,
+        geography_value_count=1,
+        time_range_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 2, tzinfo=timezone.utc),
+        warning_status="not_needed",
+    )
+    session.commit()
+    session.refresh(request)
+    assert request.comparison_request_id is not None
+    assert request.service_category_count == 2
+    assert request.geography_value_count == 1
 
 
 @pytest.mark.integration

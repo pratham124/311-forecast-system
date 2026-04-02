@@ -75,6 +75,52 @@ def seed_contract_data(session) -> None:
 
 
 @pytest.mark.contract
+def test_demand_comparison_availability_endpoint(app_client, planner_headers, session) -> None:
+    seed_contract_data(session)
+
+    response = app_client.get("/api/v1/demand-comparisons/availability", headers=planner_headers)
+    assert response.status_code == 200
+    payload = response.json()
+
+    # Top-level keys present
+    assert "serviceCategories" in payload
+    assert "byCategoryGeography" in payload
+    assert "dateConstraints" in payload
+    assert "presets" in payload
+
+    # Categories match what was seeded
+    assert "Roads" in payload["serviceCategories"]
+
+    # Date constraints reflect real data
+    constraints = payload["dateConstraints"]
+    assert constraints["historicalMin"] is not None
+    assert constraints["historicalMax"] is not None
+    assert constraints["forecastMin"] is not None
+    assert constraints["forecastMax"] is not None
+    # Overlap exists because history and forecast overlap
+    assert constraints["overlapStart"] is not None
+    assert constraints["overlapEnd"] is not None
+
+    # Per-category geography present for Roads
+    assert "Roads" in payload["byCategoryGeography"]
+    roads_geo = payload["byCategoryGeography"]["Roads"]
+    assert "geographyLevels" in roads_geo
+    assert "geographyOptions" in roads_geo
+    assert "ward" in roads_geo["geographyLevels"]
+    assert "Ward 1" in roads_geo["geographyOptions"]["ward"]
+
+    # At least one preset (active forecast window)
+    assert len(payload["presets"]) >= 1
+    preset = payload["presets"][0]
+    assert "label" in preset
+    assert "timeRangeStart" in preset
+    assert "timeRangeEnd" in preset
+
+    # Forecast product identified
+    assert payload["forecastProduct"] == "daily_1_day"
+
+
+@pytest.mark.contract
 def test_demand_comparison_context_and_query_endpoints(app_client, planner_headers, session) -> None:
     seed_contract_data(session)
 

@@ -1,11 +1,26 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DemandComparisonPage } from '../../../pages/DemandComparisonPage';
 
 const contextPayload = {
   serviceCategories: ['Roads'],
-  geographyLevels: ['ward'],
-  geographyOptions: { ward: ['Ward 1'] },
+  byCategoryGeography: {
+    Roads: {
+      geographyLevels: ['ward'],
+      geographyOptions: { ward: ['Ward 1'] },
+    },
+  },
+  dateConstraints: {
+    historicalMin: '2026-01-01T00:00:00Z',
+    historicalMax: '2026-12-31T00:00:00Z',
+    forecastMin: '2026-01-01T00:00:00Z',
+    forecastMax: '2026-12-31T00:00:00Z',
+    overlapStart: '2026-01-01T00:00:00Z',
+    overlapEnd: '2026-12-31T00:00:00Z',
+  },
+  presets: [],
+  forecastProduct: 'daily_1_day',
 };
 
 describe('DemandComparison failure states', () => {
@@ -22,6 +37,7 @@ describe('DemandComparison failure states', () => {
   });
 
   it('shows partial-forecast-missing messaging', async () => {
+    const user = userEvent.setup();
     fetchMock
       .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
       .mockResolvedValueOnce(
@@ -49,11 +65,13 @@ describe('DemandComparison failure states', () => {
 
     render(<DemandComparisonPage />);
     await screen.findByRole('button', { name: /compare demand/i });
-    fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
+    await user.selectOptions(screen.getByLabelText(/service categories/i), ['Roads']);
+    await user.click(screen.getByRole('button', { name: /compare demand/i }));
     expect(await screen.findByText(/missing combinations/i)).toBeInTheDocument();
   });
 
   it('shows alignment failure error state', async () => {
+    const user = userEvent.setup();
     fetchMock
       .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
       .mockResolvedValueOnce(
@@ -76,7 +94,8 @@ describe('DemandComparison failure states', () => {
 
     render(<DemandComparisonPage />);
     await screen.findByRole('button', { name: /compare demand/i });
-    fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
+    await user.selectOptions(screen.getByLabelText(/service categories/i), ['Roads']);
+    await user.click(screen.getByRole('button', { name: /compare demand/i }));
     expect(await screen.findByText(/could not be aligned/i)).toBeInTheDocument();
   });
 });

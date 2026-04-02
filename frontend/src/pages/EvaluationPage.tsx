@@ -14,27 +14,27 @@ const FORECAST_PRODUCT_LABELS: Record<ForecastProduct, string> = {
 const READER_ROLES = new Set(['CityPlanner', 'OperationalManager']);
 const TRIGGER_ROLES = new Set(['OperationalManager']);
 
-function formatDateTime(value?: string | null): string {
+export function formatDateTime(value?: string | null): string {
   if (!value) return 'Not available';
   return new Date(value).toLocaleString();
 }
 
-function canReadEvaluation(roles: string[]): boolean {
+export function canReadEvaluation(roles: string[]): boolean {
   return roles.some((role) => READER_ROLES.has(role));
 }
 
-function canTriggerEvaluation(roles: string[]): boolean {
+export function canTriggerEvaluation(roles: string[]): boolean {
   return roles.some((role) => TRIGGER_ROLES.has(role));
 }
 
-function describeRunStatus(status: EvaluationRunStatus | null): string {
+export function describeRunStatus(status: EvaluationRunStatus | null): string {
   if (!status) return 'No run started in this session.';
   if (status.status === 'running') return 'Evaluation is running.';
   if (status.status === 'failed') return status.failureReason || status.summary || 'Evaluation failed.';
   return status.summary || 'Evaluation completed.';
 }
 
-async function wait(ms: number): Promise<void> {
+export async function wait(ms: number): Promise<void> {
   await new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
