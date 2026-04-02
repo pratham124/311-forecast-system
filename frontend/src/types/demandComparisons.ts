@@ -1,3 +1,32 @@
+export interface DateConstraints {
+  historicalMin?: string;
+  historicalMax?: string;
+  forecastMin?: string;
+  forecastMax?: string;
+  overlapStart?: string;
+  overlapEnd?: string;
+}
+
+export interface DatePreset {
+  label: string;
+  timeRangeStart: string;
+  timeRangeEnd: string;
+}
+
+export interface CategoryGeographyAvailability {
+  geographyLevels: string[];
+  geographyOptions: Record<string, string[]>;
+}
+
+export interface DemandComparisonAvailability {
+  serviceCategories: string[];
+  byCategoryGeography: Record<string, CategoryGeographyAvailability>;
+  dateConstraints: DateConstraints;
+  presets: DatePreset[];
+  forecastProduct?: string;
+  summary?: string;
+}
+
 export type DemandComparisonOutcomeStatus =
   | 'warning_required'
   | 'success'

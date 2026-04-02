@@ -12,7 +12,7 @@ export class ApiError extends Error {
   }
 }
 
-function contentTypeFromHeaders(headers?: HeadersInit): string | undefined {
+export function contentTypeFromHeaders(headers?: HeadersInit): string | undefined {
   if (!headers) return undefined;
   if (headers instanceof Headers) {
     return headers.get('Content-Type') ?? undefined;
@@ -24,7 +24,7 @@ function contentTypeFromHeaders(headers?: HeadersInit): string | undefined {
   return headers['Content-Type'] ?? headers['content-type'];
 }
 
-function buildHeaders(contentType?: string): Headers {
+export function buildHeaders(contentType?: string): Headers {
   const headers = new Headers();
   const accessToken = getAccessToken();
   if (accessToken) {

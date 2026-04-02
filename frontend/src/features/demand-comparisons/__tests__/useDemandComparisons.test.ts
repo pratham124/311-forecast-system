@@ -1,240 +1,254 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDemandComparisons } from '../hooks/useDemandComparisons';
 import * as api from '../../../api/demandComparisons';
 
 vi.mock('../../../api/demandComparisons');
+
+const availabilityPayload = {
+  serviceCategories: ['Roads', 'Waste'],
+  byCategoryGeography: {
+    Roads: {
+      geographyLevels: ['ward'],
+      geographyOptions: {
+        ward: ['Ward 1', 'Ward 2'],
+      },
+    },
+    Waste: {
+      geographyLevels: ['ward'],
+      geographyOptions: {
+        ward: ['Ward 1'],
+      },
+    },
+  },
+  dateConstraints: {
+    historicalMin: '2026-03-01T00:00:00Z',
+    historicalMax: '2026-03-10T00:00:00Z',
+    forecastMin: '2026-03-02T00:00:00Z',
+    forecastMax: '2026-03-06T00:00:00Z',
+    overlapStart: '2026-03-02T00:00:00Z',
+    overlapEnd: '2026-03-05T00:00:00Z',
+  },
+  presets: [
+    {
+      label: 'Overlap window',
+      timeRangeStart: '2026-03-02T00:00:00Z',
+      timeRangeEnd: '2026-03-05T00:00:00Z',
+    },
+  ],
+  forecastProduct: 'daily_1_day',
+} as const;
 
 describe('useDemandComparisons', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it('initializes context and handles abort correctly', async () => {
-    const mockContext = { serviceCategories: ['Cat A'], geographyLevels: ['Level 1'], geographyOptions: {} };
-    let resolveContext: any;
-    vi.mocked(api.fetchDemandComparisonContext).mockReturnValue(new Promise((resolve) => {
-      resolveContext = resolve;
-    }));
+  it('loads availability and exposes progressive options', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
 
-    const { result, unmount } = renderHook(() => useDemandComparisons());
-    expect(result.current.isLoadingContext).toBe(true);
-
-    act(() => {
-      resolveContext(mockContext);
-    });
-
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 0));
-    });
-
-    expect(result.current.isLoadingContext).toBe(false);
-    expect(result.current.context).toEqual(mockContext);
-    expect(result.current.filters.serviceCategories).toEqual(['Cat A']);
-    expect(result.current.filters.geographyLevel).toBe('Level 1');
-
-    unmount(); // Test abort block execution
-  });
-
-  it('handles fetchDemandComparisonContext error gracefully unless aborted', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockRejectedValue(new Error('Fetch Error'));
     const { result } = renderHook(() => useDemandComparisons());
 
     await act(async () => {
-      await new Promise(r => setTimeout(r, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(result.current.isLoadingContext).toBe(false);
-    expect(result.current.error).toBe('Fetch Error');
+    expect(result.current.isLoadingAvailability).toBe(false);
+    expect(result.current.availability?.serviceCategories).toEqual(['Roads', 'Waste']);
+    expect(result.current.availableGeographyLevels).toEqual([]);
+    expect(result.current.availableGeographyValues).toEqual([]);
+    expect(result.current.dateWindowStart).toBe('2026-03-01T00:00:00Z');
+    expect(result.current.dateWindowEnd).toBe('2026-03-10T00:00:00Z');
   });
 
-  it('handles abort properly on unmount during fetch', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockImplementation((signal) => {
-      return new Promise((_, reject) => {
-         signal?.addEventListener('abort', () => reject(new Error('AbortError')));
+  it('resets invalid downstream geography when categories change', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+
+    const { result } = renderHook(() => useDemandComparisons());
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    act(() => {
+      result.current.setFilters({
+        ...result.current.filters,
+        serviceCategories: ['Roads', 'Waste'],
+        geographyLevel: 'ward',
+        geographyValues: ['Ward 2'],
       });
     });
-    const { result, unmount } = renderHook(() => useDemandComparisons());
-    unmount(); // Aborts the signal immediately
+
+    expect(result.current.filters.geographyLevel).toBe('ward');
+    expect(result.current.availableGeographyValues).toEqual(['Ward 1']);
+    expect(result.current.filters.geographyValues).toEqual([]);
+
+    act(() => {
+      result.current.setFilters({
+        ...result.current.filters,
+        serviceCategories: [],
+      });
+    });
+
+    expect(result.current.filters.geographyLevel).toBeUndefined();
+    expect(result.current.filters.geographyValues).toEqual([]);
+  });
+
+  it('clamps selected date range to backend window', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+
+    const { result } = renderHook(() => useDemandComparisons());
 
     await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Error should not be set because signal was aborted
-    expect(result.current.error).toBeNull();
-  });
-
-  it('submits query and updates states successfully', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    const mockResponse = { outcomeStatus: 'success', comparisonRequestId: 'req-1', message: 'Ok', series: [] };
-    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue(mockResponse as any);
-
-    const { result } = renderHook(() => useDemandComparisons());
-
-    let promise: any;
     act(() => {
-      promise = result.current.submit({ serviceCategories: ['New Cat'] }, true);
+      result.current.setFilters({
+        ...result.current.filters,
+        serviceCategories: ['Roads'],
+        timeRangeStart: '2026-02-25T00:00:00Z',
+        timeRangeEnd: '2026-03-03T00:00:00Z',
+      });
     });
 
-    expect(result.current.isSubmitting).toBe(true);
-    expect(result.current.filters.serviceCategories).toEqual(['New Cat']);
-
-    const res = await act(async () => promise);
-    expect(res).toEqual(mockResponse);
-    expect(result.current.response).toEqual(mockResponse);
-    expect(result.current.isSubmitting).toBe(false);
+    expect(result.current.filters.timeRangeStart).toBe('2026-03-01T00:00:00.000Z');
+    expect(result.current.filters.timeRangeEnd).toBe('2026-03-03T00:00:00.000Z');
+    expect(result.current.dateRangeError).toBeNull();
   });
 
-  it('submits query and handles error', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    vi.mocked(api.submitDemandComparisonQuery).mockRejectedValue(new Error('Submit Error'));
+  it('submits valid filters and stores response', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({
+      comparisonRequestId: 'cmp-1',
+      outcomeStatus: 'success',
+      series: [],
+    } as any);
 
     const { result } = renderHook(() => useDemandComparisons());
 
-    const res = await act(async () => result.current.submit());
-
-    expect(res).toBeNull();
-    expect(result.current.error).toBe('Submit Error');
-    expect(result.current.response).toBeNull();
-    expect(result.current.isSubmitting).toBe(false);
-  });
-
-  it('submits query falling back to generic error', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    vi.mocked(api.submitDemandComparisonQuery).mockRejectedValue('String Error');
-
-    const { result } = renderHook(() => useDemandComparisons());
-    await act(async () => { await result.current.submit(); });
-    expect(result.current.error).toBe('Unable to compare demand.');
-  });
-
-  it('handles race conditions via lastRequestToken', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-
-    let resolveFirst: any;
-    const promise1 = new Promise((r) => { resolveFirst = r; });
-    const mockResponse2 = { outcomeStatus: 'success', message: 'Second', series: [] };
-
-    vi.mocked(api.submitDemandComparisonQuery)
-      .mockReturnValueOnce(promise1 as any)
-      .mockResolvedValueOnce(mockResponse2 as any);
-
-    const { result } = renderHook(() => useDemandComparisons());
-
-    let submit1: any;
-    let submit2: any;
-    act(() => {
-      submit1 = result.current.submit();
-      submit2 = result.current.submit();
-    });
-
-    // submit2 resolves immediately
-    await act(async () => { await submit2; });
-    expect(result.current.response).toEqual(mockResponse2);
-    expect(result.current.isSubmitting).toBe(false);
-
-    // resolve submit1 now
-    await act(async () => { resolveFirst({ outcomeStatus: 'success', message: 'First', series: [] }); await submit1; });
-    // State should remain for submit2
-    expect(result.current.response).toEqual(mockResponse2);
-  });
-
-  it('handles race condition for errors', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-
-    let rejectFirst: any;
-    const promise1 = new Promise((_, r) => { rejectFirst = r; });
-    const mockResponse2 = { outcomeStatus: 'success', message: 'Second', series: [] };
-
-    vi.mocked(api.submitDemandComparisonQuery)
-      .mockReturnValueOnce(promise1 as any)
-      .mockResolvedValueOnce(mockResponse2 as any);
-
-    const { result } = renderHook(() => useDemandComparisons());
-
-    let submit1: any;
-    let submit2: any;
-    act(() => {
-      submit1 = result.current.submit();
-      submit2 = result.current.submit();
-    });
-
-    await act(async () => { await submit2; });
     await act(async () => {
-      rejectFirst(new Error('First Error'));
-      try { await submit1; } catch (e) {}
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Should not inherit the error from the earlier stale request
-    expect(result.current.error).toBeNull();
+    act(() => {
+      result.current.setFilters({
+        ...result.current.filters,
+        serviceCategories: ['Roads'],
+        geographyLevel: 'ward',
+        geographyValues: ['Ward 1'],
+        timeRangeStart: '2026-03-02T00:00:00Z',
+        timeRangeEnd: '2026-03-03T00:00:00Z',
+      });
+    });
+
+    let response: any;
+    await act(async () => {
+      response = await result.current.submit();
+    });
+
+    expect(response?.outcomeStatus).toBe('success');
+    expect(result.current.response?.comparisonRequestId).toBe('cmp-1');
+    expect(api.submitDemandComparisonQuery).toHaveBeenCalledTimes(1);
   });
 
-  it('reports render event correctly and prevents duplicates', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({ comparisonRequestId: 'test-req', outcomeStatus: 'success', message: 'Ok', series: [] } as any);
+  it('applies backend date preset', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
 
     const { result } = renderHook(() => useDemandComparisons());
 
-    await act(async () => { await result.current.submit(); });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    act(() => {
+      result.current.applyDatePreset({
+        label: 'Overlap window',
+        timeRangeStart: '2026-03-02T00:00:00Z',
+        timeRangeEnd: '2026-03-05T00:00:00Z',
+      });
+    });
+
+    expect(result.current.filters.timeRangeStart).toBe('2026-03-02T00:00:00.000Z');
+    expect(result.current.filters.timeRangeEnd).toBe('2026-03-05T00:00:00.000Z');
+  });
+
+  it('auto-selects deterministic availability-backed combination', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({
+      comparisonRequestId: 'cmp-auto',
+      outcomeStatus: 'success',
+      series: [],
+    } as any);
+
+    const { result } = renderHook(() => useDemandComparisons());
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    let response: any;
+    await act(async () => {
+      response = await result.current.autoSelectForecastBackedCombination();
+    });
+
+    expect(response?.comparisonRequestId).toBe('cmp-auto');
+    expect(api.submitDemandComparisonQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceCategories: ['Roads'],
+        geographyLevel: 'ward',
+        geographyValues: ['Ward 1'],
+        proceedAfterWarning: true,
+      }),
+    );
+    expect(result.current.autoSelectProgress).toEqual({ current: 0, total: 0 });
+    expect(result.current.isAutoSelecting).toBe(false);
+  });
+
+  it('deduplicates render event submissions', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({
+      comparisonRequestId: 'cmp-render',
+      outcomeStatus: 'success',
+      series: [],
+    } as any);
+
+    const { result } = renderHook(() => useDemandComparisons());
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    act(() => {
+      result.current.setFilters({
+        ...result.current.filters,
+        serviceCategories: ['Roads'],
+        timeRangeStart: '2026-03-02T00:00:00Z',
+        timeRangeEnd: '2026-03-03T00:00:00Z',
+      });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
 
     await act(async () => {
       await result.current.reportRenderEvent({ renderStatus: 'rendered' } as any);
-    });
-    expect(api.submitDemandComparisonRenderEvent).toHaveBeenCalledWith('test-req', { renderStatus: 'rendered' });
-    
-    // call again to trigger early return branch for duplicate render events
-    await act(async () => {
       await result.current.reportRenderEvent({ renderStatus: 'rendered' } as any);
     });
+
     expect(api.submitDemandComparisonRenderEvent).toHaveBeenCalledTimes(1);
-
-    // Calling it again with same values shouldn't resubmit
-    vi.mocked(api.submitDemandComparisonRenderEvent).mockClear();
-    await act(async () => {
-      await result.current.reportRenderEvent({ renderStatus: 'rendered' } as any);
-    });
-    expect(api.submitDemandComparisonRenderEvent).not.toHaveBeenCalled();
   });
 
-  it('bails out of reportRenderEvent if no comparisonRequestId', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({ outcomeStatus: 'success', message: 'Ok', series: [] } as any);
+  it('maps availability load network failures to a friendly message', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockRejectedValue(new Error('Load failed'));
 
     const { result } = renderHook(() => useDemandComparisons());
-    await act(async () => { await result.current.submit(); });
 
     await act(async () => {
-      await result.current.reportRenderEvent({ renderStatus: 'rendered' } as any);
-    });
-    expect(api.submitDemandComparisonRenderEvent).not.toHaveBeenCalled();
-  });
-
-  it('handles reportRenderEvent error', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({ comparisonRequestId: 'test-err', outcomeStatus: 'success', message: 'Ok', series: [] } as any);
-    vi.mocked(api.submitDemandComparisonRenderEvent).mockRejectedValue(new Error('Render Event Error'));
-
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const { result } = renderHook(() => useDemandComparisons());
-    await act(async () => { await result.current.submit(); });
-
-    await act(async () => {
-      await result.current.reportRenderEvent({ renderStatus: 'rendered' } as any);
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to submit demand comparison render event', expect.any(Error));
-    consoleSpy.mockRestore();
-  });
-
-  it('clears response and error', async () => {
-    vi.mocked(api.fetchDemandComparisonContext).mockResolvedValue({ serviceCategories: [], geographyLevels: [], geographyOptions: {} });
-    const { result } = renderHook(() => useDemandComparisons());
-
-    act(() => { result.current.clearResponse(); });
-
-    expect(result.current.response).toBeNull();
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toBe('Unable to load comparison filters. Check your connection and try again.');
   });
 });

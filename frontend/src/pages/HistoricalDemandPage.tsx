@@ -6,7 +6,7 @@ import { HistoricalDemandResults } from '../features/historical-demand/component
 import { HistoricalDemandStatus } from '../features/historical-demand/components/HistoricalDemandStatus';
 import { useHistoricalDemand } from '../features/historical-demand/hooks/useHistoricalDemand';
 
-function toApiDateTime(value: string): string {
+export function toApiDateTime(value: string): string {
   if (!value) {
     return value;
   }

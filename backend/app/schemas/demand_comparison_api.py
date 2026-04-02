@@ -6,6 +6,43 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
+class DateConstraints(BaseModel):
+    historical_min: datetime | None = Field(default=None, alias="historicalMin")
+    historical_max: datetime | None = Field(default=None, alias="historicalMax")
+    forecast_min: datetime | None = Field(default=None, alias="forecastMin")
+    forecast_max: datetime | None = Field(default=None, alias="forecastMax")
+    overlap_start: datetime | None = Field(default=None, alias="overlapStart")
+    overlap_end: datetime | None = Field(default=None, alias="overlapEnd")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class DatePreset(BaseModel):
+    label: str
+    time_range_start: datetime = Field(alias="timeRangeStart")
+    time_range_end: datetime = Field(alias="timeRangeEnd")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class CategoryGeographyAvailability(BaseModel):
+    geography_levels: list[str] = Field(alias="geographyLevels")
+    geography_options: dict[str, list[str]] = Field(default_factory=dict, alias="geographyOptions")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class DemandComparisonAvailability(BaseModel):
+    service_categories: list[str] = Field(alias="serviceCategories")
+    by_category_geography: dict[str, CategoryGeographyAvailability] = Field(default_factory=dict, alias="byCategoryGeography")
+    date_constraints: DateConstraints = Field(alias="dateConstraints")
+    presets: list[DatePreset] = Field(default_factory=list)
+    forecast_product: str | None = Field(default=None, alias="forecastProduct")
+    summary: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class DemandComparisonContext(BaseModel):
     service_categories: list[str] = Field(alias="serviceCategories")
     geography_levels: list[str] = Field(alias="geographyLevels")

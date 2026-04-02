@@ -1,0 +1,167 @@
+/**
+ * Covers uncovered branches in HistoricalDemandFilters and HistoricalDemandStatus.
+ */
+import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { HistoricalDemandFilters } from '../components/HistoricalDemandFilters';
+import { HistoricalDemandResults } from '../components/HistoricalDemandResults';
+import { HistoricalDemandStatus } from '../components/HistoricalDemandStatus';
+import type { HistoricalDemandFilters as FiltersType, HistoricalDemandResponse } from '../../../types/historicalDemand';
+
+afterEach(cleanup);
+
+// ─── HistoricalDemandFilters ──────────────────────────────────────────────────
+
+const baseFilters: FiltersType = {
+  serviceCategories: [],
+  timeRangeStart: '2026-03-01T00:00:00Z',
+  timeRangeEnd: '2026-03-31T23:59:59Z',
+};
+
+describe('HistoricalDemandFilters – nullish timeRangeEnd fallback', () => {
+  it('renders correctly when timeRangeEnd is undefined (?? empty string branch)', () => {
+    const filtersWithNoEnd: FiltersType = {
+      serviceCategories: [],
+      timeRangeStart: '2026-03-01T00:00:00Z',
+      timeRangeEnd: undefined as unknown as string,
+    };
+    render(
+      <HistoricalDemandFilters
+        context={null}
+        filters={filtersWithNoEnd}
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+    // timeRangeEnd is undefined → ?? '' → ''.replace('Z', '') = '' → input value is ''
+    const endInput = screen.getByLabelText(/time range end/i) as HTMLInputElement;
+    expect(endInput.value).toBe('');
+  });
+});
+
+describe('HistoricalDemandFilters – updateField', () => {
+  it('calls onChange with the new value when a field changes', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <HistoricalDemandFilters
+        context={{ serviceCategories: ['Roads', 'Waste'], supportedGeographyLevels: ['ward'], summary: '' }}
+        filters={baseFilters}
+        onChange={onChange}
+        onSubmit={vi.fn()}
+      />,
+    );
+    await user.selectOptions(screen.getByRole('combobox', { name: /service category/i }), 'Roads');
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ serviceCategory: 'Roads' }));
+  });
+
+  it('calls onChange with undefined when an empty value is selected', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <HistoricalDemandFilters
+        context={{ serviceCategories: ['Roads'], supportedGeographyLevels: [], summary: '' }}
+        filters={{ ...baseFilters, serviceCategory: 'Roads' }}
+        onChange={onChange}
+        onSubmit={vi.fn()}
+      />,
+    );
+    await user.selectOptions(screen.getByRole('combobox', { name: /service category/i }), '');
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ serviceCategory: undefined }));
+  });
+});
+
+// ─── HistoricalDemandStatus ───────────────────────────────────────────────────
+
+describe('HistoricalDemandStatus', () => {
+  it('shows loading state', () => {
+    render(<HistoricalDemandStatus isLoading={true} error={null} response={null} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText(/loading historical demand/i)).toBeInTheDocument();
+  });
+
+  it('shows error state', () => {
+    render(<HistoricalDemandStatus isLoading={false} error="Something broke" response={null} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText('Something broke')).toBeInTheDocument();
+  });
+
+  it('shows warning state with proceed/decline buttons', () => {
+    const response = {
+      warning: { shown: true, acknowledged: false, message: 'Big request!' },
+      outcomeStatus: 'success',
+    } as unknown as HistoricalDemandResponse;
+    const onProceed = vi.fn();
+    const onDecline = vi.fn();
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={onProceed} onDecline={onDecline} />);
+    expect(screen.getByText('Big request!')).toBeInTheDocument();
+    screen.getByRole('button', { name: /proceed/i }).click();
+    expect(onProceed).toHaveBeenCalled();
+    screen.getByRole('button', { name: /revise/i }).click();
+    expect(onDecline).toHaveBeenCalled();
+  });
+
+  it('shows no data state', () => {
+    const response = { outcomeStatus: 'no_data', message: 'Nothing found.' } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText('Nothing found.')).toBeInTheDocument();
+  });
+
+  it('shows retrieval_failed state', () => {
+    const response = { outcomeStatus: 'retrieval_failed', summary: 'Could not fetch data.' } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText('Could not fetch data.')).toBeInTheDocument();
+  });
+
+  it('shows render_failed state', () => {
+    const response = { outcomeStatus: 'render_failed', message: 'Render failed.' } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText('Render failed.')).toBeInTheDocument();
+  });
+
+  it('returns null when no relevant state', () => {
+    const { container } = render(<HistoricalDemandStatus isLoading={false} error={null} response={null} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('shows no_data without message (uses fallback text)', () => {
+    // Covers line 34: response?.message ?? 'No historical demand data matched...'
+    const response = { outcomeStatus: 'no_data' } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText(/no historical demand data matched/i)).toBeInTheDocument();
+  });
+
+  it('shows retrieval_failed without summary (uses message ?? fallback)', () => {
+    // Covers line 37: response.summary ?? response.message ?? 'We could not display...'
+    const response = { outcomeStatus: 'retrieval_failed' } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandStatus isLoading={false} error={null} response={response} onProceed={vi.fn()} onDecline={vi.fn()} />);
+    expect(screen.getByText(/we could not display historical demand data/i)).toBeInTheDocument();
+  });
+});
+
+// ─── HistoricalDemandResults ──────────────────────────────────────────────────
+
+describe('HistoricalDemandResults – geographyKey null branch', () => {
+  it('returns null when summaryPoints is empty', () => {
+    const response = {
+      summaryPoints: [],
+    } as unknown as HistoricalDemandResponse;
+    const { container } = render(<HistoricalDemandResults response={response} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders City-wide when geographyKey is null (lines 27 and 52-53)', () => {
+    const response = {
+      summaryPoints: [
+        {
+          bucketStart: '2026-03-05T00:00:00Z',
+          serviceCategory: 'Roads',
+          geographyKey: null,  // null → triggers ?? 'city' in key and ?? 'City-wide' in cell
+          demandCount: 5,
+        },
+      ],
+    } as unknown as HistoricalDemandResponse;
+    render(<HistoricalDemandResults response={response} />);
+    // The table cell should show 'City-wide' when geographyKey is null
+    expect(screen.getByText('City-wide')).toBeInTheDocument();
+  });
+});

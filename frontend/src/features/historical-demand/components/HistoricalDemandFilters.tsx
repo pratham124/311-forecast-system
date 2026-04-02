@@ -32,11 +32,11 @@ export function HistoricalDemandFilters({ context, filters, onChange, onSubmit, 
       <div className="grid gap-2 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="time-range-start">Time range start</Label>
-          <Input id="time-range-start" name="timeRangeStart" type="datetime-local" value={filters.timeRangeStart.replace('Z', '')} onChange={updateField} disabled={disabled} />
+          <Input id="time-range-start" name="timeRangeStart" type="datetime-local" value={(filters.timeRangeStart ?? '').replace('Z', '')} onChange={updateField} disabled={disabled} />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="time-range-end">Time range end</Label>
-          <Input id="time-range-end" name="timeRangeEnd" type="datetime-local" value={filters.timeRangeEnd.replace('Z', '')} onChange={updateField} disabled={disabled} />
+          <Input id="time-range-end" name="timeRangeEnd" type="datetime-local" value={(filters.timeRangeEnd ?? '').replace('Z', '')} onChange={updateField} disabled={disabled} />
         </div>
       </div>
       <div className="grid gap-2 md:grid-cols-[0.9fr_1.1fr]">

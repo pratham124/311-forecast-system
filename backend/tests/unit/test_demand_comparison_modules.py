@@ -16,6 +16,7 @@ from app.repositories.demand_lineage_repository import DemandLineageRepository
 from app.schemas.demand_comparison_api import DemandComparisonQueryRequest, DemandComparisonRenderEvent
 from app.services.demand_comparison_context_service import DemandComparisonContextService
 from app.services.demand_comparison_outcomes import build_terminal_message, map_terminal_outcome
+from app.services.demand_comparison_availability_service import DemandComparisonAvailabilityService
 from app.services.demand_comparison_render_service import DemandComparisonRenderService
 from app.services.demand_comparison_result_builder import DemandComparisonAlignmentError, DemandComparisonResultBuilder
 from app.services.demand_comparison_service import DemandComparisonService
@@ -442,3 +443,85 @@ def test_result_builder_parsers_and_service_filter_guards() -> None:
         SimpleNamespace(forecast_product="daily_1_day", source_forecast_version_id="forecast-1"),
     )
     assert len(forecast) == 1
+
+
+def test_availability_service_intersects_historical_and_forecast_options() -> None:
+    cleaned_repository = StubCleanedRepository(
+        records=[
+            {"requested_at": "2026-03-01T00:15:00Z", "category": "Roads", "ward": "Ward 1"},
+            {"requested_at": "2026-03-01T01:15:00Z", "category": "Roads", "ward": "Ward 2"},
+            {"requested_at": "2026-03-01T02:15:00Z", "category": "Waste", "ward": "Ward 1"},
+        ]
+    )
+    daily_marker = SimpleNamespace(
+        forecast_version_id="forecast-1",
+        horizon_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        horizon_end=datetime(2026, 3, 2, tzinfo=timezone.utc),
+    )
+    forecast_repository = SimpleNamespace(
+        get_current_marker=lambda product: daily_marker if product == "daily_1_day_demand" else None,
+        list_buckets=lambda _version_id: [
+            SimpleNamespace(service_category="Roads", geography_key="Ward 1"),
+            SimpleNamespace(service_category="Parks", geography_key="Ward 3"),
+        ],
+    )
+    weekly_forecast_repository = SimpleNamespace(
+        get_current_marker=lambda _product: None,
+        list_buckets=lambda _version_id: [],
+    )
+
+    availability = DemandComparisonAvailabilityService(
+        cleaned_dataset_repository=cleaned_repository,
+        forecast_repository=forecast_repository,
+        weekly_forecast_repository=weekly_forecast_repository,
+        source_name="edmonton_311",
+        daily_forecast_product_name="daily_1_day_demand",
+        weekly_forecast_product_name="weekly_7_day_demand",
+    ).get_availability()
+
+    assert availability.service_categories == ["Roads"]
+    assert availability.forecast_product == "daily_1_day"
+    roads = availability.by_category_geography["Roads"]
+    assert "ward" in roads.geography_levels
+    assert roads.geography_options["ward"] == ["Ward 1"]
+    assert availability.date_constraints.historical_min is not None
+    assert availability.date_constraints.forecast_min is not None
+    assert availability.date_constraints.overlap_start is not None
+
+
+def test_availability_service_hides_geography_when_forecast_is_category_only() -> None:
+    cleaned_repository = StubCleanedRepository(
+        records=[
+            {"requested_at": "2026-03-01T00:15:00Z", "category": "Roads", "ward": "Ward 1"},
+            {"requested_at": "2026-03-01T01:15:00Z", "category": "Roads", "ward": "Ward 2"},
+        ]
+    )
+    daily_marker = SimpleNamespace(
+        forecast_version_id="forecast-1",
+        horizon_start=datetime(2026, 3, 1, tzinfo=timezone.utc),
+        horizon_end=datetime(2026, 3, 2, tzinfo=timezone.utc),
+    )
+    forecast_repository = SimpleNamespace(
+        get_current_marker=lambda product: daily_marker if product == "daily_1_day_demand" else None,
+        list_buckets=lambda _version_id: [
+            SimpleNamespace(service_category="Roads", geography_key=None),
+        ],
+    )
+    weekly_forecast_repository = SimpleNamespace(
+        get_current_marker=lambda _product: None,
+        list_buckets=lambda _version_id: [],
+    )
+
+    availability = DemandComparisonAvailabilityService(
+        cleaned_dataset_repository=cleaned_repository,
+        forecast_repository=forecast_repository,
+        weekly_forecast_repository=weekly_forecast_repository,
+        source_name="edmonton_311",
+        daily_forecast_product_name="daily_1_day_demand",
+        weekly_forecast_product_name="weekly_7_day_demand",
+    ).get_availability()
+
+    assert availability.service_categories == ["Roads"]
+    roads = availability.by_category_geography["Roads"]
+    assert roads.geography_levels == []
+    assert roads.geography_options == {}

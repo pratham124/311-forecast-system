@@ -24,7 +24,7 @@ interface ForecastVisualizationChartProps {
   visualization: ForecastVisualization;
 }
 
-function formatTick(timestamp: string, granularity: ForecastVisualization['forecastGranularity']): string {
+export function formatTick(timestamp: string, granularity: ForecastVisualization['forecastGranularity']): string {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return timestamp;
   return granularity === 'hourly'
@@ -32,7 +32,11 @@ function formatTick(timestamp: string, granularity: ForecastVisualization['forec
     : date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
 }
 
-function buildChartData(visualization: ForecastVisualization): ChartDatum[] {
+export function formatTooltipLabel(label: unknown): string {
+  return typeof label === 'string' ? label : 'Chart point';
+}
+
+export function buildChartData(visualization: ForecastVisualization): ChartDatum[] {
   const byTimestamp = new Map<string, ChartDatum>();
 
   for (const point of visualization.historicalSeries) {
@@ -96,7 +100,7 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
               width={40}
             />
             <Tooltip
-              labelFormatter={(label) => typeof label === 'string' ? label : 'Chart point'}
+              labelFormatter={formatTooltipLabel}
               contentStyle={{
                 borderRadius: '16px',
                 border: '1px solid rgba(25,58,90,0.14)',
