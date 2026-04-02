@@ -129,8 +129,12 @@ export function getDateWindow(availability: DemandComparisonAvailability | null)
   const dateConstraints = availability.dateConstraints ?? {};
   // Allow the full data span so users can query historical-only ranges even when
   // no overlap with the active forecast exists.
-  const startOptions = [dateConstraints.historicalMin, dateConstraints.forecastMin].filter(Boolean);
-  const endOptions = [dateConstraints.historicalMax, dateConstraints.forecastMax].filter(Boolean);
+  const startOptions = [dateConstraints.historicalMin, dateConstraints.forecastMin].filter(
+    (value): value is string => Boolean(value),
+  );
+  const endOptions = [dateConstraints.historicalMax, dateConstraints.forecastMax].filter(
+    (value): value is string => Boolean(value),
+  );
   const start = startOptions.reduce<string | undefined>((min, val) => {
     if (!min) return val;
     return val < min ? val : min;

@@ -14,7 +14,7 @@ afterEach(cleanup);
 // ─── HistoricalDemandFilters ──────────────────────────────────────────────────
 
 const baseFilters: FiltersType = {
-  serviceCategories: [],
+  serviceCategory: undefined,
   timeRangeStart: '2026-03-01T00:00:00Z',
   timeRangeEnd: '2026-03-31T23:59:59Z',
 };
@@ -22,7 +22,7 @@ const baseFilters: FiltersType = {
 describe('HistoricalDemandFilters – nullish timeRangeEnd fallback', () => {
   it('renders correctly when timeRangeEnd is undefined (?? empty string branch)', () => {
     const filtersWithNoEnd: FiltersType = {
-      serviceCategories: [],
+      serviceCategory: undefined,
       timeRangeStart: '2026-03-01T00:00:00Z',
       timeRangeEnd: undefined as unknown as string,
     };

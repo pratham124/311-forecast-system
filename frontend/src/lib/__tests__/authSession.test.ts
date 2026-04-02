@@ -13,7 +13,7 @@ describe('getStoredAuthSession', () => {
   });
 
   it('returns the parsed session when stored', () => {
-    const session = { accessToken: 'tok', user: { id: '1', email: 'a@b.com', roles: [] } };
+    const session = { accessToken: 'tok', user: { userAccountId: '1', email: 'a@b.com', roles: [] } };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     expect(getStoredAuthSession()).toEqual(session);
   });
@@ -27,7 +27,7 @@ describe('getStoredAuthSession', () => {
 
 describe('saveAuthSession', () => {
   it('serializes session into localStorage', () => {
-    const session = { accessToken: 'tok2', user: { id: '2', email: 'b@c.com', roles: ['CityPlanner'] } };
+    const session = { accessToken: 'tok2', user: { userAccountId: '2', email: 'b@c.com', roles: ['CityPlanner'] } };
     saveAuthSession(session);
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!)).toEqual(session);
   });
@@ -47,7 +47,7 @@ describe('getAccessToken', () => {
   });
 
   it('returns the access token from stored session', () => {
-    const session = { accessToken: 'my-token', user: { id: '3', email: 'c@d.com', roles: [] } };
+    const session = { accessToken: 'my-token', user: { userAccountId: '3', email: 'c@d.com', roles: [] } };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     expect(getAccessToken()).toBe('my-token');
   });
@@ -71,7 +71,9 @@ describe('authSession – window undefined branches (SSR guard)', () => {
     delete globalThis.window;
     try {
       // Should not throw; just returns early
-      expect(() => saveAuthSession({ accessToken: 'x', user: { id: '1', email: 'a@b.com', roles: [] } })).not.toThrow();
+      expect(() =>
+        saveAuthSession({ accessToken: 'x', user: { userAccountId: '1', email: 'a@b.com', roles: [] } }),
+      ).not.toThrow();
     } finally {
       globalThis.window = originalWindow;
     }
