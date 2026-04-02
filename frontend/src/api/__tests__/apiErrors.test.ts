@@ -141,7 +141,7 @@ describe('submitHistoricalDemandQuery', () => {
   it('throws on non-ok response', async () => {
     fetchMock.mockResolvedValue(errJson(400));
     await expect(
-      submitHistoricalDemandQuery({ serviceCategories: [], timeRangeStart: '', timeRangeEnd: '' }),
+      submitHistoricalDemandQuery({ serviceCategory: undefined, timeRangeStart: '', timeRangeEnd: '' }),
     ).rejects.toThrow('Historical demand request failed with status 400');
   });
 });

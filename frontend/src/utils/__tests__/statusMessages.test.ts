@@ -6,10 +6,15 @@ function makeVisualization(overrides: Partial<ForecastVisualization>): ForecastV
   return {
     visualizationLoadId: 'v1',
     forecastProduct: 'daily_1_day',
-    viewStatus: 'live',
+    forecastGranularity: 'daily',
+    categoryFilter: { selectedCategory: null, selectedCategories: [] },
+    historyWindowStart: '2026-03-01T00:00:00Z',
+    historyWindowEnd: '2026-03-31T23:59:59Z',
+    alerts: [],
+    pipelineStatus: [],
+    viewStatus: 'success',
     historicalSeries: [],
     forecastSeries: [],
-    statusMessages: [],
     ...overrides,
   } as ForecastVisualization;
 }
@@ -31,17 +36,17 @@ describe('buildStatusSummary', () => {
   });
 
   it('returns degradation copy for history_missing', () => {
-    const result = buildStatusSummary(makeVisualization({ viewStatus: 'live', degradationType: 'history_missing' }));
+    const result = buildStatusSummary(makeVisualization({ viewStatus: 'degraded', degradationType: 'history_missing' }));
     expect(result).toMatch(/history is not available/i);
   });
 
   it('returns degradation copy for uncertainty_missing', () => {
-    const result = buildStatusSummary(makeVisualization({ viewStatus: 'live', degradationType: 'uncertainty_missing' }));
+    const result = buildStatusSummary(makeVisualization({ viewStatus: 'degraded', degradationType: 'uncertainty_missing' }));
     expect(result).toMatch(/shaded range/i);
   });
 
   it('returns default live copy', () => {
-    const result = buildStatusSummary(makeVisualization({ viewStatus: 'live' }));
+    const result = buildStatusSummary(makeVisualization({ viewStatus: 'success' }));
     expect(result).toMatch(/latest forecast/i);
   });
 });
@@ -49,10 +54,10 @@ describe('buildStatusSummary', () => {
 describe('groupStatusMessages', () => {
   it('groups messages by level', () => {
     const messages = [
-      { level: 'info' as const, message: 'Info message' },
-      { level: 'warning' as const, message: 'Warning message' },
-      { level: 'error' as const, message: 'Error message' },
-      { level: 'info' as const, message: 'Another info' },
+      { code: 'i1', level: 'info' as const, message: 'Info message' },
+      { code: 'w1', level: 'warning' as const, message: 'Warning message' },
+      { code: 'e1', level: 'error' as const, message: 'Error message' },
+      { code: 'i2', level: 'info' as const, message: 'Another info' },
     ];
     const result = groupStatusMessages(messages);
     expect(result.info).toHaveLength(2);

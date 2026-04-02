@@ -41,9 +41,10 @@ describe('computeChartGeometry', () => {
   it('computes bandArea when uncertaintyBands are provided', () => {
     const viz = makeVisualization({
       uncertaintyBands: {
+        labels: ['P10', 'P50', 'P90'],
         points: [
-          { timestamp: '2026-03-03T00:00:00Z', p10: 10, p90: 20 },
-          { timestamp: '2026-03-04T00:00:00Z', p10: 12, p90: 22 },
+          { timestamp: '2026-03-03T00:00:00Z', p10: 10, p50: 15, p90: 20 },
+          { timestamp: '2026-03-04T00:00:00Z', p10: 12, p50: 17, p90: 22 },
         ],
       },
     });
@@ -54,7 +55,7 @@ describe('computeChartGeometry', () => {
 
   it('returns empty string for bandArea when uncertaintyBands has no points', () => {
     const viz = makeVisualization({
-      uncertaintyBands: { points: [] },
+      uncertaintyBands: { labels: ['P10', 'P50', 'P90'], points: [] },
     });
     const geometry = computeChartGeometry(viz);
     expect(geometry.bandArea).toBe('');

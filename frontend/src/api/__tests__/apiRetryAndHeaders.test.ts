@@ -286,7 +286,7 @@ describe('historicalDemand: 401 retry path', () => {
         filters: {}, aggregationGranularity: 'daily', resultMode: 'chart_and_table', summaryPoints: [],
       }));
 
-    const result = await submitHistoricalDemandQuery({ serviceCategories: [], timeRangeStart: '', timeRangeEnd: '' });
+    const result = await submitHistoricalDemandQuery({ serviceCategory: undefined, timeRangeStart: '', timeRangeEnd: '' });
     expect(result.outcomeStatus).toBe('success');
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
@@ -305,7 +305,7 @@ describe('historicalDemand: buildHeaders', () => {
 
   it('sends Content-Type when body present', async () => {
     fetchMock.mockResolvedValue(okJson({ analysisRequestId: 'r1', outcomeStatus: 'success', filters: {}, aggregationGranularity: 'daily', resultMode: 'chart_and_table', summaryPoints: [] }));
-    await submitHistoricalDemandQuery({ serviceCategories: [], timeRangeStart: '', timeRangeEnd: '' });
+    await submitHistoricalDemandQuery({ serviceCategory: undefined, timeRangeStart: '', timeRangeEnd: '' });
     const initArg = fetchMock.mock.calls[0][1] as RequestInit;
     expect((initArg.headers as Headers).get('Content-Type')).toBe('application/json');
   });
