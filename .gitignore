@@ -32,9 +32,10 @@ backend/.artifacts/forecast_models/
 backend/.artifacts/weekly_forecast_models/
 coverage/
 **/.vite
-.coverage
+**.coverage
 frontend/.tmp-coverage-gaps.cjs
 frontend/.tmp-coverage-gaps.js
 frontend/.tmp-print-branch.cjs
 frontend/coverage-out*.txt
 frontend/coverage.txt
+backend/**.db
