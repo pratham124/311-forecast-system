@@ -55,13 +55,11 @@ describe('useDemandComparisons', () => {
 
     expect(result.current.isLoadingAvailability).toBe(false);
     expect(result.current.availability?.serviceCategories).toEqual(['Roads', 'Waste']);
-    expect(result.current.availableGeographyLevels).toEqual([]);
-    expect(result.current.availableGeographyValues).toEqual([]);
     expect(result.current.dateWindowStart).toBe('2026-03-01T00:00:00Z');
     expect(result.current.dateWindowEnd).toBe('2026-03-10T00:00:00Z');
   });
 
-  it('resets invalid downstream geography when categories change', async () => {
+  it('clears stale geography state when filters are updated', async () => {
     vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
 
     const { result } = renderHook(() => useDemandComparisons());
@@ -79,8 +77,7 @@ describe('useDemandComparisons', () => {
       });
     });
 
-    expect(result.current.filters.geographyLevel).toBe('ward');
-    expect(result.current.availableGeographyValues).toEqual(['Ward 1']);
+    expect(result.current.filters.geographyLevel).toBeUndefined();
     expect(result.current.filters.geographyValues).toEqual([]);
 
     act(() => {
@@ -135,8 +132,6 @@ describe('useDemandComparisons', () => {
       result.current.setFilters({
         ...result.current.filters,
         serviceCategories: ['Roads'],
-        geographyLevel: 'ward',
-        geographyValues: ['Ward 1'],
         timeRangeStart: '2026-03-02T00:00:00Z',
         timeRangeEnd: '2026-03-03T00:00:00Z',
       });
@@ -150,6 +145,39 @@ describe('useDemandComparisons', () => {
     expect(response?.outcomeStatus).toBe('success');
     expect(result.current.response?.comparisonRequestId).toBe('cmp-1');
     expect(api.submitDemandComparisonQuery).toHaveBeenCalledTimes(1);
+    expect(api.submitDemandComparisonQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        geographyLevel: undefined,
+        geographyValues: [],
+      }),
+    );
+  });
+
+  it('submits all available categories when the UI selection is empty', async () => {
+    vi.mocked(api.fetchDemandComparisonAvailability).mockResolvedValue(availabilityPayload as any);
+    vi.mocked(api.submitDemandComparisonQuery).mockResolvedValue({
+      comparisonRequestId: 'cmp-all',
+      outcomeStatus: 'success',
+      series: [],
+    } as any);
+
+    const { result } = renderHook(() => useDemandComparisons());
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    let response: any;
+    await act(async () => {
+      response = await result.current.submit();
+    });
+
+    expect(response?.comparisonRequestId).toBe('cmp-all');
+    expect(api.submitDemandComparisonQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceCategories: ['Roads', 'Waste'],
+      }),
+    );
   });
 
   it('applies backend date preset', async () => {
@@ -196,8 +224,8 @@ describe('useDemandComparisons', () => {
     expect(api.submitDemandComparisonQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         serviceCategories: ['Roads'],
-        geographyLevel: 'ward',
-        geographyValues: ['Ward 1'],
+        geographyLevel: undefined,
+        geographyValues: [],
         proceedAfterWarning: true,
       }),
     );

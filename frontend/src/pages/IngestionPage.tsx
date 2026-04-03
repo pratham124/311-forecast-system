@@ -207,7 +207,7 @@ export function IngestionPage({ roles }: IngestionPageProps) {
           <Card className="rounded-[22px] md:col-span-2">
             <CardContent className="p-5">
               <span className="block text-sm text-muted">Latest 311 requested_at in stored data</span>
-              <strong className="mt-2 block text-lg text-ink">{formatDateTime(dataset.latestRequestedAt)}</strong>
+              <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.latestRequestedAt)}</strong>
             </CardContent>
           </Card>
         </section>

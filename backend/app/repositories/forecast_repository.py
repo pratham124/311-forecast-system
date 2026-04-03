@@ -170,6 +170,27 @@ class ForecastRepository:
             return None
         return version if version.storage_status == "stored" else None
 
+    def list_stored_versions_overlapping_range(
+        self,
+        *,
+        range_start: datetime,
+        range_end: datetime,
+    ) -> list[ForecastVersion]:
+        statement = (
+            select(ForecastVersion)
+            .where(
+                ForecastVersion.storage_status == "stored",
+                ForecastVersion.horizon_end >= range_start,
+                ForecastVersion.horizon_start <= range_end,
+            )
+            .order_by(
+                ForecastVersion.stored_at.desc().nullslast(),
+                ForecastVersion.activated_at.desc().nullslast(),
+                ForecastVersion.forecast_version_id.desc(),
+            )
+        )
+        return list(self.session.scalars(statement))
+
     def _require_version(self, forecast_version_id: str) -> ForecastVersion:
         version = self.get_forecast_version(forecast_version_id)
         if version is None:

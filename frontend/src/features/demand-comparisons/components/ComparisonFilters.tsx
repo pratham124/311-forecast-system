@@ -1,7 +1,7 @@
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import type {
-  DatePreset,
   DemandComparisonAvailability,
   DemandComparisonFilters,
 } from '../../../types/demandComparisons';
@@ -9,188 +9,217 @@ import type {
 interface ComparisonFiltersProps {
   availability: DemandComparisonAvailability | null;
   filters: DemandComparisonFilters;
-  availableGeographyLevels: string[];
-  availableGeographyValues: string[];
   dateWindowStart?: string;
   dateWindowEnd?: string;
-  datePresets?: DatePreset[];
   dateRangeError?: string | null;
   onChange: (next: DemandComparisonFilters) => void;
-  onApplyDatePreset?: (preset: DatePreset) => void;
   onSubmit: () => void;
-  onAutoSelect?: () => void;
-  isAutoSelecting?: boolean;
-  autoSelectProgress?: { current: number; total: number };
   disabled?: boolean;
 }
 
-function toDateTimeLocalValue(value: string): string {
+const EDMONTON_TIMEZONE = 'America/Edmonton';
+
+function toDateInputValue(value: string): string {
+  if (!value) {
+    return '';
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return '';
   }
-  return date.toISOString().slice(0, 16);
+  return date.toISOString().slice(0, 10);
 }
 
-function isSameInstant(left: string, right: string): boolean {
-  const leftDate = new Date(left);
-  const rightDate = new Date(right);
-  if (Number.isNaN(leftDate.getTime()) || Number.isNaN(rightDate.getTime())) {
-    return false;
+function getTimeZoneOffsetMilliseconds(timeZone: string, value: Date): number {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  });
+
+  const parts = formatter.formatToParts(value);
+  const year = Number(parts.find((part) => part.type === 'year')?.value ?? '0');
+  const month = Number(parts.find((part) => part.type === 'month')?.value ?? '1');
+  const day = Number(parts.find((part) => part.type === 'day')?.value ?? '1');
+  const hour = Number(parts.find((part) => part.type === 'hour')?.value ?? '0');
+  const minute = Number(parts.find((part) => part.type === 'minute')?.value ?? '0');
+  const second = Number(parts.find((part) => part.type === 'second')?.value ?? '0');
+
+  return Date.UTC(year, month - 1, day, hour, minute, second) - value.getTime();
+}
+
+function toEdmontonBoundaryIso(value: string, boundary: 'start' | 'end'): string {
+  if (!value) {
+    return value;
   }
-  return leftDate.getTime() === rightDate.getTime();
+
+  const [year, month, day] = value.split('-').map(Number);
+  const hour = boundary === 'end' ? 23 : 0;
+  const minute = boundary === 'end' ? 59 : 0;
+  const second = boundary === 'end' ? 59 : 0;
+
+  let utcGuess = Date.UTC(year, month - 1, day, hour, minute, second);
+  for (let index = 0; index < 3; index += 1) {
+    const offset = getTimeZoneOffsetMilliseconds(EDMONTON_TIMEZONE, new Date(utcGuess));
+    const nextGuess = Date.UTC(year, month - 1, day, hour, minute, second) - offset;
+    if (nextGuess === utcGuess) {
+      break;
+    }
+    utcGuess = nextGuess;
+  }
+
+  return new Date(utcGuess).toISOString().replace('.000Z', 'Z');
 }
 
 export function ComparisonFilters({
   availability,
   filters,
-  availableGeographyLevels,
-  availableGeographyValues,
   dateWindowStart,
   dateWindowEnd,
-  datePresets = [],
   dateRangeError = null,
   onChange,
-  onApplyDatePreset,
   onSubmit,
-  onAutoSelect,
-  isAutoSelecting = false,
-  autoSelectProgress = { current: 0, total: 0 },
   disabled = false,
 }: ComparisonFiltersProps) {
+  const [openMenu, setOpenMenu] = useState<'categories' | null>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
   const serviceCategories = availability?.serviceCategories ?? [];
   const isDateRangeInvalid = Boolean(dateRangeError);
-  const hasCategorySelection = filters.serviceCategories.length > 0;
-  const showGeographyLevel = hasCategorySelection;
-  const showGeographyValues = Boolean(filters.geographyLevel);
-  const startMin = dateWindowStart ? toDateTimeLocalValue(dateWindowStart) : undefined;
-  const endMax = dateWindowEnd ? toDateTimeLocalValue(dateWindowEnd) : undefined;
-  const selectedPreset = datePresets.find(
-    (preset) =>
-      isSameInstant(filters.timeRangeStart, preset.timeRangeStart)
-      && isSameInstant(filters.timeRangeEnd, preset.timeRangeEnd),
-  );
+  const canSubmitAllCategories = serviceCategories.length > 0;
+  const startMin = dateWindowStart ? toDateInputValue(dateWindowStart) : undefined;
+  const endMax = dateWindowEnd ? toDateInputValue(dateWindowEnd) : undefined;
+  const serviceCategoriesLabel = useMemo(() => {
+    if (filters.serviceCategories.length === 0) return 'All categories';
+    if (filters.serviceCategories.length <= 2) return filters.serviceCategories.join(', ');
+    return `${filters.serviceCategories.length} categories selected`;
+  }, [filters.serviceCategories]);
+
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (categoriesRef.current?.contains(target)) return;
+      setOpenMenu(null);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [openMenu]);
+
+  const updateDateField = (boundary: 'start' | 'end') => (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    onChange({
+      ...filters,
+      [boundary === 'start' ? 'timeRangeStart' : 'timeRangeEnd']: toEdmontonBoundaryIso(value, boundary),
+    });
+  };
+
+  const toggleCategory = (category: string) => {
+    const nextCategories = filters.serviceCategories.includes(category)
+      ? filters.serviceCategories.filter((item) => item !== category)
+      : [...filters.serviceCategories, category].sort();
+    onChange({ ...filters, serviceCategories: nextCategories });
+  };
 
   return (
     <div className="grid gap-5">
       <div className="grid gap-2">
         <Label htmlFor="comparison-categories">Service categories</Label>
-        <select
-          id="comparison-categories"
-          multiple
-          className="min-h-40 rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-ink"
-          value={filters.serviceCategories}
-          disabled={disabled}
-          onChange={(event) => {
-            const selected = Array.from(event.target.selectedOptions, (opt) => opt.value);
-            onChange({ ...filters, serviceCategories: selected });
-          }}
-        >
-          {serviceCategories.map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-        <p className="text-xs text-muted">Hold Ctrl / Cmd to select multiple.</p>
+        <div ref={categoriesRef} className={openMenu === 'categories' ? 'relative z-[120]' : 'relative z-10'}>
+          <button
+            id="comparison-categories"
+            type="button"
+            onClick={() => setOpenMenu((current) => (current === 'categories' ? null : 'categories'))}
+            disabled={disabled}
+            className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-[rgba(25,58,90,0.14)] bg-white px-4 py-3 text-left text-sm text-ink shadow-sm transition hover:border-accent focus:border-accent focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            aria-haspopup="listbox"
+            aria-expanded={openMenu === 'categories'}
+          >
+            <span>{serviceCategoriesLabel}</span>
+            <span className="ml-4 text-muted">{openMenu === 'categories' ? 'Hide' : 'Choose'}</span>
+          </button>
+          {openMenu === 'categories' ? (
+            <div className="absolute z-[130] mt-2 w-full rounded-2xl border border-[rgba(25,58,90,0.14)] bg-white p-3 shadow-panel backdrop-blur-xl">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="m-0 text-sm font-semibold text-ink">Service categories</p>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...filters, serviceCategories: [] })}
+                  className="text-sm font-medium text-forecast hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div role="listbox" aria-label="Service categories" className="max-h-64 space-y-2 overflow-auto">
+                {serviceCategories.length === 0 ? <p className="m-0 text-sm text-muted">No categories available.</p> : null}
+                {serviceCategories.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange({ ...filters, serviceCategories: [] });
+                      setOpenMenu(null);
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl px-2 py-2 text-left text-sm text-ink transition hover:bg-[#eef5fa]"
+                    aria-pressed={filters.serviceCategories.length === 0}
+                  >
+                    <span>All categories</span>
+                    {filters.serviceCategories.length === 0 ? <span className="text-forecast">Selected</span> : null}
+                  </button>
+                ) : null}
+                {serviceCategories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => toggleCategory(category)}
+                    className="flex w-full items-center justify-between rounded-xl px-2 py-2 text-left text-sm text-ink transition hover:bg-[#eef5fa]"
+                    aria-pressed={filters.serviceCategories.includes(category)}
+                  >
+                    <span>{category}</span>
+                    {filters.serviceCategories.includes(category) ? <span className="text-forecast">Selected</span> : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
-
-      {showGeographyLevel ? (
-        <div className="grid gap-2">
-          <Label htmlFor="comparison-geo-level">Geography level</Label>
-          <select
-            id="comparison-geo-level"
-            className="min-h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-ink"
-            value={filters.geographyLevel ?? ''}
-            disabled={disabled || availableGeographyLevels.length === 0}
-            onChange={(event) => onChange({ ...filters, geographyLevel: event.target.value || undefined, geographyValues: [] })}
-          >
-            <option value="">None</option>
-            {availableGeographyLevels.map((level) => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-
-      {showGeographyValues ? (
-        <div className="grid gap-2">
-          <Label htmlFor="comparison-geo-values">Geography values</Label>
-          <select
-            id="comparison-geo-values"
-            multiple
-            className="min-h-40 rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-ink"
-            value={filters.geographyValues}
-            disabled={disabled || availableGeographyValues.length === 0}
-            onChange={(event) => {
-              const selected = Array.from(event.target.selectedOptions, (opt) => opt.value);
-              onChange({ ...filters, geographyValues: selected });
-            }}
-          >
-            {availableGeographyValues.map((value) => (
-              <option key={value} value={value}>{value}</option>
-            ))}
-          </select>
-          <p className="text-xs text-muted">Hold Ctrl / Cmd to select multiple.</p>
-        </div>
-      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="comparison-start">Start</Label>
           <Input
             id="comparison-start"
-            type="datetime-local"
-            value={toDateTimeLocalValue(filters.timeRangeStart)}
+            type="date"
+            value={toDateInputValue(filters.timeRangeStart)}
             min={startMin}
             max={endMax}
             disabled={disabled}
-            onChange={(event) => onChange({ ...filters, timeRangeStart: new Date(event.target.value).toISOString() })}
+            onChange={updateDateField('start')}
           />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="comparison-end">End</Label>
           <Input
             id="comparison-end"
-            type="datetime-local"
-            value={toDateTimeLocalValue(filters.timeRangeEnd)}
+            type="date"
+            value={toDateInputValue(filters.timeRangeEnd)}
             min={startMin}
             max={endMax}
             disabled={disabled}
-            onChange={(event) => onChange({ ...filters, timeRangeEnd: new Date(event.target.value).toISOString() })}
+            onChange={updateDateField('end')}
           />
         </div>
       </div>
-
-      {datePresets.length > 0 && onApplyDatePreset ? (
-        <div className="grid gap-2">
-          <Label>Quick presets</Label>
-          <div className="flex flex-wrap gap-2">
-            {datePresets.map((preset) => (
-              (() => {
-                const isSelected = selectedPreset?.label === preset.label
-                  && selectedPreset.timeRangeStart === preset.timeRangeStart
-                  && selectedPreset.timeRangeEnd === preset.timeRangeEnd;
-                return (
-                  <button
-                    key={`${preset.label}:${preset.timeRangeStart}:${preset.timeRangeEnd}`}
-                    type="button"
-                    aria-pressed={isSelected}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${isSelected
-                      ? 'border-accent bg-accent/10 text-accent'
-                      : 'border-slate-300 bg-white text-ink hover:bg-slate-50'}`}
-                    disabled={disabled}
-                    onClick={() => onApplyDatePreset(preset)}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })()
-            ))}
-          </div>
-          {selectedPreset ? (
-            <p className="text-xs text-muted">Applied preset: {selectedPreset.label}</p>
-          ) : null}
-        </div>
-      ) : null}
 
       {isDateRangeInvalid ? (
         <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -198,25 +227,9 @@ export function ComparisonFilters({
         </p>
       ) : null}
 
-      {onAutoSelect ? (
-        <div className="grid gap-2">
-          <button
-            type="button"
-            disabled={disabled || isAutoSelecting || !availability || availability.serviceCategories.length === 0}
-            onClick={onAutoSelect}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isAutoSelecting
-              ? `Applying best available combination... (${Math.max(1, autoSelectProgress.current)}/${Math.max(1, autoSelectProgress.total)})`
-              : 'Auto-select forecast-backed combination'}
-          </button>
-          <p className="text-xs text-muted">Uses backend-verified category, geography, and preset defaults.</p>
-        </div>
-      ) : null}
-
       <button
         type="button"
-        disabled={disabled || isAutoSelecting || filters.serviceCategories.length === 0 || isDateRangeInvalid}
+        disabled={disabled || !canSubmitAllCategories || isDateRangeInvalid}
         onClick={onSubmit}
         className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-4 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >

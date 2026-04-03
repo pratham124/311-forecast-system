@@ -194,7 +194,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(authMocks.refreshStoredSession).toHaveBeenCalled();
     });
-    expect(screen.getByText(/forecast route content/i)).toBeInTheDocument();
+    expect(await screen.findByText(/forecast route content/i)).toBeInTheDocument();
   });
 
   it('ignores bootstrap user resolution after unmount', async () => {

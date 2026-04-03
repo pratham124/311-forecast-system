@@ -140,6 +140,9 @@ def test_build_ingestion_job_runs_pipeline(monkeypatch: pytest.MonkeyPatch) -> N
     calls: list[str] = []
 
     class FakeSession:
+        def commit(self) -> None:
+            calls.append("committed")
+
         def close(self) -> None:
             calls.append("closed")
 
@@ -147,15 +150,18 @@ def test_build_ingestion_job_runs_pipeline(monkeypatch: pytest.MonkeyPatch) -> N
         def __init__(self, session, client, logging_service) -> None:
             calls.append("created")
 
-        def run(self, trigger_type: str):
+        def run(self, trigger_type: str, run_follow_on_jobs: bool = True):
             calls.append(trigger_type)
-            return "done"
+            calls.append(f"follow_on:{run_follow_on_jobs}")
+            return SimpleNamespace(status="success", result_type="no_new_data")
 
     monkeypatch.setattr("app.services.scheduler_service.IngestionPipeline", FakePipeline)
     job = build_ingestion_job(lambda: FakeSession())
 
-    assert job() == "done"
-    assert calls == ["created", "scheduled", "closed"]
+    result = job()
+
+    assert result.status == "success"
+    assert calls == ["created", "scheduled", "follow_on:False", "committed", "closed"]
 
 
 class NoCursorClient(Edmonton311Client):

@@ -57,6 +57,21 @@ describe('useHistoricalDemand – error paths', () => {
     expect(result.current.error).toBe('Unable to load historical demand data.');
   });
 
+  it('shows a validation error and skips the request when either date is missing', async () => {
+    const { result } = renderHook(() => useHistoricalDemand());
+    await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+
+    let ret: unknown;
+    await act(async () => {
+      ret = await result.current.submit({ timeRangeStart: '' });
+    });
+
+    expect(ret).toBeNull();
+    expect(result.current.error).toBe('Select both a start date and an end date.');
+    expect(result.current.response).toBeNull();
+    expect(api.submitHistoricalDemandQuery).not.toHaveBeenCalled();
+  });
+
   it('clearResponse resets response and error state', async () => {
     vi.mocked(api.submitHistoricalDemandQuery).mockRejectedValue(new Error('fail'));
 

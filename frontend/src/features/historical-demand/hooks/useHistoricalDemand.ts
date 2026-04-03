@@ -54,6 +54,12 @@ export function useHistoricalDemand() {
   const submit = async (overrides?: Partial<HistoricalDemandFilters>, proceedAfterWarning = false) => {
     const nextFilters = { ...filters, ...overrides };
     setFilters(nextFilters);
+    if (!nextFilters.timeRangeStart || !nextFilters.timeRangeEnd) {
+      setError('Select both a start date and an end date.');
+      setResponse(null);
+      setIsSubmitting(false);
+      return null;
+    }
     setIsSubmitting(true);
     setError(null);
     try {

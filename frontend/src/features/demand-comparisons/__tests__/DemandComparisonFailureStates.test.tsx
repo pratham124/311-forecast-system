@@ -65,7 +65,8 @@ describe('DemandComparison failure states', () => {
 
     render(<DemandComparisonPage />);
     await screen.findByRole('button', { name: /compare demand/i });
-    await user.selectOptions(screen.getByLabelText(/service categories/i), ['Roads']);
+    await user.click(screen.getByLabelText('Service categories'));
+    await user.click(screen.getByRole('button', { name: 'Roads' }));
     await user.click(screen.getByRole('button', { name: /compare demand/i }));
     expect(await screen.findByText(/missing combinations/i)).toBeInTheDocument();
   });
@@ -94,7 +95,8 @@ describe('DemandComparison failure states', () => {
 
     render(<DemandComparisonPage />);
     await screen.findByRole('button', { name: /compare demand/i });
-    await user.selectOptions(screen.getByLabelText(/service categories/i), ['Roads']);
+    await user.click(screen.getByLabelText('Service categories'));
+    await user.click(screen.getByRole('button', { name: 'Roads' }));
     await user.click(screen.getByRole('button', { name: /compare demand/i }));
     expect(await screen.findByText(/could not be aligned/i)).toBeInTheDocument();
   });

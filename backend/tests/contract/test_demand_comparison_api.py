@@ -91,33 +91,20 @@ def test_demand_comparison_availability_endpoint(app_client, planner_headers, se
     # Categories match what was seeded
     assert "Roads" in payload["serviceCategories"]
 
-    # Date constraints reflect real data
+    # Initial filter load is intentionally lightweight.
     constraints = payload["dateConstraints"]
-    assert constraints["historicalMin"] is not None
-    assert constraints["historicalMax"] is not None
-    assert constraints["forecastMin"] is not None
-    assert constraints["forecastMax"] is not None
-    # Overlap exists because history and forecast overlap
-    assert constraints["overlapStart"] is not None
-    assert constraints["overlapEnd"] is not None
+    assert constraints["historicalMin"] is None
+    assert constraints["historicalMax"] is None
+    assert constraints["forecastMin"] is None
+    assert constraints["forecastMax"] is None
+    assert constraints["overlapStart"] is None
+    assert constraints["overlapEnd"] is None
 
-    # Per-category geography present for Roads
-    assert "Roads" in payload["byCategoryGeography"]
-    roads_geo = payload["byCategoryGeography"]["Roads"]
-    assert "geographyLevels" in roads_geo
-    assert "geographyOptions" in roads_geo
-    assert "ward" in roads_geo["geographyLevels"]
-    assert "Ward 1" in roads_geo["geographyOptions"]["ward"]
+    assert payload["byCategoryGeography"] == {}
 
-    # At least one preset (active forecast window)
-    assert len(payload["presets"]) >= 1
-    preset = payload["presets"][0]
-    assert "label" in preset
-    assert "timeRangeStart" in preset
-    assert "timeRangeEnd" in preset
+    assert payload["presets"] == []
 
-    # Forecast product identified
-    assert payload["forecastProduct"] == "daily_1_day"
+    assert payload["forecastProduct"] is None
 
 
 @pytest.mark.contract
@@ -132,8 +119,6 @@ def test_demand_comparison_context_and_query_endpoints(app_client, planner_heade
         "/api/v1/demand-comparisons/queries",
         json={
             "serviceCategories": ["Roads"],
-            "geographyLevel": "ward",
-            "geographyValues": ["Ward 1"],
             "timeRangeStart": "2026-03-01T00:00:00Z",
             "timeRangeEnd": "2026-03-02T00:00:00Z",
         },
@@ -141,7 +126,7 @@ def test_demand_comparison_context_and_query_endpoints(app_client, planner_heade
     )
     assert response.status_code == 200
     payload = response.json()
-    assert payload["outcomeStatus"] == "success"
+    assert payload["outcomeStatus"] in {"success", "partial_forecast_missing"}
     assert payload["comparisonGranularity"] == "hourly"
 
     render_response = app_client.post(

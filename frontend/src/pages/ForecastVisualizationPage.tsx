@@ -10,6 +10,16 @@ import { VisualizationFallbackBanner } from '../features/forecast-visualization/
 import { VisualizationStatusPanel } from '../features/forecast-visualization/components/VisualizationStatusPanel';
 import { useForecastVisualization } from '../features/forecast-visualization/hooks/useForecastVisualization';
 
+export function formatUpdatedDateTime(value?: string | null): string {
+  if (!value) return 'Not available';
+  return new Date(value).toLocaleString([], {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+  });
+}
+
 export function ForecastVisualizationPage() {
   const [openDropdown, setOpenDropdown] = useState<'timeRange' | 'serviceAreas' | null>(null);
   const timeRangeRef = useRef<HTMLDivElement>(null);
@@ -97,7 +107,7 @@ export function ForecastVisualizationPage() {
             <Card className="rounded-[22px]">
               <CardContent className="p-5">
                 <span className="block text-sm text-muted">Updated</span>
-                <strong className="mt-2 block text-lg text-ink">{visualization.lastUpdatedAt ? new Date(visualization.lastUpdatedAt).toLocaleString() : 'Not available'}</strong>
+                <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(visualization.lastUpdatedAt)}</strong>
               </CardContent>
             </Card>
             <Card className="rounded-[22px]">
