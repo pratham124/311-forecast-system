@@ -54,6 +54,7 @@ class IngestionPipeline:
         existing_run_id: str | None = None,
         existing_cursor: str | None = None,
         previous_marker=None,
+        run_follow_on_jobs: bool = True,
     ) -> IngestionRunStatus:
         if existing_run_id is None:
             run_id, cursor_value, previous_marker = self.start_run(trigger_type=trigger_type)
@@ -109,7 +110,12 @@ class IngestionPipeline:
             validation_status="pending",
             dataset_kind="source",
         )
-        validation_run_id = self.validation_pipeline.run(run_id, source_dataset.dataset_version_id, records)
+        validation_run_id = self.validation_pipeline.run(
+            run_id,
+            source_dataset.dataset_version_id,
+            records,
+            run_follow_on_jobs=run_follow_on_jobs,
+        )
 
         validation_run = self.validation_pipeline.validation_repository.get_run(validation_run_id)
         candidate_status = validation_run.status if validation_run is not None else "failed"

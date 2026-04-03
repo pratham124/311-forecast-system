@@ -8,13 +8,14 @@ from sqlalchemy.orm import Session
 from app.clients.edmonton_311 import Edmonton311Client
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.core.auth import require_operational_manager, require_planner_or_manager
-from app.core.db import get_db_session
+from app.core.db import get_db_session, get_session_factory
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.failure_notification_repository import FailureNotificationRepository
 from app.repositories.run_repository import RunRepository
 from app.schemas.failure_notifications import FailureNotificationList
 from app.schemas.ingestion import CurrentDataset, IngestionRunAccepted, IngestionRunStatus
+from app.services.ingestion_follow_on_jobs import launch_ingestion_follow_on_jobs
 from app.services.ingestion_logging_service import IngestionLoggingService
 from app.services.ingestion_query_service import IngestionQueryService
 
@@ -43,17 +44,30 @@ def trigger_ingestion(
 ) -> IngestionRunAccepted:
     pipeline = IngestionPipeline(session, client, IngestionLoggingService(logging.getLogger("ingestion")))
     run_id, cursor_used, previous_marker = pipeline.start_run(trigger_type="on_demand")
+    session.commit()
 
     def execute() -> None:
-        pipeline.run(
-            trigger_type="on_demand",
-            existing_run_id=run_id,
-            existing_cursor=cursor_used,
-            previous_marker=previous_marker,
-        )
+        background_session = get_session_factory()()
+        try:
+            background_pipeline = IngestionPipeline(
+                background_session,
+                client,
+                IngestionLoggingService(logging.getLogger("ingestion")),
+            )
+            result = background_pipeline.run(
+                trigger_type="on_demand",
+                existing_run_id=run_id,
+                existing_cursor=cursor_used,
+                previous_marker=previous_marker,
+                run_follow_on_jobs=False,
+            )
+            background_session.commit()
+            if result.status == "success" and result.result_type == "new_data":
+                launch_ingestion_follow_on_jobs()
+        finally:
+            background_session.close()
 
     background_tasks.add_task(execute)
-    session.commit()
     return IngestionRunAccepted(run_id=run_id, status="running")
 
 

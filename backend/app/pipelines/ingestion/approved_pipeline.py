@@ -38,6 +38,7 @@ class ApprovedPipeline:
         validation_run_id: str,
         cleaned_records: list[dict[str, object]],
         duplicate_group_count: int,
+        run_follow_on_jobs: bool = True,
     ) -> str:
         cleaned_version = self.cleaned_dataset_service.store_and_approve_cleaned_dataset(
             source_name=source_name,
@@ -53,6 +54,8 @@ class ApprovedPipeline:
             approved_dataset_version_id=cleaned_version.dataset_version_id,
             summary="Validation and deduplication completed successfully.",
         )
+        if not run_follow_on_jobs:
+            return cleaned_version.dataset_version_id
         self._trigger_forecast_model_training()
         self._trigger_weekly_forecast_model_training()
         self._trigger_forecast_generation()
