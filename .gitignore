@@ -31,4 +31,4 @@ build/
 backend/.artifacts/forecast_models/
 backend/.artifacts/weekly_forecast_models/
 coverage/
-.vite/
+**/.vite
