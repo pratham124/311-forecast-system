@@ -39,3 +39,4 @@ frontend/.tmp-print-branch.cjs
 frontend/coverage-out*.txt
 frontend/coverage.txt
 backend/**.db
+backend/.coverage
