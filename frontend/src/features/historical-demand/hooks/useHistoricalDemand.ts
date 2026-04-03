@@ -37,11 +37,6 @@ export function useHistoricalDemand() {
     fetchHistoricalDemandContext(controller.signal)
       .then((payload) => {
         setContext(payload);
-        setFilters((current) => ({
-          ...current,
-          serviceCategory: current.serviceCategory ?? payload.serviceCategories[0],
-          geographyLevel: current.geographyLevel ?? payload.supportedGeographyLevels[0],
-        }));
       })
       .catch((requestError: Error) => {
         if (!controller.signal.aborted) {

@@ -36,8 +36,8 @@ describe('IngestionPage', () => {
 
     render(<IngestionPage roles={['CityPlanner']} />);
 
-    expect(await screen.findByText(/current dataset version/i)).toBeInTheDocument();
-    expect(screen.getByText(/dataset-1/i)).toBeInTheDocument();
+    expect(await screen.findByText(/record count/i)).toBeInTheDocument();
+    expect(screen.getByText(String(currentDataset.record_count))).toBeInTheDocument();
     expect(screen.getByText(/latest 311 requested_at in stored data/i)).toBeInTheDocument();
     expect(screen.getByText(new Date(currentDataset.latest_requested_at).toLocaleString())).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /trigger 311 ingestion/i })).not.toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('IngestionPage', () => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
     });
     expect(screen.getByText(/new_data_applied/i)).toBeInTheDocument();
-    expect(screen.getByText(/dataset-2/i)).toBeInTheDocument();
+    expect(screen.getByText(String(currentDataset.record_count))).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(String(fetchMock.mock.calls[1][0])).toContain('/api/v1/ingestion-runs/311/trigger');
     expect(String(fetchMock.mock.calls[2][0])).toContain('/api/v1/ingestion-runs/run-2');

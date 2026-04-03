@@ -164,7 +164,7 @@ describe('IngestionPage – error state', () => {
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
     }, { timeout: 4000 });
-    expect(await screen.findByText(/dataset-poll/i, {}, { timeout: 4000 })).toBeInTheDocument();
+    expect(await screen.findByText(/latest 311 requested_at in stored data/i, {}, { timeout: 4000 })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 

@@ -27,6 +27,34 @@ class CleanedDatasetRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def list_current_categories(self, source_name: str) -> list[str]:
+        rows = list(
+            self.session.scalars(
+                select(CleanedCurrentRecord.category)
+                .where(
+                    CleanedCurrentRecord.source_name == source_name,
+                    CleanedCurrentRecord.category.is_not(None),
+                    CleanedCurrentRecord.category != "",
+                )
+                .distinct()
+            )
+        )
+        categories = sorted({value.strip() for value in rows if isinstance(value, str) and value.strip()})
+        if categories:
+            return categories
+
+        current_dataset = self.get_current_approved_dataset(source_name)
+        if current_dataset is None:
+            return []
+
+        return sorted(
+            {
+                str(record.get("category")).strip()
+                for record in self.list_dataset_records(current_dataset.dataset_version_id)
+                if isinstance(record.get("category"), str) and str(record.get("category")).strip()
+            }
+        )
+
     def get_latest_current_requested_at(self, source_name: str) -> datetime | None:
         latest = self.session.scalar(
             select(func.max(CleanedCurrentRecord.requested_at)).where(CleanedCurrentRecord.source_name == source_name)

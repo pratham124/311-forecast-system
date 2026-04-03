@@ -20,6 +20,16 @@ export function formatDateTime(value?: string | null): string {
   return new Date(value).toLocaleString();
 }
 
+export function formatUpdatedDateTime(value?: string | null): string {
+  if (!value) return 'Not available';
+  return new Date(value).toLocaleString([], {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+  });
+}
+
 export function describeRunStatus(status: IngestionRunStatus | null): string {
   if (!status) return 'No run started in this session.';
   if (status.status === 'running') return '311 ingestion is running.';
@@ -181,38 +191,20 @@ export function IngestionPage({ roles }: IngestionPageProps) {
       ) : null}
 
       {dataset ? (
-        <section className="mt-5 grid gap-4 md:grid-cols-4">
-          <Card className="rounded-[22px]">
-            <CardContent className="p-5">
-              <span className="block text-sm text-muted">Source</span>
-              <strong className="mt-2 block text-lg text-ink">{dataset.sourceName}</strong>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[22px] md:col-span-2">
-            <CardContent className="p-5">
-              <span className="block text-sm text-muted">Current dataset version</span>
-              <strong className="mt-2 block break-all text-lg text-ink">{dataset.datasetVersionId}</strong>
-            </CardContent>
-          </Card>
+        <section className="mt-5 grid gap-4 md:grid-cols-2">
           <Card className="rounded-[22px]">
             <CardContent className="p-5">
               <span className="block text-sm text-muted">Record count</span>
               <strong className="mt-2 block text-lg text-ink">{dataset.recordCount}</strong>
             </CardContent>
           </Card>
-          <Card className="rounded-[22px] md:col-span-2">
+          <Card className="rounded-[22px]">
             <CardContent className="p-5">
               <span className="block text-sm text-muted">Updated</span>
-              <strong className="mt-2 block text-lg text-ink">{formatDateTime(dataset.updatedAt)}</strong>
+              <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.updatedAt)}</strong>
             </CardContent>
           </Card>
           <Card className="rounded-[22px] md:col-span-2">
-            <CardContent className="p-5">
-              <span className="block text-sm text-muted">Updated by run</span>
-              <strong className="mt-2 block break-all text-lg text-ink">{dataset.updatedByRunId}</strong>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[22px] md:col-span-4">
             <CardContent className="p-5">
               <span className="block text-sm text-muted">Latest 311 requested_at in stored data</span>
               <strong className="mt-2 block text-lg text-ink">{formatDateTime(dataset.latestRequestedAt)}</strong>
