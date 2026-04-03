@@ -1,6 +1,5 @@
 /**
- * Extra coverage for ComparisonFilters – NaN date handling in utility functions
- * and the auto-select progress label.
+ * Extra coverage for ComparisonFilters – NaN date handling and simplified UI state.
  */
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -28,8 +27,6 @@ function renderFilters(overrides: Partial<Parameters<typeof ComparisonFilters>[0
     <ComparisonFilters
       availability={availability}
       filters={baseFilters}
-      availableGeographyLevels={['ward']}
-      availableGeographyValues={['Ward 1']}
       onChange={vi.fn()}
       onSubmit={vi.fn()}
       {...overrides}
@@ -48,54 +45,23 @@ describe('ComparisonFilters – date helper edge cases', () => {
     expect(screen.getByRole('button', { name: /compare demand/i })).toBeInTheDocument();
   });
 
-  it('renders quick presets and selected preset indicator with matching timestamps', () => {
+  it('does not render quick presets when they are omitted from the UI', () => {
     renderFilters({
-      datePresets: [
-        { label: 'Overlap window', timeRangeStart: '2026-03-02T00:00:00Z', timeRangeEnd: '2026-03-05T00:00:00Z' },
-      ],
-      onApplyDatePreset: vi.fn(),
+      filters: { ...baseFilters, timeRangeStart: '2026-03-02T00:00:00Z', timeRangeEnd: '2026-03-05T00:00:00Z' },
     });
-    expect(screen.getByText('Overlap window')).toBeInTheDocument();
-    expect(screen.getByText(/Applied preset/i)).toBeInTheDocument();
-  });
-
-  it('renders preset button without selected indicator when times differ', () => {
-    renderFilters({
-      filters: { ...baseFilters, timeRangeStart: '2026-03-02T00:00:00Z', timeRangeEnd: '2026-03-04T00:00:00Z' },
-      datePresets: [
-        { label: 'Overlap window', timeRangeStart: '2026-03-02T00:00:00Z', timeRangeEnd: '2026-03-05T00:00:00Z' },
-      ],
-      onApplyDatePreset: vi.fn(),
-    });
+    expect(screen.queryByText('Overlap window')).not.toBeInTheDocument();
     expect(screen.queryByText(/Applied preset/i)).not.toBeInTheDocument();
   });
 
-  it('shows auto-select progress text when isAutoSelecting', () => {
-    renderFilters({
-      onAutoSelect: vi.fn(),
-      isAutoSelecting: true,
-      autoSelectProgress: { current: 1, total: 3 },
-    });
-    expect(screen.getByText(/Applying best available combination/i)).toBeInTheDocument();
+  it('does not render auto-select controls', () => {
+    renderFilters();
+    expect(screen.queryByText(/Auto-select forecast-backed combination/i)).not.toBeInTheDocument();
   });
 
-  it('shows auto-select button label when not selecting', () => {
-    renderFilters({ onAutoSelect: vi.fn(), isAutoSelecting: false });
-    expect(screen.getByText(/Auto-select forecast-backed combination/i)).toBeInTheDocument();
-  });
-
-  it('returns false from isSameInstant when date strings are invalid (NaN path)', () => {
-    // isSameInstant is called inside datePresets.find(); to trigger NaN branch,
-    // pass invalid date strings AND non-empty datePresets with onApplyDatePreset.
+  it('renders safely with invalid dates and no preset UI', () => {
     renderFilters({
       filters: { ...baseFilters, timeRangeStart: 'not-a-date', timeRangeEnd: 'also-not-a-date' },
-      datePresets: [
-        { label: 'Overlap', timeRangeStart: '2026-03-02T00:00:00Z', timeRangeEnd: '2026-03-05T00:00:00Z' },
-      ],
-      onApplyDatePreset: vi.fn(),
     });
-    // isSameInstant('not-a-date', '2026-03-02T00:00:00Z') → NaN → return false
-    // So no preset is selected; 'Applied preset' text should NOT appear
     expect(screen.queryByText(/Applied preset/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /compare demand/i })).toBeInTheDocument();
   });

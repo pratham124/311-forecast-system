@@ -9,12 +9,9 @@ import {
   buildDefaultAutoSelection,
   clampIso,
   getDateWindow,
-  intersectValues,
   isLikelyNetworkTransportError,
   parseIso,
   pickPreferredPreset,
-  resolveAvailableGeographyLevels,
-  resolveAvailableGeographyValues,
   toDisplayError,
   uniqueStrings,
   validateDateRange,
@@ -96,35 +93,6 @@ describe('useDemandComparisons helpers', () => {
     expect(clampIso('2026-03-05T12:00:00Z', '2026-03-01T00:00:00Z', '2026-03-10T00:00:00Z')).toBe('2026-03-05T12:00:00.000Z');
   });
 
-  it('intersects value groups and handles empty groups', () => {
-    expect(intersectValues([])).toEqual([]);
-    expect(intersectValues([['Ward 1', 'Ward 1', 'Ward 2'], ['Ward 1', 'Ward 3']])).toEqual(['Ward 1']);
-  });
-
-  it('resolves geography levels and values from category intersections', () => {
-    expect(resolveAvailableGeographyLevels(availability, [])).toEqual([]);
-    expect(resolveAvailableGeographyLevels(availability, ['Roads', 'Waste'])).toEqual(['ward']);
-
-    const missingByCategory = {
-      ...availability,
-      byCategoryGeography: undefined,
-    } as unknown as DemandComparisonAvailability;
-    expect(resolveAvailableGeographyLevels(missingByCategory, ['Roads'])).toEqual([]);
-
-    expect(resolveAvailableGeographyValues(availability, ['Roads', 'Waste'], undefined)).toEqual([]);
-    expect(resolveAvailableGeographyValues(availability, ['Roads', 'Waste'], 'ward')).toEqual(['Ward 1']);
-    expect(resolveAvailableGeographyValues(missingByCategory, ['Roads'], 'ward')).toEqual([]);
-
-    const missingOptions = {
-      ...availability,
-      byCategoryGeography: {
-        Roads: { geographyLevels: ['ward'], geographyOptions: {} },
-        Waste: { geographyLevels: ['ward'], geographyOptions: { ward: ['Ward 1'] } },
-      },
-    } as DemandComparisonAvailability;
-    expect(resolveAvailableGeographyValues(missingOptions, ['Roads'], 'ward')).toEqual([]);
-  });
-
   it('derives date windows from constraints including null and missing constraints', () => {
     expect(getDateWindow(null)).toEqual({});
 
@@ -164,7 +132,7 @@ describe('useDemandComparisons helpers', () => {
     expect(validateDateRange(baseFilters, window)).toBeNull();
   });
 
-  it('applies availability rules by sanitizing categories/geographies and normalizing inverted clamped ranges', () => {
+  it('applies availability rules by sanitizing categories and clearing geography state', () => {
     const next = applyAvailabilityRules(
       {
         serviceCategories: ['Roads', 'Unknown'],
@@ -212,8 +180,8 @@ describe('useDemandComparisons helpers', () => {
 
     expect(selected).toEqual({
       serviceCategories: ['Roads'],
-      geographyLevel: 'ward',
-      geographyValues: ['Ward 1'],
+      geographyLevel: undefined,
+      geographyValues: [],
       timeRangeStart: '2026-03-02T00:00:00Z',
       timeRangeEnd: '2026-03-05T00:00:00Z',
     });

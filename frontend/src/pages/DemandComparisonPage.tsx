@@ -11,21 +11,14 @@ export function DemandComparisonPage() {
     availability,
     filters,
     setFilters,
-    availableGeographyLevels,
-    availableGeographyValues,
     dateWindowStart,
     dateWindowEnd,
-    datePresets,
     dateRangeError,
     response,
     isLoadingAvailability,
     isSubmitting,
-    isAutoSelecting,
-    autoSelectProgress,
     error,
     submit,
-    autoSelectForecastBackedCombination,
-    applyDatePreset,
     reportRenderEvent,
     clearResponse,
   } = useDemandComparisons();
@@ -48,7 +41,7 @@ export function DemandComparisonPage() {
             Compare approved history with the active forecast scope.
           </CardTitle>
           <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Select one or more categories, optionally narrow to geographies, and compare one continuous time range using the active forecast lineage chosen by the backend.
+            Select one or more categories and compare one continuous time range using the active forecast lineage chosen by the backend.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
@@ -58,23 +51,14 @@ export function DemandComparisonPage() {
             <ComparisonFilters
               availability={availability}
               filters={filters}
-              availableGeographyLevels={availableGeographyLevels}
-              availableGeographyValues={availableGeographyValues}
               dateWindowStart={dateWindowStart}
               dateWindowEnd={dateWindowEnd}
-              datePresets={datePresets}
               dateRangeError={dateRangeError}
               onChange={setFilters}
-              onApplyDatePreset={applyDatePreset}
               onSubmit={() => {
                 void submit();
               }}
-              onAutoSelect={() => {
-                void autoSelectForecastBackedCombination();
-              }}
-              isAutoSelecting={isAutoSelecting}
-              autoSelectProgress={autoSelectProgress}
-              disabled={isSubmitting || isAutoSelecting}
+              disabled={isSubmitting}
             />
           )}
         </CardContent>
@@ -83,7 +67,7 @@ export function DemandComparisonPage() {
       <div className="mt-5">
         <ComparisonOutcomeState
           error={error}
-          isLoading={isSubmitting && !isAutoSelecting}
+          isLoading={isSubmitting}
           response={response}
           onProceed={() => {
             void submit(undefined, true);

@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveAuthSession } from '../lib/authSession';
-import { IngestionPage } from './IngestionPage';
+import { formatUpdatedDateTime, IngestionPage } from './IngestionPage';
 
 const currentDataset = {
   source_name: 'edmonton_311',
@@ -39,7 +39,7 @@ describe('IngestionPage', () => {
     expect(await screen.findByText(/record count/i)).toBeInTheDocument();
     expect(screen.getByText(String(currentDataset.record_count))).toBeInTheDocument();
     expect(screen.getByText(/latest 311 requested_at in stored data/i)).toBeInTheDocument();
-    expect(screen.getByText(new Date(currentDataset.latest_requested_at).toLocaleString())).toBeInTheDocument();
+    expect(screen.getByText(formatUpdatedDateTime(currentDataset.latest_requested_at))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /trigger 311 ingestion/i })).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/datasets/current');
   });

@@ -65,3 +65,12 @@ class ForecastSourceResolution:
     source_weekly_forecast_version_id: str | None
     source_cleaned_dataset_version_id: str | None
 
+
+@dataclass(frozen=True)
+class ForecastLoadResult:
+    rows: list[dict[str, object]]
+    forecast_product: ForecastProduct | None
+    forecast_granularity: ForecastGranularity | None
+    comparison_granularity: ComparisonGranularity
+    source_forecast_version_id: str | None
+    source_weekly_forecast_version_id: str | None

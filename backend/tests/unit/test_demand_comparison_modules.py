@@ -29,6 +29,16 @@ class StubCleanedRepository:
         self.records = records or []
         self.dataset = dataset
 
+    def list_current_categories(self, source_name):
+        assert source_name == "edmonton_311"
+        return sorted(
+            {
+                str(record.get("category")).strip()
+                for record in self.records
+                if isinstance(record.get("category"), str) and str(record.get("category")).strip()
+            }
+        )
+
     def list_current_cleaned_records(self, source_name, **_kwargs):
         assert source_name == "edmonton_311"
         return self.records
@@ -39,19 +49,35 @@ class StubCleanedRepository:
 
 
 class StubForecastRepository:
-    def __init__(self, marker=None) -> None:
+    def __init__(self, marker=None, versions=None, buckets_by_version=None) -> None:
         self.marker = marker
+        self.versions = versions or []
+        self.buckets_by_version = buckets_by_version or {}
 
     def get_current_marker(self, forecast_product_name):
         return self.marker if forecast_product_name == "daily_1_day_demand" else None
 
+    def list_stored_versions_overlapping_range(self, **_kwargs):
+        return self.versions
+
+    def list_buckets(self, forecast_version_id):
+        return self.buckets_by_version.get(forecast_version_id, [])
+
 
 class StubWeeklyForecastRepository:
-    def __init__(self, marker=None) -> None:
+    def __init__(self, marker=None, versions=None, buckets_by_version=None) -> None:
         self.marker = marker
+        self.versions = versions or []
+        self.buckets_by_version = buckets_by_version or {}
 
     def get_current_marker(self, forecast_product_name):
         return self.marker if forecast_product_name == "weekly_7_day_demand" else None
+
+    def list_stored_versions_overlapping_range(self, **_kwargs):
+        return self.versions
+
+    def list_buckets(self, weekly_forecast_version_id):
+        return self.buckets_by_version.get(weekly_forecast_version_id, [])
 
 
 class StubComparisonRepository:
@@ -120,8 +146,8 @@ def test_context_service_collects_categories_and_geography_levels() -> None:
     context = service.get_context()
 
     assert context.service_categories == ["Roads", "Waste"]
-    assert set(context.geography_levels) == {"district", "geography_key", "neighbourhood", "ward"}
-    assert context.geography_options["ward"] == ["Ward 1"]
+    assert context.geography_levels == []
+    assert context.geography_options == {}
     assert DemandComparisonContextService.extract_geography_value({"neighborhood": "Downtown"}, "neighbourhood") == "Downtown"
     assert DemandComparisonContextService.extract_geography_value({"ward": "Ward 1"}, None) is None
     assert DemandComparisonContextService.extract_geography_value({}, "ward") is None
@@ -378,8 +404,11 @@ def test_result_builder_parsers_and_service_filter_guards() -> None:
                 {"category": "Waste", "ward": "Ward 1"},
             ]
         ),
-        forecast_repository=SimpleNamespace(list_buckets=lambda *_args, **_kwargs: [StubBucket()]),
-        weekly_forecast_repository=SimpleNamespace(list_buckets=lambda *_args, **_kwargs: []),
+        forecast_repository=StubForecastRepository(
+            versions=[SimpleNamespace(forecast_version_id="forecast-1")],
+            buckets_by_version={"forecast-1": [StubBucket()]},
+        ),
+        weekly_forecast_repository=StubWeeklyForecastRepository(),
         context_service=StubContextService(),
         warning_service=SimpleNamespace(),
         source_resolver=SimpleNamespace(),
@@ -440,9 +469,60 @@ def test_result_builder_parsers_and_service_filter_guards() -> None:
                 "timeRangeEnd": "2026-03-02T00:00:00Z",
             }
         ),
-        SimpleNamespace(forecast_product="daily_1_day", source_forecast_version_id="forecast-1"),
     )
-    assert len(forecast) == 1
+    assert len(forecast.rows) == 1
+    assert forecast.source_forecast_version_id == "forecast-1"
+    assert forecast.forecast_product == "daily_1_day"
+
+
+def test_load_forecast_records_prefers_daily_and_falls_back_to_weekly() -> None:
+    builder = DemandComparisonResultBuilder()
+    daily_bucket = SimpleNamespace(
+        bucket_start=datetime(2026, 3, 31, 12, tzinfo=timezone.utc),
+        bucket_end=datetime(2026, 3, 31, 13, tzinfo=timezone.utc),
+        service_category="Roads",
+        geography_key=None,
+        point_forecast=4.0,
+    )
+    weekly_bucket = SimpleNamespace(
+        forecast_date_local=date(2026, 3, 30),
+        service_category="Roads",
+        geography_key=None,
+        point_forecast=8.0,
+    )
+    service = DemandComparisonService(
+        comparison_repository=SimpleNamespace(),
+        cleaned_dataset_repository=SimpleNamespace(list_current_cleaned_records=lambda *_args, **_kwargs: []),
+        forecast_repository=StubForecastRepository(
+            versions=[SimpleNamespace(forecast_version_id="forecast-daily")],
+            buckets_by_version={"forecast-daily": [daily_bucket]},
+        ),
+        weekly_forecast_repository=StubWeeklyForecastRepository(
+            versions=[SimpleNamespace(weekly_forecast_version_id="forecast-weekly")],
+            buckets_by_version={"forecast-weekly": [weekly_bucket]},
+        ),
+        context_service=StubContextService(),
+        warning_service=SimpleNamespace(),
+        source_resolver=SimpleNamespace(),
+        result_builder=builder,
+    )
+
+    forecast = service._load_forecast_records(
+        DemandComparisonQueryRequest.model_validate(
+            {
+                "serviceCategories": ["Roads"],
+                "timeRangeStart": "2026-03-30T00:00:00Z",
+                "timeRangeEnd": "2026-04-01T00:00:00Z",
+            }
+        )
+    )
+
+    assert len(forecast.rows) == 2
+    assert forecast.source_forecast_version_id == "forecast-daily"
+    assert forecast.source_weekly_forecast_version_id == "forecast-weekly"
+    assert forecast.forecast_product is None
+    assert forecast.forecast_granularity is None
+    assert forecast.comparison_granularity == "daily"
 
 
 def test_availability_service_intersects_historical_and_forecast_options() -> None:
@@ -479,14 +559,13 @@ def test_availability_service_intersects_historical_and_forecast_options() -> No
         weekly_forecast_product_name="weekly_7_day_demand",
     ).get_availability()
 
-    assert availability.service_categories == ["Roads"]
-    assert availability.forecast_product == "daily_1_day"
-    roads = availability.by_category_geography["Roads"]
-    assert "ward" in roads.geography_levels
-    assert roads.geography_options["ward"] == ["Ward 1"]
-    assert availability.date_constraints.historical_min is not None
-    assert availability.date_constraints.forecast_min is not None
-    assert availability.date_constraints.overlap_start is not None
+    assert availability.service_categories == ["Roads", "Waste"]
+    assert availability.forecast_product is None
+    assert availability.by_category_geography == {}
+    assert availability.date_constraints.historical_min is None
+    assert availability.date_constraints.forecast_min is None
+    assert availability.date_constraints.overlap_start is None
+    assert availability.presets == []
 
 
 def test_availability_service_hides_geography_when_forecast_is_category_only() -> None:
@@ -522,6 +601,5 @@ def test_availability_service_hides_geography_when_forecast_is_category_only() -
     ).get_availability()
 
     assert availability.service_categories == ["Roads"]
-    roads = availability.by_category_geography["Roads"]
-    assert roads.geography_levels == []
-    assert roads.geography_options == {}
+    assert availability.by_category_geography == {}
+    assert availability.presets == []

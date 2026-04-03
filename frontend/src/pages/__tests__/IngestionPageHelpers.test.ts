@@ -4,6 +4,7 @@ import {
   canTriggerIngestion,
   describeRunStatus,
   formatDateTime,
+  formatUpdatedDateTime,
   wait,
 } from '../IngestionPage';
 
@@ -11,6 +12,14 @@ describe('IngestionPage helper functions', () => {
   it('formats missing date values as Not available', () => {
     expect(formatDateTime(undefined)).toBe('Not available');
     expect(formatDateTime(null)).toBe('Not available');
+    expect(formatUpdatedDateTime(undefined)).toBe('Not available');
+    expect(formatUpdatedDateTime(null)).toBe('Not available');
+  });
+
+  it('formats compact date values without minutes or seconds', () => {
+    const formatted = formatUpdatedDateTime('2026-03-25T10:05:00Z');
+    expect(formatted).toContain('2026');
+    expect(formatted).not.toContain(':05');
   });
 
   it('checks role-based read and trigger permissions', () => {

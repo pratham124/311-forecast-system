@@ -258,14 +258,11 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
             <CardHeader>
               <CardTitle>Current official evaluation</CardTitle>
               <CardDescription>{evaluation.comparisonSummary ?? evaluation.summary ?? 'No evaluation summary is available.'}</CardDescription>
+              <p className="mt-3 text-sm text-muted">
+                Fair comparison window: {formatUpdatedDateTime(evaluation.fairComparison.evaluationWindowStart)} to {formatUpdatedDateTime(evaluation.fairComparison.evaluationWindowEnd)}
+              </p>
             </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-[0.95fr_1.05fr]">
-              <div className="grid gap-4">
-                <div className="rounded-[22px] border border-slate-200 bg-white/70 p-4">
-                  <span className="block text-xs uppercase tracking-[0.16em] text-muted">Fair comparison window</span>
-                  <p className="mt-2 text-sm text-ink">{formatDateTime(evaluation.fairComparison.evaluationWindowStart)} to {formatDateTime(evaluation.fairComparison.evaluationWindowEnd)}</p>
-                </div>
-              </div>
+            <CardContent>
               <div className="rounded-[24px] border border-slate-200 bg-white/80 p-4">
                 <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
                   <div>

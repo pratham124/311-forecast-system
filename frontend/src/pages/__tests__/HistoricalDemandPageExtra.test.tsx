@@ -110,25 +110,20 @@ describe('HistoricalDemandPage – extra coverage', () => {
     expect(toApiDateTime('2026-03-31', 'end')).toBe('2026-03-31T23:59:59Z');
   });
 
-  it('passes empty string through toApiDateTime unchanged (falsy early return)', async () => {
+  it('shows an inline validation error when a required date is missing', async () => {
     fetchMock
-      .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify(successPayload), { status: 200 }))
-      .mockResolvedValueOnce(new Response(null, { status: 202 }));
+      .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }));
 
     render(<HistoricalDemandPage />);
     await screen.findByRole('button', { name: /explore historical demand/i });
 
-    // Simulate clearing the start date (sets it to '' via updateField)
     fireEvent.change(screen.getByLabelText(/time range start/i), {
       target: { name: 'timeRangeStart', value: '' },
     });
 
     fireEvent.click(screen.getByRole('button', { name: /explore historical demand/i }));
 
-    // Component should still render without crashing
-    await waitFor(() => {
-      expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
-    });
+    expect(await screen.findByText(/select both a start date and an end date\./i)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -81,7 +81,8 @@ describe('DemandComparisonPage', () => {
     render(<DemandComparisonPage />);
 
     await screen.findByLabelText('Service categories');
-    await user.selectOptions(screen.getByLabelText('Service categories'), ['Roads']);
+    await user.click(screen.getByLabelText('Service categories'));
+    await user.click(screen.getByRole('button', { name: 'Roads' }));
     fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
 
     expect(await screen.findByText(/comparison summary/i)).toBeInTheDocument();
@@ -112,7 +113,8 @@ describe('DemandComparisonPage', () => {
     render(<DemandComparisonPage />);
 
     await screen.findByLabelText('Service categories');
-    await user.selectOptions(screen.getByLabelText('Service categories'), ['Roads']);
+    await user.click(screen.getByLabelText('Service categories'));
+    await user.click(screen.getByRole('button', { name: 'Roads' }));
     fireEvent.click(screen.getByRole('button', { name: /compare demand/i }));
 
     expect(await screen.findByText(/large request warning/i)).toBeInTheDocument();

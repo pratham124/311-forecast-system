@@ -159,6 +159,27 @@ class WeeklyForecastRepository:
             return None
         return version
 
+    def list_stored_versions_overlapping_range(
+        self,
+        *,
+        range_start: datetime,
+        range_end: datetime,
+    ) -> list[WeeklyForecastVersion]:
+        statement = (
+            select(WeeklyForecastVersion)
+            .where(
+                WeeklyForecastVersion.storage_status == "stored",
+                WeeklyForecastVersion.week_end_local >= range_start,
+                WeeklyForecastVersion.week_start_local <= range_end,
+            )
+            .order_by(
+                WeeklyForecastVersion.stored_at.desc().nullslast(),
+                WeeklyForecastVersion.activated_at.desc().nullslast(),
+                WeeklyForecastVersion.weekly_forecast_version_id.desc(),
+            )
+        )
+        return list(self.session.scalars(statement))
+
     def _require_version(self, weekly_forecast_version_id: str) -> WeeklyForecastVersion:
         version = self.get_forecast_version(weekly_forecast_version_id)
         if version is None:

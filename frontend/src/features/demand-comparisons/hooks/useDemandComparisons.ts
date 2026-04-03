@@ -84,44 +84,6 @@ export function clampIso(value: string, minIso?: string, maxIso?: string): strin
   return date.toISOString();
 }
 
-export function intersectValues(groups: string[][]): string[] {
-  if (groups.length === 0) {
-    return [];
-  }
-  const [first, ...rest] = groups;
-  const firstUnique = uniqueStrings(first);
-  return firstUnique.filter((candidate) => rest.every((group) => group.includes(candidate)));
-}
-
-export function resolveAvailableGeographyLevels(
-  availability: DemandComparisonAvailability,
-  serviceCategories: string[],
-): string[] {
-  if (serviceCategories.length === 0) {
-    return [];
-  }
-  const byCategory = availability.byCategoryGeography ?? {};
-  const levelGroups = serviceCategories.map(
-    (category) => byCategory[category]?.geographyLevels ?? [],
-  );
-  return intersectValues(levelGroups);
-}
-
-export function resolveAvailableGeographyValues(
-  availability: DemandComparisonAvailability,
-  serviceCategories: string[],
-  geographyLevel?: string,
-): string[] {
-  if (!geographyLevel || serviceCategories.length === 0) {
-    return [];
-  }
-  const byCategory = availability.byCategoryGeography ?? {};
-  const valueGroups = serviceCategories.map(
-    (category) => byCategory[category]?.geographyOptions?.[geographyLevel] ?? [],
-  );
-  return intersectValues(valueGroups);
-}
-
 export function getDateWindow(availability: DemandComparisonAvailability | null): DateWindow {
   if (!availability) {
     return {};
@@ -178,20 +140,6 @@ export function applyAvailabilityRules(
     availability.serviceCategories.includes(category),
   );
 
-  const availableLevels = resolveAvailableGeographyLevels(availability, serviceCategories);
-  const geographyLevel = filters.geographyLevel && availableLevels.includes(filters.geographyLevel)
-    ? filters.geographyLevel
-    : undefined;
-
-  const availableGeoValues = resolveAvailableGeographyValues(
-    availability,
-    serviceCategories,
-    geographyLevel,
-  );
-  const geographyValues = geographyLevel
-    ? filters.geographyValues.filter((value) => availableGeoValues.includes(value))
-    : [];
-
   const timeRangeStart = clampIso(filters.timeRangeStart, dateWindow.start, dateWindow.end);
   let timeRangeEnd = clampIso(filters.timeRangeEnd, dateWindow.start, dateWindow.end);
   const startDate = parseIso(timeRangeStart);
@@ -203,10 +151,23 @@ export function applyAvailabilityRules(
   return {
     ...filters,
     serviceCategories,
-    geographyLevel,
-    geographyValues,
+    geographyLevel: undefined,
+    geographyValues: [],
     timeRangeStart,
     timeRangeEnd,
+  };
+}
+
+export function expandAllCategoriesSelection(
+  filters: DemandComparisonFilters,
+  availability: DemandComparisonAvailability | null,
+): DemandComparisonFilters {
+  if (!availability || filters.serviceCategories.length > 0) {
+    return filters;
+  }
+  return {
+    ...filters,
+    serviceCategories: [...availability.serviceCategories],
   };
 }
 
@@ -225,17 +186,12 @@ export function buildDefaultAutoSelection(
   }
 
   const serviceCategories = [serviceCategory];
-  const geographyLevels = resolveAvailableGeographyLevels(availability, serviceCategories);
-  const geographyLevel = geographyLevels[0];
-  const geographyValues = geographyLevel
-    ? resolveAvailableGeographyValues(availability, serviceCategories, geographyLevel).slice(0, 1)
-    : [];
   const preferredPreset = pickPreferredPreset(availability.presets);
 
   return {
     serviceCategories,
-    geographyLevel,
-    geographyValues,
+    geographyLevel: undefined,
+    geographyValues: [],
     timeRangeStart: preferredPreset?.timeRangeStart ?? dateWindow.start ?? fallbackFilters.timeRangeStart,
     timeRangeEnd: preferredPreset?.timeRangeEnd ?? dateWindow.end ?? fallbackFilters.timeRangeEnd,
   };
@@ -260,24 +216,6 @@ export function useDemandComparisons() {
   const renderEvents = useRef<Record<string, boolean>>({});
 
   const dateWindow = useMemo(() => getDateWindow(availability), [availability]);
-  const availableGeographyLevels = useMemo(() => {
-    if (!availability) {
-      return [];
-    }
-    return resolveAvailableGeographyLevels(availability, filters.serviceCategories);
-  }, [availability, filters.serviceCategories]);
-
-  const availableGeographyValues = useMemo(() => {
-    if (!availability) {
-      return [];
-    }
-    return resolveAvailableGeographyValues(
-      availability,
-      filters.serviceCategories,
-      filters.geographyLevel,
-    );
-  }, [availability, filters.serviceCategories, filters.geographyLevel]);
-
   const datePresets = useMemo(() => availability?.presets ?? [], [availability]);
   const dateRangeError = useMemo(
     () => validateDateRange(filters, dateWindow),
@@ -325,9 +263,10 @@ export function useDemandComparisons() {
 
   const submit = async (overrides?: Partial<DemandComparisonFilters>, proceedAfterWarning = false) => {
     const mergedFilters = { ...filters, ...overrides };
-    const nextFilters = availability
+    const availabilityScopedFilters = availability
       ? applyAvailabilityRules(mergedFilters, availability, dateWindow)
       : mergedFilters;
+    const nextFilters = expandAllCategoriesSelection(availabilityScopedFilters, availability);
     const nextRangeError = validateDateRange(nextFilters, dateWindow);
     setFiltersState(nextFilters);
 
@@ -431,8 +370,6 @@ export function useDemandComparisons() {
     availability,
     filters,
     setFilters,
-    availableGeographyLevels,
-    availableGeographyValues,
     dateWindowStart: dateWindow.start,
     dateWindowEnd: dateWindow.end,
     datePresets,

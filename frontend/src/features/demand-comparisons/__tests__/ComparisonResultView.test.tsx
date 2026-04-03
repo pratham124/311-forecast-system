@@ -36,13 +36,13 @@ describe('ComparisonResultView', () => {
           seriesType: 'historical',
           serviceCategory: 'Cat1',
           geographyKey: 'geo1',
-          points: [{ bucketStart: '2023-01-01', bucketEnd: '2023-01-02', value: 10 }]
+          points: [{ bucketStart: '2023-01-01T00:00:00Z', bucketEnd: '2023-01-02T00:00:00Z', value: 10 }]
         },
         {
           seriesType: 'forecast',
           serviceCategory: 'Cat2',
           geographyKey: undefined,
-          points: []
+          points: [{ bucketStart: '2023-01-01T00:00:00Z', bucketEnd: '2023-01-02T00:00:00Z', value: 12 }]
         }
       ]
     };
@@ -57,11 +57,11 @@ describe('ComparisonResultView', () => {
     expect(screen.getByText('Series table')).toBeInTheDocument();
     expect(screen.getByText('historical')).toBeInTheDocument();
     expect(screen.getByText('Cat1')).toBeInTheDocument();
-    expect(screen.getByText('geo1')).toBeInTheDocument();
     expect(screen.getByText('2023-01-01 - 10')).toBeInTheDocument();
 
     expect(screen.getByText('forecast')).toBeInTheDocument();
     expect(screen.getByText('Cat2')).toBeInTheDocument();
-    expect(screen.getAllByText('All selected')).toHaveLength(1); // fallback mapped
+    expect(screen.getByText('Comparison Chart')).toBeInTheDocument();
+    expect(screen.queryByText('Geography')).not.toBeInTheDocument();
   });
 });
