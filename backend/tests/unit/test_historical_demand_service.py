@@ -17,6 +17,15 @@ class StubCleanedDatasetRepository:
         self.records = records
         self.dataset_version_id = dataset_version_id
 
+    def list_current_categories(self, source_name: str):
+        return sorted(
+            {
+                str(record.get("category")).strip()
+                for record in self.records
+                if isinstance(record.get("category"), str) and str(record.get("category")).strip()
+            }
+        )
+
     def list_current_cleaned_records(self, source_name: str, *, start_time=None, end_time=None):
         return list(self.records)
 
@@ -81,7 +90,7 @@ def test_context_service_exposes_only_reliable_geography_levels():
     service = HistoricalContextService(StubCleanedDatasetRepository(records), "edmonton_311")
     context = service.get_context()
     assert context.service_categories == ["Roads", "Waste"]
-    assert context.supported_geography_levels == ["ward"]
+    assert context.supported_geography_levels == []
 
 
 @pytest.mark.unit

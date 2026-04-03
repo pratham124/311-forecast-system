@@ -52,7 +52,8 @@ describe('HistoricalDemandFilters – updateField', () => {
         onSubmit={vi.fn()}
       />,
     );
-    await user.selectOptions(screen.getByRole('combobox', { name: /service category/i }), 'Roads');
+    await user.click(screen.getByRole('button', { name: /service category/i }));
+    await user.click(screen.getByRole('button', { name: /^Roads$/i }));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ serviceCategory: 'Roads' }));
   });
 
@@ -67,8 +68,23 @@ describe('HistoricalDemandFilters – updateField', () => {
         onSubmit={vi.fn()}
       />,
     );
-    await user.selectOptions(screen.getByRole('combobox', { name: /service category/i }), '');
+    await user.click(screen.getByRole('button', { name: /service category/i }));
+    await user.click(screen.getByRole('button', { name: /all categories/i }));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ serviceCategory: undefined }));
+  });
+
+  it('prevents selecting future dates via max=today on date inputs', () => {
+    render(
+      <HistoricalDemandFilters
+        context={null}
+        filters={baseFilters}
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+    const expectedMax = new Date().toISOString().slice(0, 10);
+    expect(screen.getByLabelText(/time range start/i)).toHaveAttribute('max', expectedMax);
+    expect(screen.getByLabelText(/time range end/i)).toHaveAttribute('max', expectedMax);
   });
 });
 
@@ -140,7 +156,7 @@ describe('HistoricalDemandStatus', () => {
 
 // ─── HistoricalDemandResults ──────────────────────────────────────────────────
 
-describe('HistoricalDemandResults – geographyKey null branch', () => {
+describe('HistoricalDemandResults', () => {
   it('returns null when summaryPoints is empty', () => {
     const response = {
       summaryPoints: [],
@@ -149,19 +165,20 @@ describe('HistoricalDemandResults – geographyKey null branch', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders City-wide when geographyKey is null (lines 27 and 52-53)', () => {
+  it('renders stable date labels without showing a geography column', () => {
     const response = {
       summaryPoints: [
         {
           bucketStart: '2026-03-05T00:00:00Z',
           serviceCategory: 'Roads',
-          geographyKey: null,  // null → triggers ?? 'city' in key and ?? 'City-wide' in cell
+          geographyKey: null,
           demandCount: 5,
         },
       ],
     } as unknown as HistoricalDemandResponse;
     render(<HistoricalDemandResults response={response} />);
-    // The table cell should show 'City-wide' when geographyKey is null
-    expect(screen.getByText('City-wide')).toBeInTheDocument();
+    expect(screen.getByText('Date')).toBeInTheDocument();
+    expect(screen.queryByText('Geography')).not.toBeInTheDocument();
+    expect(screen.getAllByText('2026-03-05').length).toBeGreaterThan(0);
   });
 });

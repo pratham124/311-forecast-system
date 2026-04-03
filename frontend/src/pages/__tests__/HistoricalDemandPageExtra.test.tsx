@@ -1,6 +1,6 @@
 /**
  * Extra coverage for HistoricalDemandPage:
- * - toApiDateTime: datetime-local format (non-Z, non-TZ suffix) → lines 16-20
+ * - toApiDateTime: date-only format converts to day boundaries
  * - toApiDateTime: empty value → lines 11-12
  * - clearResponse via onDecline callback → lines 86-87
  */
@@ -55,7 +55,7 @@ describe('HistoricalDemandPage – extra coverage', () => {
     fetchMock.mockReset();
   });
 
-  it('converts datetime-local value (no timezone suffix) via toApiDateTime when submitting', async () => {
+  it('converts date-only value via toApiDateTime when submitting', async () => {
     fetchMock
       .mockResolvedValueOnce(new Response(JSON.stringify(contextPayload), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(successPayload), { status: 200 }))
@@ -64,9 +64,12 @@ describe('HistoricalDemandPage – extra coverage', () => {
     render(<HistoricalDemandPage />);
     await screen.findByRole('button', { name: /explore historical demand/i });
 
-    // Change the start datetime input to a format without timezone (datetime-local format)
+    // Change the start date input to a date-only value.
     fireEvent.change(screen.getByLabelText(/time range start/i), {
-      target: { name: 'timeRangeStart', value: '2026-03-01T00:00' },
+      target: { name: 'timeRangeStart', value: '2026-03-01' },
+    });
+    fireEvent.change(screen.getByLabelText(/time range end/i), {
+      target: { name: 'timeRangeEnd', value: '2026-03-31' },
     });
 
     fireEvent.click(screen.getByRole('button', { name: /explore historical demand/i }));
@@ -75,9 +78,9 @@ describe('HistoricalDemandPage – extra coverage', () => {
       expect(fetchMock).toHaveBeenCalledTimes(3);
     });
 
-    // The submitted body should have the ISO converted value (toApiDateTime converted it)
     const submitBody = JSON.parse(fetchMock.mock.calls[1][1]?.body as string);
-    expect(submitBody.timeRangeStart).toMatch(/Z$/);
+    expect(submitBody.timeRangeStart).toBe('2026-03-01T00:00:00Z');
+    expect(submitBody.timeRangeEnd).toBe('2026-03-31T23:59:59Z');
   });
 
   it('clears response and error when onDecline is triggered (warning flow)', async () => {
@@ -100,6 +103,11 @@ describe('HistoricalDemandPage – extra coverage', () => {
 
   it('passes invalid date strings through toApiDateTime unchanged (NaN branch, lines 18-19)', () => {
     expect(toApiDateTime('invalid-date-xyz')).toBe('invalid-date-xyz');
+  });
+
+  it('converts date-only inputs to explicit day boundaries', () => {
+    expect(toApiDateTime('2026-03-01', 'start')).toBe('2026-03-01T00:00:00Z');
+    expect(toApiDateTime('2026-03-31', 'end')).toBe('2026-03-31T23:59:59Z');
   });
 
   it('passes empty string through toApiDateTime unchanged (falsy early return)', async () => {

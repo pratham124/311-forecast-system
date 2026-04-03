@@ -6,9 +6,12 @@ import { HistoricalDemandResults } from '../features/historical-demand/component
 import { HistoricalDemandStatus } from '../features/historical-demand/components/HistoricalDemandStatus';
 import { useHistoricalDemand } from '../features/historical-demand/hooks/useHistoricalDemand';
 
-export function toApiDateTime(value: string): string {
+export function toApiDateTime(value: string, boundary: 'start' | 'end' = 'start'): string {
   if (!value) {
     return value;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return boundary === 'end' ? `${value}T23:59:59Z` : `${value}T00:00:00Z`;
   }
   if (value.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(value)) {
     return value;
@@ -41,8 +44,8 @@ export function HistoricalDemandPage() {
 
   const normalizedFilters = {
     ...filters,
-    timeRangeStart: toApiDateTime(filters.timeRangeStart),
-    timeRangeEnd: toApiDateTime(filters.timeRangeEnd),
+    timeRangeStart: toApiDateTime(filters.timeRangeStart, 'start'),
+    timeRangeEnd: toApiDateTime(filters.timeRangeEnd, 'end'),
   };
 
   return (
@@ -54,7 +57,7 @@ export function HistoricalDemandPage() {
             Explore how 311 demand has shifted across time and geography.
           </CardTitle>
           <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Filter historical records by service category, time range, and only the supported geography levels available in the approved cleaned dataset.
+            Filter historical records by service category and time range to review how demand has changed over time.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">

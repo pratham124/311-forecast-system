@@ -72,6 +72,7 @@ describe('EvaluationPage', () => {
 
     expect(await screen.findByText(/current official evaluation/i)).toBeInTheDocument();
     expect(screen.getByText(/matched the strongest included baseline/i)).toBeInTheDocument();
+    expect(screen.queryByText(/current sources/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /trigger daily 1-day evaluation/i })).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/evaluations/current?forecastProduct=daily_1_day');
   });

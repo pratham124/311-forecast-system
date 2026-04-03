@@ -20,19 +20,11 @@ class HistoricalContextService:
 
     def get_context(self) -> HistoricalDemandContextRead:
         dataset = self.cleaned_dataset_repository.get_current_approved_dataset(self.source_name)
-        records = self.cleaned_dataset_repository.list_current_cleaned_records(self.source_name)
-        categories = sorted(
-            {
-                str(record.get("category")).strip()
-                for record in records
-                if isinstance(record.get("category"), str) and str(record.get("category")).strip()
-            }
-        )
-        levels = self.supported_geography_levels(records)
+        categories = self.cleaned_dataset_repository.list_current_categories(self.source_name)
         dataset_label = dataset.dataset_version_id if dataset is not None else "none"
         return HistoricalDemandContextRead(
             serviceCategories=categories,
-            supportedGeographyLevels=levels,
+            supportedGeographyLevels=[],
             summary=f"Using approved cleaned dataset {dataset_label} for historical demand exploration.",
         )
 
@@ -41,6 +33,10 @@ class HistoricalContextService:
         if dataset is None:
             raise LookupError("No approved cleaned dataset is available")
         return dataset.dataset_version_id
+
+    def get_supported_geography_levels(self) -> list[str]:
+        records = self.cleaned_dataset_repository.list_current_cleaned_records(self.source_name)
+        return self.supported_geography_levels(records)
 
     def supported_geography_levels(self, records: list[dict[str, Any]]) -> list[str]:
         if not records:

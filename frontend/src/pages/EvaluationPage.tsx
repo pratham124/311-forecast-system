@@ -19,6 +19,16 @@ export function formatDateTime(value?: string | null): string {
   return new Date(value).toLocaleString();
 }
 
+export function formatUpdatedDateTime(value?: string | null): string {
+  if (!value) return 'Not available';
+  return new Date(value).toLocaleString([], {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+  });
+}
+
 export function canReadEvaluation(roles: string[]): boolean {
   return roles.some((role) => READER_ROLES.has(role));
 }
@@ -227,7 +237,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
             <Card className="rounded-[22px]">
               <CardContent className="p-5">
                 <span className="block text-sm text-muted">Updated</span>
-                <strong className="mt-2 block text-lg text-ink">{formatDateTime(evaluation.updatedAt)}</strong>
+                <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(evaluation.updatedAt)}</strong>
               </CardContent>
             </Card>
             <Card className="rounded-[22px]">
@@ -254,12 +264,6 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
                 <div className="rounded-[22px] border border-slate-200 bg-white/70 p-4">
                   <span className="block text-xs uppercase tracking-[0.16em] text-muted">Fair comparison window</span>
                   <p className="mt-2 text-sm text-ink">{formatDateTime(evaluation.fairComparison.evaluationWindowStart)} to {formatDateTime(evaluation.fairComparison.evaluationWindowEnd)}</p>
-                </div>
-                <div className="rounded-[22px] border border-slate-200 bg-white/70 p-4">
-                  <span className="block text-xs uppercase tracking-[0.16em] text-muted">Current sources</span>
-                  <p className="mt-2 text-sm text-ink">Cleaned dataset: {evaluation.sourceCleanedDatasetVersionId ?? 'Not available'}</p>
-                  <p className="mt-1 text-sm text-ink">Daily forecast: {evaluation.sourceForecastVersionId ?? 'Not used'}</p>
-                  <p className="mt-1 text-sm text-ink">Weekly forecast: {evaluation.sourceWeeklyForecastVersionId ?? 'Not used'}</p>
                 </div>
               </div>
               <div className="rounded-[24px] border border-slate-200 bg-white/80 p-4">

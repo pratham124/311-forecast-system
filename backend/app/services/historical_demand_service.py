@@ -312,7 +312,7 @@ class HistoricalDemandAnalysisService:
     def _ensure_supported_geography(self, geography_level: str | None) -> None:
         if geography_level is None:
             return
-        supported_levels = self.context_service.get_context().supported_geography_levels
+        supported_levels = self.context_service.get_supported_geography_levels()
         if geography_level not in supported_levels:
             raise LookupError("Requested geography level is not supported by the approved historical dataset")
 

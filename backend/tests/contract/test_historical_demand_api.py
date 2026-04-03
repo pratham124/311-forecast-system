@@ -43,7 +43,7 @@ def test_get_historical_demand_context(app_client, planner_headers, session):
     assert response.status_code == 200
     body = response.json()
     assert body["serviceCategories"] == ["Roads", "Waste"]
-    assert body["supportedGeographyLevels"] == ["ward"]
+    assert body["supportedGeographyLevels"] == []
 
 
 @pytest.mark.contract
