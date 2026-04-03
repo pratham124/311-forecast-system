@@ -94,7 +94,14 @@ class ValidationPipeline:
         self.blocked_pipeline = BlockedOutcomePipeline(self.validation_repository, self.review_needed_repository)
         self.logger = logging.getLogger("validation")
 
-    def run(self, ingestion_run_id: str, source_dataset_version_id: str, records: list[dict[str, object]]) -> str:
+    def run(
+        self,
+        ingestion_run_id: str,
+        source_dataset_version_id: str,
+        records: list[dict[str, object]],
+        *,
+        run_follow_on_jobs: bool = True,
+    ) -> str:
         threshold = self.settings.duplicate_review_threshold_percentage
         validation_run = self.validation_repository.create_run(
             ingestion_run_id=ingestion_run_id,
@@ -158,6 +165,7 @@ class ValidationPipeline:
                 validation_run_id=validation_run.validation_run_id,
                 cleaned_records=cleaned_records,
                 duplicate_group_count=len(stored_groups),
+                run_follow_on_jobs=run_follow_on_jobs,
             )
             for stored_group in stored_groups:
                 stored_group.cleaned_record_id = cleaned_dataset_id

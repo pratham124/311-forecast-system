@@ -9,6 +9,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from app.clients.edmonton_311 import Edmonton311Client
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
+from app.services.ingestion_follow_on_jobs import launch_ingestion_follow_on_jobs
 from app.services.ingestion_logging_service import IngestionLoggingService
 
 
@@ -47,7 +48,11 @@ def build_ingestion_job(session_factory: Callable[[], object]) -> Callable[[], o
                 client=Edmonton311Client(),
                 logging_service=IngestionLoggingService(logging.getLogger("scheduler.ingestion")),
             )
-            return pipeline.run(trigger_type="scheduled")
+            result = pipeline.run(trigger_type="scheduled", run_follow_on_jobs=False)
+            session.commit()
+            if result.status == "success" and result.result_type == "new_data":
+                launch_ingestion_follow_on_jobs()
+            return result
         finally:
             session.close()
 
