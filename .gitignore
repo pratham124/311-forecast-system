@@ -30,6 +30,7 @@ build/
 .pytest_cache/
 backend/.artifacts/forecast_models/
 backend/.artifacts/weekly_forecast_models/
+backend/backend/.artifacts/
 coverage/
 **/.vite
 **.coverage
@@ -38,5 +39,8 @@ frontend/.tmp-coverage-gaps.js
 frontend/.tmp-print-branch.cjs
 frontend/coverage-out*.txt
 frontend/coverage.txt
+ui-playwright/playwright-report/
+ui-playwright/test-results/
+ui-playwright/screenshots/
 backend/**.db
 backend/.coverage
