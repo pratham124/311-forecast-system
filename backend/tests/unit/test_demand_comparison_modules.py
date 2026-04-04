@@ -131,6 +131,22 @@ class StubBucket:
         self.point_forecast = 1.0
 
 
+def _build_comparison_service(*, forecast_repository=None, weekly_forecast_repository=None, context_service=None) -> DemandComparisonService:
+    return DemandComparisonService(
+        comparison_repository=StubComparisonRepository(),
+        cleaned_dataset_repository=StubCleanedRepository(),
+        forecast_repository=forecast_repository or StubForecastRepository(),
+        weekly_forecast_repository=weekly_forecast_repository or StubWeeklyForecastRepository(),
+        context_service=context_service or StubContextService(),
+        warning_service=DemandComparisonWarningService(),
+        source_resolver=SimpleNamespace(
+            demand_lineage_repository=SimpleNamespace(get_current_approved_dataset=lambda _source_name: None),
+            ensure_alignment_supported=lambda **_kwargs: None,
+        ),
+        result_builder=SimpleNamespace(),
+    )
+
+
 def test_context_service_collects_categories_and_geography_levels() -> None:
     service = DemandComparisonContextService(
         StubCleanedRepository(
@@ -245,6 +261,234 @@ def test_source_resolution_prefers_daily_then_weekly_and_alignment_guard() -> No
         geography_level=None,
     )
     assert none_found is None
+    resolver.ensure_alignment_supported(comparison_granularity=None, geography_level="ward", forecast_has_geography=False)
+    assert resolver._covers(
+        start.replace(tzinfo=None),
+        end.replace(tzinfo=None),
+        start,
+        end,
+    ) is True
+
+
+def test_demand_comparison_service_load_forecast_records_hourly_paths() -> None:
+    service = _build_comparison_service(
+        forecast_repository=StubForecastRepository(
+            versions=[
+                SimpleNamespace(forecast_version_id="forecast-1"),
+                SimpleNamespace(forecast_version_id="forecast-2"),
+            ],
+            buckets_by_version={
+                "forecast-1": [
+                    SimpleNamespace(
+                        service_category="Waste",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 1, 0, tzinfo=timezone.utc),
+                        point_forecast=10.0,
+                    ),
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 2",
+                        bucket_start=datetime(2026, 3, 1, 0, tzinfo=timezone.utc),
+                        point_forecast=20.0,
+                    ),
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 2, 28, 23, tzinfo=timezone.utc),
+                        point_forecast=30.0,
+                    ),
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 1, 0, tzinfo=timezone.utc),
+                        point_forecast=1.5,
+                    ),
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 1, 0, tzinfo=timezone.utc),
+                        point_forecast=2.5,
+                    ),
+                ],
+                "forecast-2": [
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key=None,
+                        bucket_start=datetime(2026, 3, 1, 1, tzinfo=timezone.utc),
+                        point_forecast=4.0,
+                    ),
+                ],
+            },
+        ),
+        context_service=SimpleNamespace(source_name="edmonton_311", extract_geography_value=lambda record, geography_level: record.get(geography_level)),
+    )
+    payload = DemandComparisonQueryRequest.model_validate(
+        {
+            "serviceCategories": ["Roads"],
+            "geographyLevel": "ward",
+            "geographyValues": ["Ward 1"],
+            "timeRangeStart": "2026-03-01T00:00:00Z",
+            "timeRangeEnd": "2026-03-02T00:00:00Z",
+        }
+    )
+
+    result = service._load_forecast_records(payload)
+
+    assert result.forecast_product == "daily_1_day"
+    assert result.forecast_granularity == "hourly"
+    assert result.comparison_granularity == "hourly"
+    assert result.source_forecast_version_id == "forecast-1"
+    assert result.source_weekly_forecast_version_id is None
+    assert result.rows == [
+        {
+            "service_category": "Roads",
+            "geography_key": "Ward 1",
+            "point_forecast": 4.0,
+            "bucket_start": datetime(2026, 3, 1, 0, tzinfo=timezone.utc),
+        }
+    ]
+
+
+def test_demand_comparison_service_load_forecast_records_daily_and_weekly_paths() -> None:
+    service = _build_comparison_service(
+        forecast_repository=StubForecastRepository(
+            versions=[
+                SimpleNamespace(forecast_version_id="forecast-1"),
+                SimpleNamespace(forecast_version_id="forecast-2"),
+            ],
+            buckets_by_version={
+                "forecast-1": [
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 1, 1, tzinfo=timezone.utc),
+                        point_forecast=3.0,
+                    ),
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 1, 2, tzinfo=timezone.utc),
+                        point_forecast=5.0,
+                    ),
+                ],
+                "forecast-2": [
+                    SimpleNamespace(
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        bucket_start=datetime(2026, 3, 2, 1, tzinfo=timezone.utc),
+                        point_forecast=7.0,
+                    ),
+                ],
+            },
+        ),
+        weekly_forecast_repository=StubWeeklyForecastRepository(
+            versions=[
+                SimpleNamespace(weekly_forecast_version_id="weekly-1"),
+                SimpleNamespace(weekly_forecast_version_id="weekly-2"),
+                SimpleNamespace(weekly_forecast_version_id="weekly-3"),
+            ],
+            buckets_by_version={
+                "weekly-1": [
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 1),
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        point_forecast=100.0,
+                    ),
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 2),
+                        service_category="Waste",
+                        geography_key="Ward 1",
+                        point_forecast=200.0,
+                    ),
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 2),
+                        service_category="Roads",
+                        geography_key="Ward 2",
+                        point_forecast=300.0,
+                    ),
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 10),
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        point_forecast=400.0,
+                    ),
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 3),
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        point_forecast=9.0,
+                    ),
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 3),
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        point_forecast=10.0,
+                    ),
+                ],
+                "weekly-2": [
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 4),
+                        service_category="Roads",
+                        geography_key="Ward 1",
+                        point_forecast=11.0,
+                    ),
+                ],
+                "weekly-3": [
+                    SimpleNamespace(
+                        forecast_date_local=date(2026, 3, 4),
+                        service_category="Waste",
+                        geography_key="Ward 9",
+                        point_forecast=99.0,
+                    ),
+                ],
+            },
+        ),
+        context_service=SimpleNamespace(source_name="edmonton_311", extract_geography_value=lambda record, geography_level: record.get(geography_level)),
+    )
+    payload = DemandComparisonQueryRequest.model_validate(
+        {
+            "serviceCategories": ["Roads"],
+            "geographyLevel": "ward",
+            "geographyValues": ["Ward 1"],
+            "timeRangeStart": "2026-03-01T00:00:00Z",
+            "timeRangeEnd": "2026-03-05T00:00:00Z",
+        }
+    )
+
+    result = service._load_forecast_records(payload)
+
+    assert result.forecast_product is None
+    assert result.forecast_granularity is None
+    assert result.comparison_granularity == "daily"
+    assert result.source_forecast_version_id == "forecast-1"
+    assert result.source_weekly_forecast_version_id == "weekly-1"
+    assert result.rows == [
+        {
+            "service_category": "Roads",
+            "geography_key": "Ward 1",
+            "point_forecast": 8.0,
+            "forecast_date_local": date(2026, 3, 1),
+        },
+        {
+            "service_category": "Roads",
+            "geography_key": "Ward 1",
+            "point_forecast": 7.0,
+            "forecast_date_local": date(2026, 3, 2),
+        },
+        {
+            "forecast_date_local": date(2026, 3, 3),
+            "service_category": "Roads",
+            "geography_key": "Ward 1",
+            "point_forecast": 9.0,
+        },
+        {
+            "forecast_date_local": date(2026, 3, 4),
+            "service_category": "Roads",
+            "geography_key": "Ward 1",
+            "point_forecast": 11.0,
+        },
+    ]
 
 
 def test_result_builder_builds_series_missing_combinations_and_alignment_error() -> None:

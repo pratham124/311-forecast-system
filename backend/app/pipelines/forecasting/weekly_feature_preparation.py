@@ -168,14 +168,9 @@ def prepare_weekly_forecast_features(
 
     for service_category, geography_key in scopes:
         history = scope_counts.get((service_category, geography_key)) or category_counts.get(service_category, {})
-        if history:
-            history_start = min(history)
-            history_end = week_start_local.date() - timedelta(days=1)
-            history_days = max((history_end - history_start).days + 1, 1)
-        else:
-            history_start = week_start_local.date()
-            history_end = week_start_local.date() - timedelta(days=1)
-            history_days = 1
+        history_start = min(history, default=week_start_local.date())
+        history_end = week_start_local.date() - timedelta(days=1)
+        history_days = max((history_end - history_start).days + 1, 1)
         historical_mean = (
             sum(float(value) for value in history.values()) / float(history_days)
             if history

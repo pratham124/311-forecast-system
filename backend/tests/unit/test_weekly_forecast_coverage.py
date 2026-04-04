@@ -11,7 +11,7 @@ from app.api.routes import weekly_forecasts as weekly_routes
 from app.main import lifespan
 from app.models import CurrentForecastModelMarker
 from app.pipelines.forecasting.weekly_feature_preparation import prepare_weekly_forecast_features
-from app.pipelines.forecasting.weekly_demand_pipeline import _quantile
+from app.pipelines.forecasting.weekly_demand_pipeline import WeeklyDemandPipeline, _quantile
 from app.clients.geomet_client import GeoMetClient, GeoMetClientError
 from app.clients.nager_date_client import NagerDateClient
 from app.clients.open_meteo_client import OpenMeteoClient
@@ -226,6 +226,180 @@ def test_prepare_weekly_forecast_features_skips_invalid_rows() -> None:
 
     assert prepared["scopes"] == []
     assert prepared["category_counts"] == {}
+
+
+@pytest.mark.unit
+def test_weekly_demand_pipeline_handles_empty_and_fallback_prediction_paths() -> None:
+    pipeline = WeeklyDemandPipeline()
+
+    artifact = pipeline.fit({"training_rows": [], "geography_scope": "category_only"})
+    assert artifact.point_model is None
+    assert pipeline.predict(artifact, {"rows": []})["buckets"] == []
+
+    predicted = pipeline.predict(
+        artifact,
+        {
+            "rows": [
+                {
+                    "forecast_date_local": datetime(2026, 3, 23, tzinfo=timezone.utc).date(),
+                    "service_category": "Roads",
+                    "geography_key": None,
+                    "day_of_week": 0,
+                    "day_of_year": 82,
+                    "month": 3,
+                    "is_weekend": False,
+                    "is_holiday": False,
+                    "weather_is_missing": True,
+                    "avg_temperature_c": None,
+                    "total_precipitation_mm": None,
+                    "total_snowfall_mm": None,
+                    "avg_precipitation_probability_pct": None,
+                    "historical_mean": 3.5,
+                    "lag_7d": 0.0,
+                    "rolling_mean_7d": 0.0,
+                    "rolling_mean_28d": 0.0,
+                }
+            ]
+        },
+    )
+    assert predicted["buckets"][0]["point_forecast"] == 3.5
+    assert _quantile([5.0], 0.9) == 5.0
+
+
+@pytest.mark.unit
+def test_weekly_demand_pipeline_handles_zero_observed_counts_and_quantile_interpolation() -> None:
+    pipeline = WeeklyDemandPipeline()
+
+    artifact = pipeline.fit(
+        {
+            "training_rows": [
+                {
+                    "service_category": "Roads",
+                    "geography_key": None,
+                    "day_of_week": 1,
+                    "day_of_year": 82,
+                    "month": 3,
+                    "is_weekend": False,
+                    "is_holiday": False,
+                    "weather_is_missing": True,
+                    "avg_temperature_c": None,
+                    "total_precipitation_mm": None,
+                    "total_snowfall_mm": None,
+                    "avg_precipitation_probability_pct": None,
+                    "historical_mean": 0.0,
+                    "lag_7d": 0.0,
+                    "rolling_mean_7d": 0.0,
+                    "rolling_mean_28d": 0.0,
+                    "observed_count": 0.0,
+                }
+            ],
+            "geography_scope": "category_only",
+        }
+    )
+
+    assert artifact.point_model is None
+    assert artifact.residual_q10_by_weekday == {}
+    assert artifact.residual_q90_by_weekday == {}
+    assert pipeline._build_residual_calibration([], __import__("numpy").array([])) == ({}, {})
+    assert _quantile([1.0, 5.0], 0.25) == 2.0
+
+
+@pytest.mark.unit
+def test_weekly_forecast_service_rejects_stale_feature_schema() -> None:
+    settings = SimpleNamespace(
+        source_name="edmonton_311",
+        weekly_forecast_product_name="weekly_7_day_demand",
+        weekly_forecast_timezone="America/Edmonton",
+        weekly_forecast_history_days=56,
+    )
+    run = SimpleNamespace(
+        weekly_forecast_run_id="run-1",
+        status="running",
+        source_cleaned_dataset_version_id="dataset-1",
+        week_start_local=datetime(2026, 3, 23, tzinfo=timezone.utc),
+        week_end_local=datetime(2026, 3, 29, 23, 59, 59, tzinfo=timezone.utc),
+    )
+    failures: list[dict[str, object]] = []
+    service = WeeklyForecastService(
+        cleaned_dataset_repository=SimpleNamespace(
+            get_current_approved_dataset=lambda _source_name: SimpleNamespace(dataset_version_id="dataset-1"),
+            list_current_cleaned_records=lambda *args, **kwargs: [{"requested_at": "2026-03-20T10:00:00Z", "category": "Roads"}],
+        ),
+        weekly_forecast_run_repository=SimpleNamespace(
+            get_run=lambda _run_id: run,
+            find_in_progress_run=lambda **kwargs: None,
+            create_run=lambda **kwargs: run,
+            finalize_failed=lambda run_id, **kwargs: failures.append(kwargs) or SimpleNamespace(status="failed", result_type=kwargs["result_type"], failure_reason=kwargs["failure_reason"]),
+            finalize_reused=lambda *args, **kwargs: None,
+            finalize_generated=lambda *args, **kwargs: None,
+        ),
+        weekly_forecast_repository=SimpleNamespace(find_current_for_week=lambda **kwargs: None),
+        forecast_model_repository=SimpleNamespace(
+            find_current_model=lambda _product_name: SimpleNamespace(
+                source_cleaned_dataset_version_id="dataset-1",
+                feature_schema_version="stale-schema",
+                artifact_path="/tmp/stale.pkl",
+            )
+        ),
+        geomet_client=SimpleNamespace(fetch_forecast_hourly_conditions=lambda start, end: []),
+        nager_date_client=SimpleNamespace(fetch_holidays=lambda year: []),
+        settings=settings,
+    )
+
+    failed = service.execute_run("run-1")
+
+    assert failed.result_type == "engine_failure"
+    assert "outdated feature schema" in failed.failure_reason
+
+
+@pytest.mark.unit
+def test_weekly_training_service_savepoint_helpers_cover_no_session_and_rollback_paths(tmp_path) -> None:
+    settings = SimpleNamespace(
+        source_name="edmonton_311",
+        weekly_forecast_product_name="weekly_7_day_demand",
+        weekly_forecast_timezone="America/Edmonton",
+        weekly_forecast_history_days=56,
+        weekly_forecast_model_artifact_dir=str(tmp_path / "weekly_models"),
+    )
+    service = WeeklyForecastTrainingService(
+        cleaned_dataset_repository=SimpleNamespace(),
+        forecast_model_repository=SimpleNamespace(),
+        geomet_client=SimpleNamespace(),
+        nager_date_client=SimpleNamespace(fetch_holidays=lambda year: []),
+        settings=settings,
+    )
+
+    assert service._begin_repository_savepoint() is None
+    service._rollback_repository_savepoint(None)
+    service._commit_repository_savepoint(None)
+    service._rollback_repository_session()
+
+    events: list[str] = []
+
+    class FakeSavepoint:
+        is_active = True
+
+        def rollback(self):
+            events.append("rollback")
+
+        def commit(self):
+            events.append("commit")
+
+    class FakeSession:
+        def begin_nested(self):
+            events.append("begin")
+            return FakeSavepoint()
+
+        def rollback(self):
+            events.append("session_rollback")
+
+    service.forecast_model_repository = SimpleNamespace(session=FakeSession())
+    savepoint = service._begin_repository_savepoint()
+    service._rollback_repository_savepoint(savepoint)
+    service._commit_repository_savepoint(savepoint)
+    service._rollback_repository_session()
+
+    assert events == ["begin", "rollback", "commit", "session_rollback"]
 
 
 @pytest.mark.unit

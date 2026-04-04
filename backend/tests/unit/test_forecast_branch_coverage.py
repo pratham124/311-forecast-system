@@ -1984,6 +1984,44 @@ def test_forecast_training_service_failure_and_helper_paths(monkeypatch: pytest.
     monkeypatch.setattr(generic_service.pipeline, "fit", lambda prepared: (_ for _ in ()).throw(RuntimeError("fit boom")))
     assert generic_service.execute_run("model-run-empty").result_type == "engine_failure"
 
+    helper_service = module.ForecastTrainingService(
+        cleaned_dataset_repository=SimpleNamespace(),
+        forecast_model_repository=SimpleNamespace(),
+        geomet_client=SimpleNamespace(),
+        nager_date_client=SimpleNamespace(fetch_holidays=lambda year: []),
+        settings=settings,
+    )
+    assert helper_service._begin_repository_savepoint() is None
+    helper_service._rollback_repository_savepoint(None)
+    helper_service._commit_repository_savepoint(None)
+    helper_service._rollback_repository_session()
+
+    events: list[str] = []
+
+    class FakeSavepoint:
+        is_active = True
+
+        def rollback(self):
+            events.append("rollback")
+
+        def commit(self):
+            events.append("commit")
+
+    class FakeSession:
+        def begin_nested(self):
+            events.append("begin")
+            return FakeSavepoint()
+
+        def rollback(self):
+            events.append("session_rollback")
+
+    helper_service.forecast_model_repository = SimpleNamespace(session=FakeSession())
+    savepoint = helper_service._begin_repository_savepoint()
+    helper_service._rollback_repository_savepoint(savepoint)
+    helper_service._commit_repository_savepoint(savepoint)
+    helper_service._rollback_repository_session()
+    assert events == ["begin", "rollback", "commit", "session_rollback"]
+
 
 @pytest.mark.unit
 def test_geomet_forecast_transport_uses_forecast_collection_and_falls_back(monkeypatch: pytest.MonkeyPatch) -> None:
