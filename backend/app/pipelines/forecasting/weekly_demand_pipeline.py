@@ -27,7 +27,7 @@ class TrainedWeeklyDemandArtifact:
 
 
 class WeeklyDemandPipeline:
-    model_family = "lightgbm_weekly_global"
+    model_family = "historical_weekday_global"
     baseline_method = "historical_daily_mean_with_lightgbm_weather_holiday_features"
     feature_schema_version = "wk_lgbm_v4_wx_holiday"
 

@@ -69,6 +69,13 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
 
   const readable = canReadEvaluation(roles);
   const triggerable = canTriggerEvaluation(roles);
+  const runStatusTone =
+    runStatus?.status === 'failed'
+      ? 'border-red-200 bg-red-50 text-red-800'
+      : runStatus?.status === 'running'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-emerald-200 bg-emerald-50 text-emerald-800';
+  const runResultLabel = runStatus?.resultType ? runStatus.resultType.replace(/_/g, ' ') : 'pending';
 
   useEffect(() => {
     if (!isProductPickerOpen) return;
@@ -150,19 +157,23 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8" aria-label="evaluation page">
-      <Card className="relative z-20 grid gap-6 rounded-[28px] p-1 md:grid-cols-[1.35fr_0.95fr]">
-        <CardHeader className="pb-6">
-          <p className="mb-3 mt-0 text-xs uppercase tracking-[0.18em] text-accent">Forecast Evaluation</p>
-          <CardTitle className="m-0 text-4xl leading-[0.95] text-ink md:text-6xl">
-            Review whether the forecasting engine beats its baselines.
+      <Card className="relative z-20 grid gap-4 rounded-[28px] border-white/60 bg-white/85 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:grid-cols-[1.35fr_0.95fr] md:gap-6">
+        <CardHeader className="gap-3 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">Forecast Evaluation</p>
+          <CardTitle className="m-0 max-w-3xl text-3xl leading-tight text-ink sm:text-4xl md:text-5xl md:leading-[1.02]">
+            Review how the forecasting engine performs against its baselines
           </CardTitle>
-          <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Compare the current official engine output against seasonal naive and moving average baselines, then inspect segment-level exclusions before publishing decisions.
+          <CardDescription className="max-w-2xl text-sm leading-6 text-muted sm:text-[15px]">
+            Compare the current official forecast with baseline methods used for internal review.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
-          <div className="grid gap-2">
-            <Label htmlFor="forecast-product">Time range</Label>
+        <CardContent className="grid content-start gap-5 rounded-[24px] bg-slate-50/80 p-5 sm:p-6">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-ink">Choose the evaluation scope</p>
+            <p className="text-sm leading-6 text-muted">Switch between daily and weekly evaluation outputs, then trigger a fresh run if your role allows it.</p>
+          </div>
+          <div className="grid gap-2.5">
+            <Label htmlFor="forecast-product" className="text-sm font-medium text-ink">Time range</Label>
             <TimeRangeSelect
               value={forecastProduct}
               onChange={setForecastProduct}
@@ -171,7 +182,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
               containerRef={productPickerRef}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
         {triggerable ? (
           <button
             type="button"
@@ -205,22 +216,30 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
 
       {runStatus ? (
         <Card className="mt-5 rounded-[22px]" tone={runStatus.status === 'failed' ? 'danger' : 'accent'}>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg text-ink">Latest run status</CardTitle>
             <CardDescription>{describeRunStatus(runStatus)}</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-3">
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Status</span>
-              <strong className="mt-2 block text-sm capitalize text-ink">{runStatus.status}</strong>
+          <CardContent className="grid gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${runStatusTone}`}>
+                {runStatus.status}
+              </span>
+              <p className="m-0 text-sm leading-6 text-muted">{runStatus.summary ?? 'Evaluation status updated.'}</p>
             </div>
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Result type</span>
-              <strong className="mt-2 block text-sm text-ink">{runStatus.resultType ?? 'pending'}</strong>
-            </div>
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Completed</span>
-              <strong className="mt-2 block text-sm text-ink">{formatDateTime(runStatus.completedAt)}</strong>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Run status</span>
+                <strong className="mt-2 block text-base capitalize text-ink">{runStatus.status}</strong>
+              </div>
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Result</span>
+                <strong className="mt-2 block text-base capitalize text-ink">{runResultLabel}</strong>
+              </div>
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Completed at</span>
+                <strong className="mt-2 block text-base text-ink">{formatDateTime(runStatus.completedAt)}</strong>
+              </div>
             </div>
           </CardContent>
         </Card>

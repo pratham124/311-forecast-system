@@ -7,9 +7,19 @@ function formatDateLabel(value: string): string {
   return value.length > 10 ? value.slice(0, 10) : value;
 }
 
+function formatOutcomeLabel(value: string): string {
+  return value.replace(/_/g, ' ');
+}
+
 export function ComparisonResultView({ response }: { response: DemandComparisonResponse }) {
   const series = response.series ?? [];
   const missing = response.missingCombinations ?? [];
+  const outcomeTone =
+    response.outcomeStatus === 'success'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+      : response.outcomeStatus === 'forecast_only' || response.outcomeStatus === 'historical_only'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-sky-200 bg-sky-50 text-sky-800';
 
   const chartConfiguration = useMemo(() => {
     const groupedByDate: Record<string, { dateLabel: string; historical?: number; forecast?: number }> = {};
@@ -43,13 +53,32 @@ export function ComparisonResultView({ response }: { response: DemandComparisonR
   return (
     <div className="grid gap-5 min-w-0">
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-2xl text-ink">Comparison summary</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 text-sm text-ink">
-          <p>Outcome: <strong>{response.outcomeStatus}</strong></p>
-          <p>Granularity: <strong>{response.comparisonGranularity ?? 'daily'}</strong></p>
-          <p>Series returned: <strong>{series.length}</strong></p>
+        <CardContent className="grid gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${outcomeTone}`}>
+              {formatOutcomeLabel(response.outcomeStatus)}
+            </span>
+            <p className="m-0 text-sm leading-6 text-muted">
+              {response.message ?? 'Comparison results are ready to review.'}
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-[22px] border border-slate-200 bg-white/80 p-4">
+              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Outcome</span>
+              <strong className="mt-2 block text-base capitalize text-ink">{formatOutcomeLabel(response.outcomeStatus)}</strong>
+            </div>
+            <div className="rounded-[22px] border border-slate-200 bg-white/80 p-4">
+              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Granularity</span>
+              <strong className="mt-2 block text-base capitalize text-ink">{response.comparisonGranularity ?? 'daily'}</strong>
+            </div>
+            <div className="rounded-[22px] border border-slate-200 bg-white/80 p-4">
+              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Series returned</span>
+              <strong className="mt-2 block text-base text-ink">{series.length}</strong>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -96,35 +125,49 @@ export function ComparisonResultView({ response }: { response: DemandComparisonR
           <CardTitle className="text-xl text-ink">Series table</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
-          {tableGroups.map(([category, items]) => (
-            <div key={category} className="overflow-x-auto min-w-0 rounded-[22px] border border-slate-200 bg-white/80 p-4">
-              <h3 className="m-0 text-base font-semibold text-ink">{category}</h3>
-              <table className="mt-3 min-w-full border-collapse text-left text-sm text-ink">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="py-2 pr-4">Type</th>
-                    <th className="py-2 pr-4">Points</th>
-                  </tr>
-                </thead>
-                <tbody>
+          <div className="grid gap-4 md:grid-cols-2">
+            {tableGroups.map(([category, items]) => (
+              <div
+                key={category}
+                className="rounded-[22px] border border-slate-200 bg-white/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <h3 className="m-0 text-base font-semibold text-ink">{category}</h3>
+                  <span className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                    {items.length} series
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3">
                   {items.map((item) => (
-                    <tr key={`${item.seriesType}:${item.serviceCategory}:${item.geographyKey ?? 'all'}`} className="border-b border-slate-100 align-top last:border-b-0">
-                      <td className="py-2 pr-4">{item.seriesType}</td>
-                      <td className="py-2 pr-4">
-                        <div className="max-h-32 overflow-y-auto overflow-x-hidden break-all min-w-[200px]">
-                          {item.points.map((point) => (
-                            <div key={`${point.bucketStart}:${point.bucketEnd}`}>
-                              {formatDateLabel(point.bucketStart)} - {point.value}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
+                    <div
+                      key={`${item.seriesType}:${item.serviceCategory}:${item.geographyKey ?? 'all'}`}
+                      className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
+                          {item.seriesType}
+                        </span>
+                        <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted">
+                          {item.points.length} points
+                        </span>
+                      </div>
+                      <div className="mt-2 grid gap-2 text-xs leading-tight text-muted sm:grid-cols-2">
+                        {item.points.map((point) => (
+                          <div
+                            key={`${point.bucketStart}:${point.bucketEnd}`}
+                            className="flex items-center justify-between rounded-2xl bg-white/50 px-3 py-1 text-[11px] font-semibold text-ink shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+                          >
+                            <span>{formatDateLabel(point.bucketStart)}</span>
+                            <span className="text-sm text-ink">{point.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

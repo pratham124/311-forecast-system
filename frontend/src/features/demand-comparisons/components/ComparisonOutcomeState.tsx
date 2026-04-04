@@ -11,7 +11,7 @@ interface ComparisonOutcomeStateProps {
 
 export function ComparisonOutcomeState({ error, isLoading, response, onProceed, onDecline }: ComparisonOutcomeStateProps) {
   if (isLoading) {
-    return <Alert><AlertDescription>Comparing historical and forecast demand...</AlertDescription></Alert>;
+    return <Alert><AlertDescription>Loading comparison options...</AlertDescription></Alert>;
   }
   if (error) {
     return <Alert><AlertDescription>{error}</AlertDescription></Alert>;
@@ -28,7 +28,7 @@ export function ComparisonOutcomeState({ error, isLoading, response, onProceed, 
             <p>{response.message}</p>
             <div className="flex gap-2">
               <button type="button" onClick={onProceed} className="rounded-2xl bg-accent px-4 py-2 text-sm font-semibold text-white">Proceed</button>
-              <button type="button" onClick={onDecline} className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-ink">Cancel</button>
+              <button type="button" onClick={onDecline} className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-ink">Revise filters</button>
             </div>
           </div>
         </AlertDescription>

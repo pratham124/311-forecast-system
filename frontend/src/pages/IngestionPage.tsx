@@ -37,6 +37,16 @@ export function describeRunStatus(status: IngestionRunStatus | null): string {
   return '311 ingestion completed.';
 }
 
+export function formatIngestionResultType(value?: string | null): string {
+  if (!value) return 'Pending';
+  return value
+    .replace(/_/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export async function wait(ms: number): Promise<void> {
   await new Promise((resolve) => window.setTimeout(resolve, ms));
 }
@@ -143,21 +153,25 @@ export function IngestionPage({ roles }: IngestionPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8" aria-label="ingestion page">
-      <Card className="relative z-20 grid gap-6 rounded-[28px] p-1 md:grid-cols-[1.35fr_0.95fr]">
-        <CardHeader className="pb-6">
-          <p className="mb-3 mt-0 text-xs uppercase tracking-[0.18em] text-accent">311 Ingestion</p>
-          <CardTitle className="m-0 text-4xl leading-[0.95] text-ink md:text-6xl">
-            Refresh the approved Edmonton 311 source snapshot.
+      <Card className="relative z-20 grid gap-4 rounded-[28px] border-white/60 bg-white/85 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:grid-cols-[1.35fr_0.95fr] md:gap-6">
+        <CardHeader className="gap-3 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">311 Ingestion</p>
+          <CardTitle className="m-0 max-w-3xl text-3xl leading-tight text-ink sm:text-4xl md:text-5xl md:leading-[1.02]">
+            Fetch the latest Edmonton 311 data
           </CardTitle>
-          <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Trigger a fresh pull from the Edmonton 311 source, then monitor the run outcome and the currently approved dataset version from one place.
+          <CardDescription className="max-w-2xl text-sm leading-6 text-muted sm:text-[15px]">
+            Pull the latest 311 source data and review the approved dataset in one place.
           </CardDescription>
+          <p className="max-w-2xl text-sm leading-6 text-muted">
+            Use this page to monitor the run outcome, confirm record counts, and see when the approved data was last refreshed.
+          </p>
         </CardHeader>
-        <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-              Current dataset visibility
-            </span>
+        <CardContent className="grid content-center gap-5 rounded-[24px] bg-slate-50/80 p-5 sm:p-6">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-ink">Run and monitor ingestion</p>
+            <p className="text-sm leading-6 text-muted">Trigger a new pull when needed, then watch the current dataset state and run status below.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             {triggerable ? (
               <button
                 type="button"
@@ -191,47 +205,73 @@ export function IngestionPage({ roles }: IngestionPageProps) {
 
       {runStatus ? (
         <Card className="mt-5 rounded-[22px]" tone={runStatus.status === 'failed' ? 'danger' : 'accent'}>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg text-ink">Latest run status</CardTitle>
             <CardDescription>{describeRunStatus(runStatus)}</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-3">
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Status</span>
-              <strong className="mt-2 block text-sm capitalize text-ink">{runStatus.status}</strong>
+          <CardContent className="grid gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                  runStatus.status === 'failed'
+                    ? 'border-red-200 bg-red-50 text-red-800'
+                    : runStatus.status === 'running'
+                      ? 'border-amber-200 bg-amber-50 text-amber-800'
+                      : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                }`}
+              >
+                {runStatus.status}
+              </span>
+              <p className="m-0 text-sm leading-6 text-muted">Ingestion status updated.</p>
             </div>
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Result type</span>
-              <strong className="mt-2 block text-sm text-ink">{runStatus.resultType ?? 'pending'}</strong>
-            </div>
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Records received</span>
-              <strong className="mt-2 block text-sm text-ink">{runStatus.recordsReceived ?? 0}</strong>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Run status</span>
+                <strong className="mt-2 block text-base capitalize text-ink">{runStatus.status}</strong>
+              </div>
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Result</span>
+                <strong className="mt-2 block text-base text-ink">{formatIngestionResultType(runStatus.resultType)}</strong>
+              </div>
+              <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Records received</span>
+                <strong className="mt-2 block text-base text-ink">{runStatus.recordsReceived ?? 0}</strong>
+              </div>
             </div>
           </CardContent>
         </Card>
       ) : null}
 
       {dataset ? (
-        <section className="mt-5 grid gap-4 md:grid-cols-2">
+        <section className="mt-5 grid gap-4">
           <Card className="rounded-[22px]">
             <CardContent className="p-5">
-              <span className="block text-sm text-muted">Record count</span>
-              <strong className="mt-2 block text-lg text-ink">{dataset.recordCount}</strong>
+              <p className="m-0 text-sm font-semibold text-ink">Approved dataset snapshot</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+                This is the current approved 311 source snapshot available to the rest of the app.
+              </p>
             </CardContent>
           </Card>
-          <Card className="rounded-[22px]">
-            <CardContent className="p-5">
-              <span className="block text-sm text-muted">Updated</span>
-              <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.updatedAt)}</strong>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[22px] md:col-span-2">
-            <CardContent className="p-5">
-              <span className="block text-sm text-muted">Latest 311 requested_at in stored data</span>
-              <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.latestRequestedAt)}</strong>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="rounded-[22px]">
+              <CardContent className="p-5">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Record count</span>
+                <strong className="mt-2 block text-2xl text-ink">{dataset.recordCount}</strong>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[22px]">
+              <CardContent className="p-5">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Last updated</span>
+                <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.updatedAt)}</strong>
+              </CardContent>
+            </Card>
+            <Card className="rounded-[22px]">
+              <CardContent className="p-5">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Latest source activity</span>
+                <strong className="mt-2 block text-lg text-ink">{formatUpdatedDateTime(dataset.latestRequestedAt)}</strong>
+              </CardContent>
+            </Card>
+          </div>
         </section>
       ) : !isLoading && !error ? (
         <Alert className="mt-5">

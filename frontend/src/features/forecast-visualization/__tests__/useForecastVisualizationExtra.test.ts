@@ -98,7 +98,7 @@ describe('useForecastVisualization – error paths', () => {
     });
     await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
 
-    expect(result.current.serviceCategories).toEqual(['Roads', 'Waste']);
+    expect(result.current.serviceCategories).toEqual([]);
     expect(result.current.serviceCategories).toBe(previousCategories);
   });
 

@@ -23,7 +23,7 @@ export function useForecastVisualization() {
         setServiceCategoryOptions(nextOptions);
         setServiceCategories((current) => {
           const filtered = current.filter((category) => nextOptions.includes(category));
-          const next = filtered.length === 0 && nextOptions.length > 0 ? [...nextOptions] : filtered;
+          const next = filtered.length === nextOptions.length ? [] : filtered;
           return next.length === current.length && next.every((value, index) => value === current[index]) ? current : next;
         });
         setServiceCategoriesReady(true);
@@ -40,7 +40,7 @@ export function useForecastVisualization() {
   useEffect(() => {
     if (!serviceCategoriesReady) return;
     const controller = new AbortController();
-    const allSelected = serviceCategoryOptions.length > 0 && serviceCategories.length === serviceCategoryOptions.length;
+    const allSelected = serviceCategories.length === 0;
     const excludedCategories = !allSelected && serviceCategories.length > serviceCategoryOptions.length / 2
       ? serviceCategoryOptions.filter((category) => !serviceCategories.includes(category))
       : [];

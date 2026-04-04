@@ -35,7 +35,7 @@ describe('HistoricalDemandFilters – nullish timeRangeEnd fallback', () => {
       />,
     );
     // timeRangeEnd is undefined → ?? '' → ''.replace('Z', '') = '' → input value is ''
-    const endInput = screen.getByLabelText(/time range end/i) as HTMLInputElement;
+    const endInput = screen.getByLabelText(/^end$/i) as HTMLInputElement;
     expect(endInput.value).toBe('');
   });
 });
@@ -83,8 +83,22 @@ describe('HistoricalDemandFilters – updateField', () => {
       />,
     );
     const expectedMax = new Date().toISOString().slice(0, 10);
-    expect(screen.getByLabelText(/time range start/i)).toHaveAttribute('max', expectedMax);
-    expect(screen.getByLabelText(/time range end/i)).toHaveAttribute('max', expectedMax);
+    expect(screen.getByLabelText(/^start$/i)).toHaveAttribute('max', '2026-03-31');
+    expect(screen.getByLabelText(/^end$/i)).toHaveAttribute('max', expectedMax);
+    expect(screen.getByLabelText(/^end$/i)).toHaveAttribute('min', '2026-03-01');
+  });
+
+  it('disables submit and shows guidance when the end date is before the start date', () => {
+    render(
+      <HistoricalDemandFilters
+        context={null}
+        filters={{ ...baseFilters, timeRangeStart: '2026-03-31T00:00:00Z', timeRangeEnd: '2026-03-01T00:00:00Z' }}
+        onChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+    expect(screen.getByText(/select a valid start and end date/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /explore historical demand/i })).toBeDisabled();
   });
 });
 

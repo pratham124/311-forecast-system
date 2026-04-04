@@ -164,7 +164,7 @@ describe('IngestionPage – error state', () => {
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
     }, { timeout: 4000 });
-    expect(await screen.findByText(/latest 311 requested_at in stored data/i, {}, { timeout: 4000 })).toBeInTheDocument();
+    expect(await screen.findByText(/latest source activity/i, {}, { timeout: 4000 })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 
@@ -207,7 +207,7 @@ describe('IngestionPage – error state', () => {
       await user.click(screen.getByRole('button', { name: /trigger 311 ingestion/i }));
 
       expect(await screen.findByText(/latest run status/i)).toBeInTheDocument();
-      expect(screen.getByText(/^failed$/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/^failed$/i).length).toBeGreaterThan(0);
 
       cleanup();
       fetchMock.mockReset();

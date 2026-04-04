@@ -103,7 +103,7 @@ describe('ForecastVisualizationPage', () => {
     expect(await screen.findByText(/forecast view unavailable/i)).toBeInTheDocument();
   });
 
-  it('starts with all service areas selected and updates the request when one is removed', async () => {
+  it('starts with all service areas selected and updates the request when one is chosen', async () => {
     fetchMock
       .mockResolvedValueOnce(new Response(JSON.stringify(categoriesPayload), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(successPayload), { status: 200 }))
@@ -123,16 +123,15 @@ describe('ForecastVisualizationPage', () => {
     await screen.findByRole('img', { name: /demand forecast chart/i });
 
     fireEvent.click(screen.getByRole('button', { name: /service areas/i }));
-    fireEvent.click(screen.getByLabelText('Waste'));
+    fireEvent.click(screen.getByRole('button', { name: /^Waste$/i }));
 
     await waitFor(() => {
       const requestedUrls = fetchMock.mock.calls.map((call) => String(call[0]));
       expect(
         requestedUrls.some(
           (url) =>
-            url.includes('excludeServiceCategory=Waste')
-            && !url.includes('?serviceCategory=')
-            && !url.includes('&serviceCategory='),
+            url.includes('serviceCategory=Waste')
+            && !url.includes('excludeServiceCategory='),
         ),
       ).toBe(true);
     });

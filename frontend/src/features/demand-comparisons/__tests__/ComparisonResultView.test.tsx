@@ -16,7 +16,7 @@ describe('ComparisonResultView', () => {
     } as unknown as DemandComparisonResponse;
     render(<ComparisonResultView response={response as any} />);
     expect(screen.getByText('Comparison summary')).toBeInTheDocument();
-    expect(screen.getByText('success')).toBeInTheDocument();
+    expect(screen.getAllByText('success').length).toBeGreaterThan(0);
     expect(screen.getByText('daily')).toBeInTheDocument(); // fallback when missing
     expect(screen.getByText('0')).toBeInTheDocument(); // series length
     expect(screen.queryByText('Missing combinations')).not.toBeInTheDocument();
@@ -57,7 +57,8 @@ describe('ComparisonResultView', () => {
     expect(screen.getByText('Series table')).toBeInTheDocument();
     expect(screen.getByText('historical')).toBeInTheDocument();
     expect(screen.getByText('Cat1')).toBeInTheDocument();
-    expect(screen.getByText('2023-01-01 - 10')).toBeInTheDocument();
+    expect(screen.getAllByText('2023-01-01').length).toBeGreaterThan(0);
+    expect(screen.getByText('10')).toBeInTheDocument();
 
     expect(screen.getByText('forecast')).toBeInTheDocument();
     expect(screen.getByText('Cat2')).toBeInTheDocument();
