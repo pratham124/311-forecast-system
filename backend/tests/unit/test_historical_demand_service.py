@@ -101,6 +101,23 @@ def test_context_service_rejects_geography_level_with_insufficient_distinct_valu
 
 
 @pytest.mark.unit
+def test_context_service_supported_geography_levels_returns_empty_for_no_records() -> None:
+    service = HistoricalContextService(StubCleanedDatasetRepository([]), "edmonton_311")
+    assert service.supported_geography_levels([]) == []
+
+
+@pytest.mark.unit
+def test_context_service_get_supported_geography_levels_and_extracts_trimmed_values():
+    records = [
+        {"category": "Roads", "record_payload": json.dumps({"ward": " Ward 1 "})},
+        {"category": "Waste", "record_payload": json.dumps({"ward": "Ward 2"})},
+    ]
+    service = HistoricalContextService(StubCleanedDatasetRepository(records), "edmonton_311")
+    assert service.get_supported_geography_levels() == ["ward"]
+    assert service.extract_geography_value(records[0], "ward") == "Ward 1"
+
+
+@pytest.mark.unit
 def test_warning_service_detects_large_requests():
     warning = HistoricalWarningService(record_threshold=2).evaluate(
         candidate_record_count=3,

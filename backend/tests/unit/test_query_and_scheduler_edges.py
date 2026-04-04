@@ -15,7 +15,7 @@ from app.repositories.run_repository import RunRepository
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
 from app.services.activation_guard_service import ActivationGuardService
 from app.services.dataset_validation_service import DatasetValidationService
-from app.services.ingestion_follow_on_jobs import launch_ingestion_follow_on_jobs
+from app.services.ingestion_follow_on_jobs import _run_job, launch_ingestion_follow_on_jobs
 from app.services.ingestion_logging_service import IngestionLoggingService
 from app.services.ingestion_query_service import IngestionQueryService
 from app.services.scheduler_service import SchedulerService, build_ingestion_job
@@ -195,6 +195,52 @@ def test_launch_ingestion_follow_on_jobs_runs_sequentially(monkeypatch: pytest.M
         "weekly-forecast-model-training",
         "weekly-forecast-generation",
     ]
+
+
+@pytest.mark.unit
+def test_ingestion_follow_on_job_logs_and_continues_on_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+
+    class FakeLogger:
+        def exception(self, message, extra=None):
+            calls.append(f"{message}:{extra['job_name']}")
+
+    monkeypatch.setattr(
+        "app.services.ingestion_follow_on_jobs.logging",
+        type("FakeLogging", (), {"getLogger": staticmethod(lambda _name=None: FakeLogger())})(),
+    )
+
+    _run_job("forecast-generation", lambda: (_ for _ in ()).throw(RuntimeError("boom")))
+
+    assert calls == ["ingestion follow-on job failed:forecast-generation"]
+
+
+@pytest.mark.unit
+def test_build_ingestion_job_launches_follow_on_jobs_for_new_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+
+    class FakeSession:
+        def commit(self) -> None:
+            calls.append("committed")
+
+        def close(self) -> None:
+            calls.append("closed")
+
+    class FakePipeline:
+        def __init__(self, session, client, logging_service) -> None:
+            return None
+
+        def run(self, trigger_type: str, run_follow_on_jobs: bool = True):
+            calls.append(f"{trigger_type}:{run_follow_on_jobs}")
+            return SimpleNamespace(status="success", result_type="new_data")
+
+    monkeypatch.setattr("app.services.scheduler_service.IngestionPipeline", FakePipeline)
+    monkeypatch.setattr("app.services.scheduler_service.launch_ingestion_follow_on_jobs", lambda: calls.append("follow_on"))
+
+    result = build_ingestion_job(lambda: FakeSession())()
+
+    assert result.result_type == "new_data"
+    assert calls == ["scheduled:False", "committed", "follow_on", "closed"]
 
 
 class NoCursorClient(Edmonton311Client):

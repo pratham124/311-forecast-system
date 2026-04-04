@@ -7,6 +7,7 @@ from fastapi import HTTPException
 
 from app.core.logging import summarize_status
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
+from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.approval_status_repository import ApprovalStatusRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.review_needed_repository import ReviewNeededRepository
@@ -231,3 +232,26 @@ def test_run_ingestion_handles_missing_validation_run_record(session, monkeypatc
     assert result.status == "success"
     assert result.result_type == "new_data"
     assert result.candidate_dataset_id is not None
+
+
+@pytest.mark.unit
+def test_run_ingestion_fail_unexpected_run_uses_unexpected_failure_category(session) -> None:
+    pipeline = IngestionPipeline(
+        session,
+        NoCursorClient(),
+        IngestionLoggingService(__import__("logging").getLogger("test")),
+    )
+    run_id, _, previous_marker = pipeline.start_run()
+    session.commit()
+
+    result = pipeline.fail_unexpected_run(run_id, "boom", previous_marker)
+
+    assert result.status == "failed"
+    assert result.result_type == "unexpected_failure"
+    assert result.failure_reason == "boom"
+
+
+@pytest.mark.unit
+def test_cleaned_dataset_repository_list_current_categories_returns_empty_without_current_dataset(session) -> None:
+    repository = CleanedDatasetRepository(session)
+    assert repository.list_current_categories("edmonton_311") == []
