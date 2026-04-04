@@ -42,10 +42,15 @@ class Settings:
     edmonton_311_retry_attempts: int
     edmonton_311_retry_backoff_seconds: float
     duplicate_review_threshold_percentage: float
+    weather_provider: str
     geomet_base_url: str
     geomet_climate_identifier: str | None
     geomet_station_selector: str
     geomet_timeout_seconds: float
+    open_meteo_base_url: str
+    open_meteo_latitude: float
+    open_meteo_longitude: float
+    open_meteo_timeout_seconds: float
     nager_date_base_url: str
     forecast_model_family: str
     forecast_training_lookback_days: int
@@ -104,14 +109,19 @@ def get_settings() -> Settings:
         weekly_forecast_model_scheduler_enabled=_to_bool(os.getenv("WEEKLY_FORECAST_MODEL_SCHEDULER_ENABLED"), False),
         weekly_forecast_model_scheduler_cron=os.getenv("WEEKLY_FORECAST_MODEL_SCHEDULER_CRON", "30 0 * * 0"),
         weekly_forecast_model_artifact_dir=os.getenv("WEEKLY_FORECAST_MODEL_ARTIFACT_DIR", "backend/.artifacts/weekly_forecast_models"),
-        edmonton_311_first_run_lookback_days=int(os.getenv("EDMONTON_311_FIRST_RUN_LOOKBACK_DAYS", "365")),
+        edmonton_311_first_run_lookback_days=int(os.getenv("EDMONTON_311_FIRST_RUN_LOOKBACK_DAYS", "112")),
         edmonton_311_retry_attempts=int(os.getenv("EDMONTON_311_RETRY_ATTEMPTS", "3")),
         edmonton_311_retry_backoff_seconds=float(os.getenv("EDMONTON_311_RETRY_BACKOFF_SECONDS", "0.5")),
         duplicate_review_threshold_percentage=float(os.getenv("DUPLICATE_REVIEW_THRESHOLD_PERCENTAGE", "20")),
+        weather_provider=os.getenv("WEATHER_PROVIDER", "open_meteo"),
         geomet_base_url=os.getenv("GEOMET_BASE_URL", "https://api.weather.gc.ca"),
         geomet_climate_identifier=os.getenv("GEOMET_CLIMATE_IDENTIFIER") or None,
         geomet_station_selector=os.getenv("GEOMET_STATION_SELECTOR", "edmonton_hourly_station"),
         geomet_timeout_seconds=float(os.getenv("GEOMET_TIMEOUT_SECONDS", "30.0")),
+        open_meteo_base_url=os.getenv("OPEN_METEO_BASE_URL", "https://api.open-meteo.com/v1"),
+        open_meteo_latitude=float(os.getenv("OPEN_METEO_LATITUDE", "53.5461")),
+        open_meteo_longitude=float(os.getenv("OPEN_METEO_LONGITUDE", "-113.4938")),
+        open_meteo_timeout_seconds=float(os.getenv("OPEN_METEO_TIMEOUT_SECONDS", "30.0")),
         nager_date_base_url=os.getenv("NAGER_DATE_BASE_URL", "https://date.nager.at"),
         forecast_model_family=os.getenv("FORECAST_MODEL_FAMILY", "lightgbm_global"),
         forecast_training_lookback_days=int(os.getenv("FORECAST_TRAINING_LOOKBACK_DAYS", "112")),

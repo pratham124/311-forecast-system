@@ -165,7 +165,7 @@ describe('EvaluationPage – error state', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
     expect(await screen.findByText(/unable to trigger the evaluation\./i)).toBeInTheDocument();
   });
 
@@ -178,7 +178,7 @@ describe('EvaluationPage – error state', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
     expect(await screen.findByText(/trigger blocked by policy/i)).toBeInTheDocument();
   });
 
@@ -191,7 +191,7 @@ describe('EvaluationPage – error state', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
     expect(await screen.findByText(/network down/i)).toBeInTheDocument();
   });
 
@@ -254,7 +254,7 @@ describe('EvaluationPage – error state', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
@@ -325,7 +325,7 @@ describe('EvaluationPage – error state', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
     expect(await screen.findByText(/latest run status/i)).toBeInTheDocument();
     expect(screen.getByText(/^failed$/i)).toBeInTheDocument();
     expect((await screen.findAllByText(/not available/i)).length).toBeGreaterThan(0);

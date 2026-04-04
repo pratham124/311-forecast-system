@@ -51,6 +51,7 @@ export function IngestionPage({ roles }: IngestionPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isTriggering, setIsTriggering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [storedRunIdChecked, setStoredRunIdChecked] = useState(false);
 
   const readable = canReadIngestion(roles);
   const triggerable = canTriggerIngestion(roles);
@@ -76,19 +77,44 @@ export function IngestionPage({ roles }: IngestionPageProps) {
     return () => controller.abort();
   }, [readable]);
 
+  useEffect(() => {
+    const storedRunId = window.localStorage.getItem('ingestion_run_id');
+    if (!storedRunId || storedRunIdChecked) {
+      setStoredRunIdChecked(true);
+      return;
+    }
+    fetchIngestionRunStatus(storedRunId)
+      .then((status) => {
+        setRunStatus(status);
+        if (status.status !== 'running') {
+          window.localStorage.removeItem('ingestion_run_id');
+        }
+      })
+      .catch(() => {
+        window.localStorage.removeItem('ingestion_run_id');
+      })
+      .finally(() => {
+        setStoredRunIdChecked(true);
+      });
+  }, [storedRunIdChecked]);
+
   const handleTrigger = async () => {
     setIsTriggering(true);
     setError(null);
     try {
       const accepted = await triggerIngestionRun();
       let latestStatus: IngestionRunStatus | null = null;
-      for (let attempt = 0; attempt < 20; attempt += 1) {
+      window.localStorage.setItem('ingestion_run_id', accepted.runId);
+      while (latestStatus === null || latestStatus.status === 'running') {
         latestStatus = await fetchIngestionRunStatus(accepted.runId);
         setRunStatus(latestStatus);
         if (latestStatus.status !== 'running') {
           break;
         }
         await wait(1000);
+      }
+      if (latestStatus?.status !== 'running') {
+        window.localStorage.removeItem('ingestion_run_id');
       }
       const refreshedDataset = await fetchCurrentDataset();
       setDataset(refreshedDataset);
@@ -138,7 +164,7 @@ export function IngestionPage({ roles }: IngestionPageProps) {
                 onClick={() => {
                   void handleTrigger();
                 }}
-                disabled={isTriggering}
+                disabled={isTriggering || runStatus?.status === 'running'}
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isTriggering ? 'Running 311 ingestion...' : 'Trigger 311 ingestion'}
@@ -169,11 +195,7 @@ export function IngestionPage({ roles }: IngestionPageProps) {
             <CardTitle className="text-lg text-ink">Latest run status</CardTitle>
             <CardDescription>{describeRunStatus(runStatus)}</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-4">
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Run id</span>
-              <strong className="mt-2 block break-all text-sm text-ink">{runStatus.runId}</strong>
-            </div>
+          <CardContent className="grid gap-3 md:grid-cols-3">
             <div>
               <span className="block text-xs uppercase tracking-[0.16em] text-muted">Status</span>
               <strong className="mt-2 block text-sm capitalize text-ink">{runStatus.status}</strong>

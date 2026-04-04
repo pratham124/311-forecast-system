@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+import logging
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -26,6 +27,7 @@ def _extract_geography_key(record: dict[str, object]) -> str | None:
 class CleanedDatasetRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
+        self.logger = logging.getLogger("ingestion.cleaned_dataset_repository")
 
     def list_current_categories(self, source_name: str) -> list[str]:
         rows = list(
@@ -117,6 +119,12 @@ class CleanedDatasetRepository:
         approved_by_validation_run_id: str,
         cleaned_records: list[dict[str, object]],
     ) -> None:
+        self.logger.info(
+            "cleaned_current_records.upsert.started source_name=%s ingestion_run_id=%s input_record_count=%s",
+            source_name,
+            ingestion_run_id,
+            len(cleaned_records),
+        )
         # Last wins: duplicate service_request_id in one batch must not produce two INSERTs
         # (PK is service_request_id; pending adds are not visible to a second pass over the list).
         deduped: dict[str, dict[str, object]] = {}
@@ -125,6 +133,12 @@ class CleanedDatasetRepository:
             if sid:
                 deduped[sid] = record
         cleaned_records = list(deduped.values())
+        self.logger.info(
+            "cleaned_current_records.deduped source_name=%s ingestion_run_id=%s deduped_record_count=%s",
+            source_name,
+            ingestion_run_id,
+            len(cleaned_records),
+        )
 
         service_request_ids = [
             str(record.get("service_request_id", "")).strip()
@@ -141,8 +155,16 @@ class CleanedDatasetRepository:
             if service_request_ids
             else {}
         )
+        self.logger.info(
+            "cleaned_current_records.existing_lookup.completed source_name=%s ingestion_run_id=%s existing_row_count=%s",
+            source_name,
+            ingestion_run_id,
+            len(existing_rows),
+        )
 
         now = datetime.utcnow()
+        inserted_count = 0
+        updated_count = 0
         for record in cleaned_records:
             service_request_id = str(record.get("service_request_id", "")).strip()
             payload = json.dumps(record, sort_keys=True)
@@ -168,6 +190,7 @@ class CleanedDatasetRepository:
                 )
                 self.session.add(new_row)
                 existing_rows[service_request_id] = new_row
+                inserted_count += 1
                 continue
             existing.source_name = source_name
             existing.requested_at = requested_at
@@ -179,7 +202,15 @@ class CleanedDatasetRepository:
             existing.approved_by_validation_run_id = approved_by_validation_run_id
             existing.last_approved_dataset_version_id = approved_dataset_version_id
             existing.updated_at = now
+            updated_count += 1
         self.session.flush()
+        self.logger.info(
+            "cleaned_current_records.upsert.completed source_name=%s ingestion_run_id=%s inserted_count=%s updated_count=%s",
+            source_name,
+            ingestion_run_id,
+            inserted_count,
+            updated_count,
+        )
 
     def count_current_cleaned_records(self, source_name: str) -> int:
         return int(

@@ -18,6 +18,7 @@ from app.api.routes.validation_run_status import router as validation_run_router
 from app.api.routes.weekly_forecasts import router as weekly_forecast_router
 from app.core.config import get_settings
 from app.core.db import get_session_factory, run_migrations
+from app.core.logging import configure_logging
 from app.repositories.auth_repository import AuthRepository
 from app.services.auth_service import AuthBootstrapService
 from app.services.evaluation_service import build_evaluation_job
@@ -139,6 +140,7 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     settings = get_settings()
     app = FastAPI(title='311 Forecast System Backend', lifespan=lifespan)
     app.add_middleware(

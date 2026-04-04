@@ -8,8 +8,8 @@ import logging
 
 from fastapi import HTTPException, status
 
-from app.clients.geomet_client import GeoMetClient, GeoMetClientError
 from app.clients.nager_date_client import NagerDateClient, NagerDateClientError
+from app.clients.weather_client import WeatherClientError
 from app.core.logging import summarize_status
 from app.models import ForecastBucket, ForecastRun
 from app.pipelines.forecasting.feature_preparation import prepare_forecast_features
@@ -50,19 +50,19 @@ def _ensure_utc(value: datetime) -> datetime:
     return value.astimezone(timezone.utc)
 
 
-def _fetch_historical_weather(geomet_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
-    if hasattr(geomet_client, "fetch_historical_hourly_conditions"):
-        return list(geomet_client.fetch_historical_hourly_conditions(start, end))
-    if hasattr(geomet_client, "fetch_hourly_conditions"):
-        return list(geomet_client.fetch_hourly_conditions(start, end))
+def _fetch_historical_weather(weather_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
+    if hasattr(weather_client, "fetch_historical_hourly_conditions"):
+        return list(weather_client.fetch_historical_hourly_conditions(start, end))
+    if hasattr(weather_client, "fetch_hourly_conditions"):
+        return list(weather_client.fetch_hourly_conditions(start, end))
     return []
 
 
-def _fetch_forecast_weather(geomet_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
-    if hasattr(geomet_client, "fetch_forecast_hourly_conditions"):
-        return list(geomet_client.fetch_forecast_hourly_conditions(start, end))
-    if hasattr(geomet_client, "fetch_hourly_conditions"):
-        return list(geomet_client.fetch_hourly_conditions(start, end))
+def _fetch_forecast_weather(weather_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
+    if hasattr(weather_client, "fetch_forecast_hourly_conditions"):
+        return list(weather_client.fetch_forecast_hourly_conditions(start, end))
+    if hasattr(weather_client, "fetch_hourly_conditions"):
+        return list(weather_client.fetch_hourly_conditions(start, end))
     return []
 
 
@@ -89,7 +89,7 @@ class ForecastService:
     cleaned_dataset_repository: CleanedDatasetRepository
     forecast_run_repository: ForecastRunRepository
     forecast_repository: ForecastRepository
-    geomet_client: GeoMetClient
+    geomet_client: object
     nager_date_client: NagerDateClient
     settings: object
     forecast_model_repository: ForecastModelRepository | None = None
@@ -268,7 +268,7 @@ class ForecastService:
                 failure_reason=str(exc),
                 summary="trained forecast model missing",
             )
-        except (GeoMetClientError, NagerDateClientError, ForecastStorageError, ForecastModelStorageError) as exc:
+        except (WeatherClientError, NagerDateClientError, ForecastStorageError, ForecastModelStorageError) as exc:
             result_type = "storage_failure" if isinstance(exc, (ForecastStorageError, ForecastModelStorageError)) else "engine_failure"
             print(
                 "[debug][forecast] forecast fail "

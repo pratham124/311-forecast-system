@@ -73,7 +73,7 @@ describe('EvaluationPage', () => {
     expect(await screen.findByText(/current official evaluation/i)).toBeInTheDocument();
     expect(screen.getByText(/matched the strongest included baseline/i)).toBeInTheDocument();
     expect(screen.queryByText(/current sources/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /trigger daily 1-day evaluation/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /trigger daily evaluation/i })).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/evaluations/current?forecastProduct=daily_1_day');
   });
 
@@ -100,7 +100,7 @@ describe('EvaluationPage', () => {
     render(<EvaluationPage roles={['OperationalManager']} />);
     expect(await screen.findByText(/no current evaluation yet/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /trigger daily 1-day evaluation/i }));
+    await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();

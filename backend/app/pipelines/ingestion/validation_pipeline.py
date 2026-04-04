@@ -4,8 +4,8 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from app.clients.geomet_client import GeoMetClient
 from app.clients.nager_date_client import NagerDateClient
+from app.clients.weather_client import build_weather_client
 from app.core.config import get_settings
 from app.pipelines.ingestion.approved_pipeline import ApprovedPipeline
 from app.pipelines.ingestion.blocked_outcome_pipeline import BlockedOutcomePipeline
@@ -48,7 +48,7 @@ class ValidationPipeline:
         self.forecast_training_service = ForecastTrainingService(
             cleaned_dataset_repository=self.cleaned_dataset_repository,
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=GeoMetClient(),
+            geomet_client=build_weather_client(),
             nager_date_client=NagerDateClient(),
             settings=self.settings,
             logger=logging.getLogger("validation.forecast_training"),
@@ -56,7 +56,7 @@ class ValidationPipeline:
         self.weekly_forecast_training_service = WeeklyForecastTrainingService(
             cleaned_dataset_repository=self.cleaned_dataset_repository,
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=GeoMetClient(),
+            geomet_client=build_weather_client(),
             nager_date_client=NagerDateClient(),
             settings=self.settings,
             logger=logging.getLogger("validation.weekly_forecast_training"),
@@ -66,7 +66,7 @@ class ValidationPipeline:
             forecast_run_repository=ForecastRunRepository(session),
             forecast_repository=ForecastRepository(session),
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=GeoMetClient(),
+            geomet_client=build_weather_client(),
             nager_date_client=NagerDateClient(),
             settings=self.settings,
             logger=logging.getLogger("validation.forecast"),
@@ -76,7 +76,7 @@ class ValidationPipeline:
             weekly_forecast_run_repository=WeeklyForecastRunRepository(session),
             weekly_forecast_repository=WeeklyForecastRepository(session),
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=GeoMetClient(),
+            geomet_client=build_weather_client(),
             nager_date_client=NagerDateClient(),
             settings=self.settings,
             logger=logging.getLogger("validation.weekly_forecast"),
@@ -103,6 +103,13 @@ class ValidationPipeline:
         run_follow_on_jobs: bool = True,
     ) -> str:
         threshold = self.settings.duplicate_review_threshold_percentage
+        self.logger.info(
+            "validation.run.started ingestion_run_id=%s source_dataset_version_id=%s record_count=%s threshold_percentage=%s",
+            ingestion_run_id,
+            source_dataset_version_id,
+            len(records),
+            threshold,
+        )
         validation_run = self.validation_repository.create_run(
             ingestion_run_id=ingestion_run_id,
             source_dataset_version_id=source_dataset_version_id,
@@ -119,8 +126,19 @@ class ValidationPipeline:
             completeness_check=schema_result.completeness_check,
             issue_summary=schema_result.issue_summary,
         )
+        self.logger.info(
+            "validation.schema.completed validation_run_id=%s status=%s issue_summary=%s",
+            validation_run.validation_run_id,
+            schema_result.status,
+            schema_result.issue_summary,
+        )
         if not schema_result.passed:
             self.rejection_pipeline.reject(validation_run.validation_run_id, schema_result.issue_summary or "Rejected.")
+            self.logger.info(
+                "validation.run.completed validation_run_id=%s status=%s",
+                validation_run.validation_run_id,
+                "rejected",
+            )
             return validation_run.validation_run_id
 
         duplicate_result = self.duplicate_analysis_service.analyze(records, threshold)
@@ -134,6 +152,13 @@ class ValidationPipeline:
             duplicate_group_count=duplicate_result.duplicate_group_count,
             issue_summary=duplicate_result.issue_summary,
         )
+        self.logger.info(
+            "validation.duplicate_analysis.completed validation_run_id=%s status=%s duplicate_group_count=%s duplicate_percentage=%s",
+            validation_run.validation_run_id,
+            duplicate_result.status,
+            duplicate_result.duplicate_group_count,
+            duplicate_result.duplicate_percentage,
+        )
         if duplicate_result.status == "review_needed":
             self.blocked_pipeline.hold_for_review(
                 validation_run.validation_run_id,
@@ -141,10 +166,26 @@ class ValidationPipeline:
                 duplicate_result.duplicate_percentage,
                 duplicate_result.issue_summary or "Review needed due to duplicate threshold.",
             )
+            self.logger.info(
+                "validation.run.completed validation_run_id=%s status=%s",
+                validation_run.validation_run_id,
+                "review_needed",
+            )
             return validation_run.validation_run_id
 
         try:
+            self.logger.info(
+                "validation.duplicate_resolution.started validation_run_id=%s duplicate_group_count=%s",
+                validation_run.validation_run_id,
+                duplicate_result.duplicate_group_count,
+            )
             cleaned_records, resolutions = self.duplicate_resolution_service.resolve(records, duplicate_result.groups)
+            self.logger.info(
+                "validation.duplicate_resolution.completed validation_run_id=%s cleaned_record_count=%s resolution_count=%s",
+                validation_run.validation_run_id,
+                len(cleaned_records),
+                len(resolutions),
+            )
             stored_groups = self.validation_repository.record_duplicate_groups(
                 analysis.duplicate_analysis_id,
                 [
@@ -158,6 +199,11 @@ class ValidationPipeline:
                     for resolution in resolutions
                 ],
             )
+            self.logger.info(
+                "validation.approval.started validation_run_id=%s cleaned_record_count=%s",
+                validation_run.validation_run_id,
+                len(cleaned_records),
+            )
             cleaned_dataset_id = self.approved_pipeline.approve(
                 source_name=self.settings.source_name,
                 ingestion_run_id=ingestion_run_id,
@@ -167,11 +213,27 @@ class ValidationPipeline:
                 duplicate_group_count=len(stored_groups),
                 run_follow_on_jobs=run_follow_on_jobs,
             )
+            self.logger.info(
+                "validation.approval.completed validation_run_id=%s approved_dataset_version_id=%s",
+                validation_run.validation_run_id,
+                cleaned_dataset_id,
+            )
             for stored_group in stored_groups:
                 stored_group.cleaned_record_id = cleaned_dataset_id
             self.session.flush()
         except Exception as exc:
             self.logger.exception("validation.failed", extra={"validation_run_id": validation_run.validation_run_id})
             self.blocked_pipeline.fail(validation_run.validation_run_id, "storage", str(exc))
+            self.logger.info(
+                "validation.run.completed validation_run_id=%s status=%s",
+                validation_run.validation_run_id,
+                "failed",
+            )
+            return validation_run.validation_run_id
 
+        self.logger.info(
+            "validation.run.completed validation_run_id=%s status=%s",
+            validation_run.validation_run_id,
+            "approved",
+        )
         return validation_run.validation_run_id

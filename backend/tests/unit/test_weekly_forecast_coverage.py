@@ -14,6 +14,7 @@ from app.pipelines.forecasting.weekly_feature_preparation import prepare_weekly_
 from app.pipelines.forecasting.weekly_demand_pipeline import _quantile
 from app.clients.geomet_client import GeoMetClient, GeoMetClientError
 from app.clients.nager_date_client import NagerDateClient
+from app.clients.open_meteo_client import OpenMeteoClient
 from app.pipelines.ingestion.approved_pipeline import ApprovedPipeline
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.forecast_model_repository import ForecastModelRepository
@@ -52,7 +53,7 @@ def _seed_dataset_version(session) -> str:
 
 @pytest.mark.unit
 def test_weekly_route_dependency_factories_return_clients() -> None:
-    assert isinstance(weekly_routes.get_geomet_client(), GeoMetClient)
+    assert isinstance(weekly_routes.get_weather_client(), OpenMeteoClient)
     assert isinstance(weekly_routes.get_nager_date_client(), NagerDateClient)
 
 
@@ -67,7 +68,13 @@ def test_prepare_weekly_forecast_features_ignores_invalid_weather_rows() -> None
         weather_rows=[
             "bad-row",
             {"temperature_c": 2.0, "precipitation_mm": 1.0},
-            {"timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc), "temperature_c": 3.0, "precipitation_mm": 0.5},
+            {
+                "timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc),
+                "temperature_c": 3.0,
+                "precipitation_mm": 0.5,
+                "snowfall_mm": 2.25,
+                "precipitation_probability_pct": 55.0,
+            },
         ],
     )
 
@@ -75,6 +82,8 @@ def test_prepare_weekly_forecast_features_ignores_invalid_weather_rows() -> None
     assert monday_context["has_weather"] is True
     assert monday_context["avg_temperature_c"] == 3.0
     assert monday_context["total_precipitation_mm"] == 0.5
+    assert monday_context["total_snowfall_mm"] == 2.25
+    assert monday_context["avg_precipitation_probability_pct"] == 55.0
 
 
 @pytest.mark.unit

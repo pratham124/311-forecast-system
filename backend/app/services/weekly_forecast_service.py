@@ -8,8 +8,8 @@ import logging
 
 from fastapi import HTTPException, status
 
-from app.clients.geomet_client import GeoMetClient, GeoMetClientError
 from app.clients.nager_date_client import NagerDateClient, NagerDateClientError
+from app.clients.weather_client import WeatherClientError
 from app.core.logging import summarize_status
 from app.models import WeeklyForecastBucket, WeeklyForecastRun
 from app.pipelines.forecasting.weekly_demand_pipeline import WeeklyDemandPipeline
@@ -33,7 +33,7 @@ class WeeklyForecastService:
     weekly_forecast_run_repository: WeeklyForecastRunRepository
     weekly_forecast_repository: WeeklyForecastRepository
     settings: object
-    geomet_client: GeoMetClient
+    geomet_client: object
     nager_date_client: NagerDateClient
     forecast_model_repository: ForecastModelRepository | None = None
     logger: logging.Logger | None = None
@@ -126,6 +126,8 @@ class WeeklyForecastService:
             else:
                 if stored_model.source_cleaned_dataset_version_id != run.source_cleaned_dataset_version_id:
                     raise ForecastModelUnavailableError("Current trained weekly forecast model is stale for the approved dataset")
+                if stored_model.feature_schema_version != self.pipeline.feature_schema_version:
+                    raise ForecastModelUnavailableError("Current trained weekly forecast model uses an outdated feature schema")
                 artifact = self.training_service.load_artifact_bundle(stored_model.artifact_path)
                 generated = self.pipeline.predict(artifact, prepared)
             buckets, geography_scope = self.bucket_service.build_buckets(generated)
@@ -140,7 +142,7 @@ class WeeklyForecastService:
                 summary="weekly forecast generated and activated",
                 buckets=buckets,
             )
-        except (GeoMetClientError, NagerDateClientError) as exc:
+        except (WeatherClientError, NagerDateClientError) as exc:
             self._log("weekly_forecast.failed", run_id=run.weekly_forecast_run_id, result_type="engine_failure")
             return self.weekly_forecast_run_repository.finalize_failed(
                 run.weekly_forecast_run_id,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any
 
 import lightgbm as lgb
 import numpy as np
@@ -31,7 +32,7 @@ class TrainedHourlyDemandArtifact:
 class HourlyDemandPipeline:
     model_family = "lightgbm_global"
     baseline_method = "historical_hourly_mean"
-    feature_schema_version = "v1_hourly_lagged_demand"
+    feature_schema_version = "hly_wx_v3_missing"
     lag_hours = (1, 24, 168)
     rolling_windows = (24, 168)
 
@@ -64,7 +65,7 @@ class HourlyDemandPipeline:
             )
 
         x_train = pd.DataFrame(
-            [self._encode_row(row, category_codes, geography_codes) for row in training_rows],
+            [self._encode_row(row, category_codes, geography_codes, feature_names) for row in training_rows],
             columns=feature_names,
             dtype=float,
         )
@@ -145,7 +146,7 @@ class HourlyDemandPipeline:
             dynamic_row = dict(row)
             dynamic_row.update(self._compute_dynamic_features(dynamic_row["bucket_start"], history))
             x_score = pd.DataFrame(
-                [self._encode_row(dynamic_row, artifact.category_codes, artifact.geography_codes)],
+                [self._encode_row(dynamic_row, artifact.category_codes, artifact.geography_codes, artifact.feature_names)],
                 columns=artifact.feature_names,
                 dtype=float,
             )
@@ -265,8 +266,11 @@ class HourlyDemandPipeline:
             "month",
             "is_weekend",
             "is_holiday",
+            "weather_is_missing",
             "weather_temperature_c",
             "weather_precipitation_mm",
+            "weather_snowfall_mm",
+            "weather_precipitation_probability_pct",
             "historical_mean",
             "lag_1h",
             "lag_24h",
@@ -279,25 +283,44 @@ class HourlyDemandPipeline:
         values = sorted({row.get(key) for row in rows}, key=lambda value: "" if value is None else str(value))
         return {value: index for index, value in enumerate(values)}
 
-    def _encode_row(self, row: dict[str, object], category_codes: dict[object, int], geography_codes: dict[object, int]) -> list[float]:
-        return [
-            float(category_codes.get(row.get("service_category"), 0)),
-            float(geography_codes.get(row.get("geography_key"), 0)),
-            float(row["hour_of_day"]),
-            float(row["day_of_week"]),
-            float(row["day_of_year"]),
-            float(row["month"]),
-            1.0 if row["is_weekend"] else 0.0,
-            1.0 if row["is_holiday"] else 0.0,
-            float(row["weather_temperature_c"]),
-            float(row["weather_precipitation_mm"]),
-            float(row["historical_mean"]),
-            float(row.get("lag_1h", 0.0)),
-            float(row.get("lag_24h", 0.0)),
-            float(row.get("lag_168h", 0.0)),
-            float(row.get("rolling_mean_24h", 0.0)),
-            float(row.get("rolling_mean_168h", 0.0)),
-        ]
+    def _encode_row(
+        self,
+        row: dict[str, object],
+        category_codes: dict[object, int],
+        geography_codes: dict[object, int],
+        feature_names: list[str] | None = None,
+    ) -> list[float]:
+        values = {
+            "service_category_code": float(category_codes.get(row.get("service_category"), 0)),
+            "geography_code": float(geography_codes.get(row.get("geography_key"), 0)),
+            "hour_of_day": float(row["hour_of_day"]),
+            "day_of_week": float(row["day_of_week"]),
+            "day_of_year": float(row["day_of_year"]),
+            "month": float(row["month"]),
+            "is_weekend": 1.0 if row["is_weekend"] else 0.0,
+            "is_holiday": 1.0 if row["is_holiday"] else 0.0,
+            "weather_is_missing": 1.0 if bool(row.get("weather_is_missing")) else 0.0,
+            "weather_temperature_c": self._coerce_feature_value(row.get("weather_temperature_c")),
+            "weather_precipitation_mm": self._coerce_feature_value(row.get("weather_precipitation_mm")),
+            "weather_snowfall_mm": self._coerce_feature_value(row.get("weather_snowfall_mm")),
+            "weather_precipitation_probability_pct": self._coerce_feature_value(
+                row.get("weather_precipitation_probability_pct")
+            ),
+            "historical_mean": float(row["historical_mean"]),
+            "lag_1h": float(row.get("lag_1h", 0.0)),
+            "lag_24h": float(row.get("lag_24h", 0.0)),
+            "lag_168h": float(row.get("lag_168h", 0.0)),
+            "rolling_mean_24h": float(row.get("rolling_mean_24h", 0.0)),
+            "rolling_mean_168h": float(row.get("rolling_mean_168h", 0.0)),
+        }
+        ordered_feature_names = feature_names or self._feature_names()
+        return [float(values.get(name, 0.0)) for name in ordered_feature_names]
+
+    @staticmethod
+    def _coerce_feature_value(value: Any) -> float:
+        if value is None:
+            return float("nan")
+        return float(value)
 
     def _history_from_training_rows(self, training_rows: list[dict[str, object]]) -> dict[tuple[str, str | None], dict[datetime, float]]:
         history_by_scope: dict[tuple[str, str | None], dict[datetime, float]] = {}

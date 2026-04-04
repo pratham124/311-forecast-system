@@ -359,7 +359,8 @@ def test_demand_comparison_service_forecast_only_historical_only_weekly_and_fail
     assert forecast_only.outcome_status == "forecast_only"
     assert forecast_only.forecast_product == "weekly_7_day"
 
-    monkeypatch.setattr(service.source_resolver, "resolve", lambda **_kwargs: ("dataset-source", None))
+    monkeypatch.setattr(service.forecast_repository, "list_stored_versions_overlapping_range", lambda **_kwargs: [])
+    monkeypatch.setattr(service.weekly_forecast_repository, "list_stored_versions_overlapping_range", lambda **_kwargs: [])
     historical_only = service.execute_query(
         DemandComparisonQueryRequest.model_validate(
             {

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import date, timedelta, timezone
+from datetime import date, datetime, timezone
 
 from app.core.demand_comparison_observability import (
     summarize_demand_comparison_failure,
@@ -284,36 +284,53 @@ class DemandComparisonService:
             if value.tzinfo is None:
                 return value.replace(tzinfo=timezone.utc)
             return value.astimezone(timezone.utc)
-        daily_rows_by_key: dict[tuple[object, str, str | None], dict[str, object]] = {}
+
+        def normalize_geography(value: object) -> str | None:
+            if payload.geography_level is None:
+                return None
+            if value is None:
+                return None
+            return str(value)
+
+        def date_in_selected_range(value: date) -> bool:
+            bucket_start = datetime(value.year, value.month, value.day, tzinfo=timezone.utc)
+            return payload.time_range_start <= bucket_start < payload.time_range_end
+
+        daily_rows_by_key: dict[tuple[date, str, str | None], dict[str, object]] = {}
         used_daily_version_id: str | None = None
         for version in self.forecast_repository.list_stored_versions_overlapping_range(
             range_start=payload.time_range_start,
             range_end=payload.time_range_end,
         ):
+            version_used = False
             for bucket in self.forecast_repository.list_buckets(version.forecast_version_id):
                 if bucket.service_category not in payload.service_categories:
                     continue
-                if payload.geography_values and bucket.geography_key not in payload.geography_values:
+                geography_key = normalize_geography(bucket.geography_key)
+                if payload.geography_values and geography_key not in payload.geography_values:
                     continue
-                if normalize_dt(bucket.bucket_start) < payload.time_range_start:
+                bucket_start = normalize_dt(bucket.bucket_start)
+                if not (payload.time_range_start <= bucket_start < payload.time_range_end):
                     continue
-                if normalize_dt(bucket.bucket_end) > payload.time_range_end:
-                    continue
-                key = (normalize_dt(bucket.bucket_start), bucket.service_category, bucket.geography_key)
-                if key in daily_rows_by_key:
-                    continue
-                daily_rows_by_key[key] = {
-                    "bucket_start": bucket.bucket_start,
-                    "bucket_end": bucket.bucket_end,
-                    "service_category": bucket.service_category,
-                    "geography_key": bucket.geography_key,
-                    "point_forecast": float(bucket.point_forecast),
-                }
+                forecast_date = bucket_start.date()
+                key = (forecast_date, bucket.service_category, geography_key)
+                row = daily_rows_by_key.get(key)
+                if row is None:
+                    daily_rows_by_key[key] = {
+                        "forecast_date_local": forecast_date,
+                        "service_category": bucket.service_category,
+                        "geography_key": geography_key,
+                        "point_forecast": float(bucket.point_forecast),
+                    }
+                else:
+                    row["point_forecast"] = float(row.get("point_forecast", 0.0)) + float(bucket.point_forecast)
+                version_used = True
+            if version_used:
                 used_daily_version_id = used_daily_version_id or version.forecast_version_id
 
         daily_days_covered = {
-            (bucket_start.astimezone(timezone.utc).date(), service_category, geography_key)
-            for bucket_start, service_category, geography_key in daily_rows_by_key.keys()
+            (forecast_date, service_category, geography_key)
+            for forecast_date, service_category, geography_key in daily_rows_by_key.keys()
         }
 
         weekly_rows_by_key: dict[tuple[date, str, str | None], dict[str, object]] = {}
@@ -322,44 +339,46 @@ class DemandComparisonService:
             range_start=payload.time_range_start,
             range_end=payload.time_range_end,
         ):
+            version_used = False
             for bucket in self.weekly_forecast_repository.list_buckets(version.weekly_forecast_version_id):
                 if bucket.service_category not in payload.service_categories:
                     continue
-                if payload.geography_values and bucket.geography_key not in payload.geography_values:
+                geography_key = normalize_geography(bucket.geography_key)
+                if payload.geography_values and geography_key not in payload.geography_values:
                     continue
-                if not (payload.time_range_start.date() <= bucket.forecast_date_local <= payload.time_range_end.date()):
+                if not date_in_selected_range(bucket.forecast_date_local):
                     continue
-                key = (bucket.forecast_date_local, bucket.service_category, bucket.geography_key)
+                key = (bucket.forecast_date_local, bucket.service_category, geography_key)
                 if key in daily_days_covered or key in weekly_rows_by_key:
                     continue
                 weekly_rows_by_key[key] = {
                     "forecast_date_local": bucket.forecast_date_local,
                     "service_category": bucket.service_category,
-                    "geography_key": bucket.geography_key,
+                    "geography_key": geography_key,
                     "point_forecast": float(bucket.point_forecast),
                 }
+                version_used = True
+            if version_used:
                 used_weekly_version_id = used_weekly_version_id or version.weekly_forecast_version_id
 
-        comparison_granularity = (
-            "daily"
-            if used_weekly_version_id is not None
-            else ("hourly" if (payload.time_range_end - payload.time_range_start) <= timedelta(days=2) else "daily")
-        )
-
-        forecast_product = None
-        forecast_granularity = None
-        if used_daily_version_id and not used_weekly_version_id:
+        if used_daily_version_id and used_weekly_version_id:
+            forecast_product = None
+            forecast_granularity = None
+        elif used_daily_version_id:
             forecast_product = "daily_1_day"
             forecast_granularity = "hourly"
-        elif used_weekly_version_id and not used_daily_version_id:
+        elif used_weekly_version_id:
             forecast_product = "weekly_7_day"
             forecast_granularity = "daily"
+        else:
+            forecast_product = None
+            forecast_granularity = None
 
         return ForecastLoadResult(
             rows=list(daily_rows_by_key.values()) + list(weekly_rows_by_key.values()),
             forecast_product=forecast_product,
             forecast_granularity=forecast_granularity,
-            comparison_granularity=comparison_granularity,
+            comparison_granularity="daily",
             source_forecast_version_id=used_daily_version_id,
             source_weekly_forecast_version_id=used_weekly_version_id,
         )

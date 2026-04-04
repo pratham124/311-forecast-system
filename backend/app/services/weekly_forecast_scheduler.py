@@ -3,8 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
-from app.clients.geomet_client import GeoMetClient
 from app.clients.nager_date_client import NagerDateClient
+from app.clients.weather_client import build_weather_client
 from app.core.config import get_settings
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_model_repository import ForecastModelRepository
@@ -23,7 +23,7 @@ def _build_job(session_factory: Callable[[], object], trigger_type: str) -> Call
                 weekly_forecast_run_repository=WeeklyForecastRunRepository(session),
                 weekly_forecast_repository=WeeklyForecastRepository(session),
                 settings=get_settings(),
-                geomet_client=GeoMetClient(),
+                geomet_client=build_weather_client(),
                 nager_date_client=NagerDateClient(),
                 forecast_model_repository=ForecastModelRepository(session),
                 logger=logging.getLogger("scheduler.weekly_forecast"),
@@ -55,7 +55,7 @@ def build_weekly_forecast_training_job(session_factory: Callable[[], object]) ->
             service = WeeklyForecastTrainingService(
                 cleaned_dataset_repository=CleanedDatasetRepository(session),
                 forecast_model_repository=ForecastModelRepository(session),
-                geomet_client=GeoMetClient(),
+                geomet_client=build_weather_client(),
                 nager_date_client=NagerDateClient(),
                 settings=get_settings(),
                 logger=logging.getLogger("scheduler.weekly_forecast_model"),

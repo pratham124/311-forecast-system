@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 import pickle
 
-from app.clients.geomet_client import GeoMetClient, GeoMetClientError
+from app.clients.weather_client import WeatherClientError
 from app.clients.nager_date_client import NagerDateClient, NagerDateClientError
 from fastapi import HTTPException, status
 
@@ -29,11 +29,11 @@ def compute_weekly_training_window_start(window_end: datetime, lookback_days: in
     return window_end - timedelta(days=max(lookback_days, 7))
 
 
-def _fetch_historical_weather(geomet_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
-    if hasattr(geomet_client, "fetch_historical_hourly_conditions"):
-        return list(geomet_client.fetch_historical_hourly_conditions(start, end))
-    if hasattr(geomet_client, "fetch_hourly_conditions"):
-        return list(geomet_client.fetch_hourly_conditions(start, end))
+def _fetch_historical_weather(weather_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
+    if hasattr(weather_client, "fetch_historical_hourly_conditions"):
+        return list(weather_client.fetch_historical_hourly_conditions(start, end))
+    if hasattr(weather_client, "fetch_hourly_conditions"):
+        return list(weather_client.fetch_hourly_conditions(start, end))
     return []
 
 
@@ -41,7 +41,7 @@ def _fetch_historical_weather(geomet_client: object, start: datetime, end: datet
 class WeeklyForecastTrainingService:
     cleaned_dataset_repository: CleanedDatasetRepository
     forecast_model_repository: ForecastModelRepository
-    geomet_client: GeoMetClient
+    geomet_client: object
     nager_date_client: NagerDateClient
     settings: object
     logger: logging.Logger | None = None
@@ -69,6 +69,7 @@ class WeeklyForecastTrainingService:
         run = self.forecast_model_repository.get_run(forecast_model_run_id)
         if run is None:
             raise ValueError("Weekly forecast model run not found")
+        run_id = run.forecast_model_run_id
         if run.source_cleaned_dataset_version_id is None:
             self._log("weekly_forecast_model.failed", run_id=run.forecast_model_run_id, result_type="missing_input_data")
             return self.forecast_model_repository.finalize_failed(
@@ -130,34 +131,37 @@ class WeeklyForecastTrainingService:
                 updated_by_run_id=run.forecast_model_run_id,
                 geography_scope=artifact.geography_scope,
             )
-        except (GeoMetClientError, NagerDateClientError) as exc:
-            self._log("weekly_forecast_model.failed", run_id=run.forecast_model_run_id, result_type="engine_failure")
+        except (WeatherClientError, NagerDateClientError) as exc:
+            self._rollback_repository_session()
+            self._log("weekly_forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="engine_failure",
                 failure_reason=str(exc),
                 summary="weekly forecast model training failed",
             )
         except (OSError, pickle.PickleError, ForecastModelStorageError) as exc:
-            self._log("weekly_forecast_model.failed", run_id=run.forecast_model_run_id, result_type="storage_failure")
+            self._rollback_repository_session()
+            self._log("weekly_forecast_model.failed", run_id=run_id, result_type="storage_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="storage_failure",
                 failure_reason=str(exc),
                 summary="weekly forecast model storage failed",
             )
         except Exception as exc:
-            self._log("weekly_forecast_model.failed", run_id=run.forecast_model_run_id, result_type="engine_failure")
+            self._rollback_repository_session()
+            self._log("weekly_forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="engine_failure",
                 failure_reason=str(exc),
                 summary="weekly forecast model training failed",
             )
 
-        self._log("weekly_forecast_model.trained", run_id=run.forecast_model_run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
+        self._log("weekly_forecast_model.trained", run_id=run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
         return self.forecast_model_repository.finalize_trained(
-            run.forecast_model_run_id,
+            run_id,
             forecast_model_artifact_id=stored_artifact.forecast_model_artifact_id,
             geography_scope=artifact.geography_scope,
             summary="weekly forecast model trained and stored",
@@ -216,6 +220,11 @@ class WeeklyForecastTrainingService:
                 pickle.dump(artifact, handle)
         except OSError as exc:
             raise ForecastModelStorageError("Unable to persist weekly forecast model artifact") from exc
+
+    def _rollback_repository_session(self) -> None:
+        session = getattr(self.forecast_model_repository, "session", None)
+        if session is not None:
+            session.rollback()
 
     def _log(self, message: str, **fields) -> None:
         self.logger.info("%s", summarize_status(message, **fields))

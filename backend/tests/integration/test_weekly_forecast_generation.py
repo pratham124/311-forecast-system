@@ -100,7 +100,7 @@ def test_scheduled_and_daily_regeneration_jobs_share_same_workflow(session, monk
         def fetch_holidays(self, year, country_code="CA"):
             return []
 
-    monkeypatch.setattr("app.services.weekly_forecast_scheduler.GeoMetClient", lambda: _FakeGeoMetClient())
+    monkeypatch.setattr("app.services.weekly_forecast_scheduler.build_weather_client", lambda: _FakeGeoMetClient())
     monkeypatch.setattr("app.services.weekly_forecast_scheduler.NagerDateClient", lambda: _FakeNagerDateClient())
     weekly_job = build_weekly_forecast_job(get_session_factory())
     regeneration_job = build_weekly_regeneration_job(get_session_factory())
