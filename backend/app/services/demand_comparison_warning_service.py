@@ -20,7 +20,7 @@ class DemandComparisonWarningService:
         if span_days <= 366 and combination_count <= 10:
             return None
         message = (
-            "This request spans a large scope and may take longer to load."
+            "Retrieval has not started because this request spans a large scope and may take longer to load."
         )
         return HighVolumeWarning(
             shown=True,
