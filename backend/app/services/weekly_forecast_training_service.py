@@ -70,6 +70,7 @@ class WeeklyForecastTrainingService:
         if run is None:
             raise ValueError("Weekly forecast model run not found")
         run_id = run.forecast_model_run_id
+        savepoint = self._begin_repository_savepoint()
         if run.source_cleaned_dataset_version_id is None:
             self._log("weekly_forecast_model.failed", run_id=run.forecast_model_run_id, result_type="missing_input_data")
             return self.forecast_model_repository.finalize_failed(
@@ -132,7 +133,7 @@ class WeeklyForecastTrainingService:
                 geography_scope=artifact.geography_scope,
             )
         except (WeatherClientError, NagerDateClientError) as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             self._log("weekly_forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
                 run_id,
@@ -141,7 +142,7 @@ class WeeklyForecastTrainingService:
                 summary="weekly forecast model training failed",
             )
         except (OSError, pickle.PickleError, ForecastModelStorageError) as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             self._log("weekly_forecast_model.failed", run_id=run_id, result_type="storage_failure")
             return self.forecast_model_repository.finalize_failed(
                 run_id,
@@ -150,7 +151,7 @@ class WeeklyForecastTrainingService:
                 summary="weekly forecast model storage failed",
             )
         except Exception as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             self._log("weekly_forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
                 run_id,
@@ -159,6 +160,7 @@ class WeeklyForecastTrainingService:
                 summary="weekly forecast model training failed",
             )
 
+        self._commit_repository_savepoint(savepoint)
         self._log("weekly_forecast_model.trained", run_id=run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
         return self.forecast_model_repository.finalize_trained(
             run_id,
@@ -220,6 +222,20 @@ class WeeklyForecastTrainingService:
                 pickle.dump(artifact, handle)
         except OSError as exc:
             raise ForecastModelStorageError("Unable to persist weekly forecast model artifact") from exc
+
+    def _begin_repository_savepoint(self):
+        session = getattr(self.forecast_model_repository, "session", None)
+        if session is None:
+            return None
+        return session.begin_nested()
+
+    def _rollback_repository_savepoint(self, savepoint) -> None:
+        if savepoint is not None and getattr(savepoint, "is_active", False):
+            savepoint.rollback()
+
+    def _commit_repository_savepoint(self, savepoint) -> None:
+        if savepoint is not None and getattr(savepoint, "is_active", False):
+            savepoint.commit()
 
     def _rollback_repository_session(self) -> None:
         session = getattr(self.forecast_model_repository, "session", None)

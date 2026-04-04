@@ -83,6 +83,7 @@ class ForecastTrainingService:
         if run is None:
             raise ValueError("Forecast model run not found")
         run_id = run.forecast_model_run_id
+        savepoint = self._begin_repository_savepoint()
 
         training_window_start = _ensure_utc(run.training_window_start)
         training_window_end = _ensure_utc(run.training_window_end)
@@ -181,7 +182,7 @@ class ForecastTrainingService:
                 geography_scope=artifact.geography_scope,
             )
         except (WeatherClientError, NagerDateClientError) as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             print(
                 "[debug][forecast] training fail "
                 f"run_id={run_id} reason=engine_failure detail={exc}"
@@ -194,7 +195,7 @@ class ForecastTrainingService:
                 summary="forecast model training failed",
             )
         except (OSError, pickle.PickleError, ForecastModelStorageError) as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             print(
                 "[debug][forecast] training fail "
                 f"run_id={run_id} reason=storage_failure detail={exc}"
@@ -207,7 +208,7 @@ class ForecastTrainingService:
                 summary="forecast model storage failed",
             )
         except Exception as exc:
-            self._rollback_repository_session()
+            self._rollback_repository_savepoint(savepoint)
             print(
                 "[debug][forecast] training fail "
                 f"run_id={run_id} reason=engine_failure detail={exc}"
@@ -226,6 +227,7 @@ class ForecastTrainingService:
             f"artifact_id={stored_artifact.forecast_model_artifact_id} "
             f"artifact_path={stored_artifact.artifact_path}"
         )
+        self._commit_repository_savepoint(savepoint)
         self._log("forecast_model.trained", run_id=run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
         return self.forecast_model_repository.finalize_trained(
             run_id,
@@ -266,6 +268,20 @@ class ForecastTrainingService:
     def _store_artifact(self, artifact: TrainedHourlyDemandArtifact, artifact_path: Path) -> None:
         with artifact_path.open("wb") as handle:
             pickle.dump(artifact, handle)
+
+    def _begin_repository_savepoint(self):
+        session = getattr(self.forecast_model_repository, "session", None)
+        if session is None:
+            return None
+        return session.begin_nested()
+
+    def _rollback_repository_savepoint(self, savepoint) -> None:
+        if savepoint is not None and getattr(savepoint, "is_active", False):
+            savepoint.rollback()
+
+    def _commit_repository_savepoint(self, savepoint) -> None:
+        if savepoint is not None and getattr(savepoint, "is_active", False):
+            savepoint.commit()
 
     def _rollback_repository_session(self) -> None:
         session = getattr(self.forecast_model_repository, "session", None)
