@@ -4,7 +4,9 @@ import logging
 
 from sqlalchemy.orm import Session
 
+from app.clients.nager_date_client import NagerDateClientError
 from app.clients.nager_date_client import NagerDateClient
+from app.clients.weather_client import WeatherClientError
 from app.clients.weather_client import build_weather_client
 from app.core.config import get_settings
 from app.pipelines.ingestion.approved_pipeline import ApprovedPipeline
@@ -29,6 +31,62 @@ from app.services.weekly_forecast_service import WeeklyForecastService
 from app.services.weekly_forecast_training_service import WeeklyForecastTrainingService
 
 
+class _ApprovalWeatherClient:
+    def __init__(self, client: object, logger: logging.Logger) -> None:
+        self._client = client
+        self._logger = logger
+
+    def fetch_historical_hourly_conditions(self, start, end) -> list[dict[str, object]]:
+        return self._fetch("historical", start, end)
+
+    def fetch_forecast_hourly_conditions(self, start, end) -> list[dict[str, object]]:
+        return self._fetch("forecast", start, end)
+
+    def fetch_hourly_conditions(self, start, end) -> list[dict[str, object]]:
+        return self._fetch("generic", start, end)
+
+    def _fetch(self, mode: str, start, end) -> list[dict[str, object]]:
+        method_names = {
+            "historical": ("fetch_historical_hourly_conditions", "fetch_hourly_conditions"),
+            "forecast": ("fetch_forecast_hourly_conditions", "fetch_hourly_conditions"),
+            "generic": ("fetch_hourly_conditions",),
+        }[mode]
+        for method_name in method_names:
+            method = getattr(self._client, method_name, None)
+            if method is None:
+                continue
+            try:
+                return list(method(start, end))
+            except WeatherClientError as exc:
+                self._logger.warning(
+                    "approval.follow_on.weather_fallback mode=%s start=%s end=%s detail=%s",
+                    mode,
+                    start,
+                    end,
+                    exc,
+                )
+                return []
+        return []
+
+
+class _ApprovalHolidayClient:
+    def __init__(self, client: NagerDateClient, logger: logging.Logger) -> None:
+        self._client = client
+        self._logger = logger
+
+    def fetch_holidays(self, year: int, country_code: str = "CA") -> list[dict[str, object]]:
+        try:
+            return list(self._client.fetch_holidays(year, country_code))
+        except NagerDateClientError as exc:
+            self._logger.warning(
+                "approval.follow_on.holiday_fallback year=%s country_code=%s detail=%s",
+                year,
+                country_code,
+                exc,
+            )
+            return []
+
+
 class ValidationPipeline:
     def __init__(self, session: Session) -> None:
         self.session = session
@@ -45,19 +103,24 @@ class ValidationPipeline:
             self.validation_repository,
             self.cleaned_dataset_repository,
         )
+        approval_weather_client = _ApprovalWeatherClient(build_weather_client(), logging.getLogger("validation.approval.weather"))
+        approval_holiday_client = _ApprovalHolidayClient(
+            NagerDateClient(),
+            logging.getLogger("validation.approval.holidays"),
+        )
         self.forecast_training_service = ForecastTrainingService(
             cleaned_dataset_repository=self.cleaned_dataset_repository,
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=build_weather_client(),
-            nager_date_client=NagerDateClient(),
+            geomet_client=approval_weather_client,
+            nager_date_client=approval_holiday_client,
             settings=self.settings,
             logger=logging.getLogger("validation.forecast_training"),
         )
         self.weekly_forecast_training_service = WeeklyForecastTrainingService(
             cleaned_dataset_repository=self.cleaned_dataset_repository,
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=build_weather_client(),
-            nager_date_client=NagerDateClient(),
+            geomet_client=approval_weather_client,
+            nager_date_client=approval_holiday_client,
             settings=self.settings,
             logger=logging.getLogger("validation.weekly_forecast_training"),
         )
@@ -66,8 +129,8 @@ class ValidationPipeline:
             forecast_run_repository=ForecastRunRepository(session),
             forecast_repository=ForecastRepository(session),
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=build_weather_client(),
-            nager_date_client=NagerDateClient(),
+            geomet_client=approval_weather_client,
+            nager_date_client=approval_holiday_client,
             settings=self.settings,
             logger=logging.getLogger("validation.forecast"),
         )
@@ -76,8 +139,8 @@ class ValidationPipeline:
             weekly_forecast_run_repository=WeeklyForecastRunRepository(session),
             weekly_forecast_repository=WeeklyForecastRepository(session),
             forecast_model_repository=ForecastModelRepository(session),
-            geomet_client=build_weather_client(),
-            nager_date_client=NagerDateClient(),
+            geomet_client=approval_weather_client,
+            nager_date_client=approval_holiday_client,
             settings=self.settings,
             logger=logging.getLogger("validation.weekly_forecast"),
         )
