@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveAuthSession } from '../lib/authSession';
-import { formatUpdatedDateTime, IngestionPage } from './IngestionPage';
+import { formatIngestionResultType, formatUpdatedDateTime, IngestionPage } from './IngestionPage';
 
 const currentDataset = {
   source_name: 'edmonton_311',
@@ -38,7 +38,7 @@ describe('IngestionPage', () => {
 
     expect(await screen.findByText(/record count/i)).toBeInTheDocument();
     expect(screen.getByText(String(currentDataset.record_count))).toBeInTheDocument();
-    expect(screen.getByText(/latest 311 requested_at in stored data/i)).toBeInTheDocument();
+    expect(screen.getByText(/latest source activity/i)).toBeInTheDocument();
     expect(screen.getByText(formatUpdatedDateTime(currentDataset.latest_requested_at))).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /trigger 311 ingestion/i })).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/datasets/current');
@@ -72,7 +72,7 @@ describe('IngestionPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
     });
-    expect(screen.getByText(/new_data_applied/i)).toBeInTheDocument();
+    expect(screen.getByText(formatIngestionResultType('new_data_applied'))).toBeInTheDocument();
     expect(screen.getByText(String(currentDataset.record_count))).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(String(fetchMock.mock.calls[1][0])).toContain('/api/v1/ingestion-runs/311/trigger');

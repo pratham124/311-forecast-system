@@ -22,6 +22,11 @@ export function HistoricalDemandFilters({ context, filters, onChange, onSubmit, 
   const today = new Date().toISOString().slice(0, 10);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
+  const startValue = toDateInputValue(filters.timeRangeStart);
+  const endValue = toDateInputValue(filters.timeRangeEnd);
+  const startMax = endValue && endValue < today ? endValue : today;
+  const endMin = startValue || undefined;
+  const hasValidDateRange = Boolean(startValue && endValue && startValue <= endValue);
 
   const updateField = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -109,18 +114,23 @@ export function HistoricalDemandFilters({ context, filters, onChange, onSubmit, 
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="time-range-start">Time range start</Label>
-          <Input id="time-range-start" name="timeRangeStart" type="date" max={today} value={toDateInputValue(filters.timeRangeStart)} onChange={updateField} disabled={disabled} />
+          <Label htmlFor="time-range-start">Start</Label>
+          <Input id="time-range-start" name="timeRangeStart" type="date" max={startMax} value={startValue} onChange={updateField} disabled={disabled} />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="time-range-end">Time range end</Label>
-          <Input id="time-range-end" name="timeRangeEnd" type="date" max={today} value={toDateInputValue(filters.timeRangeEnd)} onChange={updateField} disabled={disabled} />
+          <Label htmlFor="time-range-end">End</Label>
+          <Input id="time-range-end" name="timeRangeEnd" type="date" min={endMin} max={today} value={endValue} onChange={updateField} disabled={disabled} />
         </div>
       </div>
+      {!hasValidDateRange ? (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Select a valid start and end date. The end date must be on or after the start date.
+        </p>
+      ) : null}
       <button
         type="button"
         onClick={onSubmit}
-        disabled={disabled}
+        disabled={disabled || !hasValidDateRange}
         className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
       >
         Explore historical demand

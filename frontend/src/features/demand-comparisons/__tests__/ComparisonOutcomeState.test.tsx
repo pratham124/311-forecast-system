@@ -7,7 +7,7 @@ import type { DemandComparisonResponse } from '../../../types/demandComparisons'
 describe('ComparisonOutcomeState', () => {
   it('renders loading state', () => {
     render(<ComparisonOutcomeState isLoading={true} error={null} response={null} onProceed={vi.fn()} onDecline={vi.fn()} />);
-    expect(screen.getByText('Comparing historical and forecast demand...')).toBeInTheDocument();
+    expect(screen.getByText('Loading comparison options...')).toBeInTheDocument();
   });
 
   it('renders error state', () => {
@@ -32,7 +32,7 @@ describe('ComparisonOutcomeState', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Proceed' }));
     expect(onProceed).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Revise filters' }));
     expect(onDecline).toHaveBeenCalled();
   });
 

@@ -65,10 +65,10 @@ describe('HistoricalDemandPage – extra coverage', () => {
     await screen.findByRole('button', { name: /explore historical demand/i });
 
     // Change the start date input to a date-only value.
-    fireEvent.change(screen.getByLabelText(/time range start/i), {
+    fireEvent.change(screen.getByLabelText(/^start$/i), {
       target: { name: 'timeRangeStart', value: '2026-03-01' },
     });
-    fireEvent.change(screen.getByLabelText(/time range end/i), {
+    fireEvent.change(screen.getByLabelText(/^end$/i), {
       target: { name: 'timeRangeEnd', value: '2026-03-31' },
     });
 
@@ -117,13 +117,13 @@ describe('HistoricalDemandPage – extra coverage', () => {
     render(<HistoricalDemandPage />);
     await screen.findByRole('button', { name: /explore historical demand/i });
 
-    fireEvent.change(screen.getByLabelText(/time range start/i), {
+    fireEvent.change(screen.getByLabelText(/^start$/i), {
       target: { name: 'timeRangeStart', value: '' },
     });
 
     fireEvent.click(screen.getByRole('button', { name: /explore historical demand/i }));
 
-    expect(await screen.findByText(/select both a start date and an end date\./i)).toBeInTheDocument();
+    expect(screen.getByText(/select a valid start and end date\./i)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

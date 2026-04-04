@@ -62,19 +62,26 @@ export function ForecastVisualizationPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8">
-      <Card className="relative z-20 grid gap-6 rounded-[28px] p-1 md:grid-cols-[1.6fr_1fr]">
-        <CardHeader className="pb-6">
-          <p className="mb-3 mt-0 text-xs uppercase tracking-[0.18em] text-accent">311 Forecast Overview</p>
-          <CardTitle className="m-0 text-4xl leading-[0.95] text-ink md:text-6xl">
-            See expected demand for the next day or week.
+      <Card className="relative z-20 grid gap-4 rounded-[28px] border-white/60 bg-white/85 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:grid-cols-[1.65fr_1fr] md:gap-6">
+        <CardHeader className="gap-3 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">311 Forecast Overview</p>
+          <CardTitle className="m-0 max-w-3xl text-3xl leading-tight text-ink sm:text-4xl md:text-5xl md:leading-[1.02]">
+            Expected demand for the next day or week
           </CardTitle>
-          <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Compare the latest forecast with recent request volumes. If some data is missing, this page will explain what is still available.
+          <CardDescription className="max-w-2xl text-sm leading-6 text-muted sm:text-[15px]">
+            Review the latest forecast beside recent service request volumes.
           </CardDescription>
+          <p className="max-w-2xl text-sm leading-6 text-muted">
+            When some forecast data is unavailable, this page shows what can still be viewed and explains what is missing.
+          </p>
         </CardHeader>
-        <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
-          <div className="grid gap-2">
-            <Label htmlFor="forecast-product">Time range</Label>
+        <CardContent className="grid content-start gap-5 rounded-[24px] bg-slate-50/80 p-5 sm:p-6">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-ink">Adjust the view</p>
+            <p className="text-sm leading-6 text-muted">Choose a forecast window and the service areas you want to compare.</p>
+          </div>
+          <div className="grid gap-2.5">
+            <Label htmlFor="forecast-product" className="text-sm font-medium text-ink">Time range</Label>
             <TimeRangeSelect
               value={forecastProduct}
               onChange={setForecastProduct}
@@ -83,8 +90,8 @@ export function ForecastVisualizationPage() {
               containerRef={timeRangeRef}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="service-category">Service areas</Label>
+          <div className="grid gap-2.5">
+            <Label htmlFor="service-category" className="text-sm font-medium text-ink">Service areas</Label>
             <ServiceAreaMultiSelect
               options={serviceCategoryOptions}
               selectedValues={serviceCategories}

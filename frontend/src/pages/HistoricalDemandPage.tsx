@@ -50,17 +50,20 @@ export function HistoricalDemandPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8" aria-label="historical demand page">
-      <Card className="relative z-20 grid gap-6 rounded-[28px] p-1 md:grid-cols-[1.45fr_1fr]">
-        <CardHeader className="pb-6">
-          <p className="mb-3 mt-0 text-xs uppercase tracking-[0.18em] text-accent">Historical Demand</p>
-          <CardTitle className="m-0 text-4xl leading-[0.95] text-ink md:text-6xl">
-            Explore how 311 demand has shifted across time and geography.
+      <Card className="relative z-20 grid gap-4 rounded-[28px] border-white/60 bg-white/85 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:grid-cols-[1.45fr_1fr] md:gap-6">
+        <CardHeader className="gap-3 px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">Historical Demand</p>
+          <CardTitle className="m-0 max-w-3xl text-3xl leading-tight text-ink sm:text-4xl md:text-5xl md:leading-[1.02]">
+            Explore how 311 demand changes over time
           </CardTitle>
-          <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            Filter historical records by service category and time range to review how demand has changed over time.
+          <CardDescription className="max-w-2xl text-sm leading-6 text-muted sm:text-[15px]">
+            Review historical demand by service category and time range.
           </CardDescription>
+          <p className="max-w-2xl text-sm leading-6 text-muted">
+            Use the filters to see how request volume has shifted over time before comparing it with forecast output.
+          </p>
         </CardHeader>
-        <CardContent className="grid content-start gap-4 p-7 pl-6 pt-7">
+        <CardContent className="grid content-start gap-5 rounded-[24px] bg-slate-50/80 p-5 sm:p-6">
           {isLoadingContext ? (
             <Alert><AlertDescription>Loading available historical filters...</AlertDescription></Alert>
           ) : (

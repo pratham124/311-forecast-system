@@ -327,7 +327,7 @@ describe('EvaluationPage – error state', () => {
 
     await user.click(screen.getByRole('button', { name: /trigger daily evaluation/i }));
     expect(await screen.findByText(/latest run status/i)).toBeInTheDocument();
-    expect(screen.getByText(/^failed$/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^failed$/i).length).toBeGreaterThan(0);
     expect((await screen.findAllByText(/not available/i)).length).toBeGreaterThan(0);
   });
 

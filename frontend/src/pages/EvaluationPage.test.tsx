@@ -105,7 +105,7 @@ describe('EvaluationPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/latest run status/i)).toBeInTheDocument();
     });
-    expect(screen.getByText(/stored_partial/i)).toBeInTheDocument();
+    expect(screen.getByText(/stored partial/i)).toBeInTheDocument();
     expect(screen.getByText(/current official evaluation/i)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(String(fetchMock.mock.calls[1][0])).toContain('/api/v1/evaluation-runs/trigger');

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from app.core.demand_comparison_observability import (
     summarize_demand_comparison_failure,
@@ -296,7 +296,10 @@ class DemandComparisonService:
             bucket_start = datetime(value.year, value.month, value.day, tzinfo=timezone.utc)
             return payload.time_range_start <= bucket_start < payload.time_range_end
 
-        daily_rows_by_key: dict[tuple[date, str, str | None], dict[str, object]] = {}
+        selected_duration = payload.time_range_end - payload.time_range_start
+        daily_comparison_granularity = "hourly" if selected_duration <= timedelta(days=2) else "daily"
+
+        daily_rows_by_key: dict[tuple[object, str, str | None], dict[str, object]] = {}
         used_daily_version_id: str | None = None
         for version in self.forecast_repository.list_stored_versions_overlapping_range(
             range_start=payload.time_range_start,
@@ -312,16 +315,22 @@ class DemandComparisonService:
                 bucket_start = normalize_dt(bucket.bucket_start)
                 if not (payload.time_range_start <= bucket_start < payload.time_range_end):
                     continue
-                forecast_date = bucket_start.date()
-                key = (forecast_date, bucket.service_category, geography_key)
+                if daily_comparison_granularity == "hourly":
+                    key = (bucket_start, bucket.service_category, geography_key)
+                else:
+                    key = (bucket_start.date(), bucket.service_category, geography_key)
                 row = daily_rows_by_key.get(key)
                 if row is None:
-                    daily_rows_by_key[key] = {
-                        "forecast_date_local": forecast_date,
+                    row = {
                         "service_category": bucket.service_category,
                         "geography_key": geography_key,
                         "point_forecast": float(bucket.point_forecast),
                     }
+                    if daily_comparison_granularity == "hourly":
+                        row["bucket_start"] = bucket_start
+                    else:
+                        row["forecast_date_local"] = bucket_start.date()
+                    daily_rows_by_key[key] = row
                 else:
                     row["point_forecast"] = float(row.get("point_forecast", 0.0)) + float(bucket.point_forecast)
                 version_used = True
@@ -364,21 +373,25 @@ class DemandComparisonService:
         if used_daily_version_id and used_weekly_version_id:
             forecast_product = None
             forecast_granularity = None
+            comparison_granularity = "daily"
         elif used_daily_version_id:
             forecast_product = "daily_1_day"
             forecast_granularity = "hourly"
+            comparison_granularity = daily_comparison_granularity
         elif used_weekly_version_id:
             forecast_product = "weekly_7_day"
             forecast_granularity = "daily"
+            comparison_granularity = "daily"
         else:
             forecast_product = None
             forecast_granularity = None
+            comparison_granularity = "daily"
 
         return ForecastLoadResult(
             rows=list(daily_rows_by_key.values()) + list(weekly_rows_by_key.values()),
             forecast_product=forecast_product,
             forecast_granularity=forecast_granularity,
-            comparison_granularity="daily",
+            comparison_granularity=comparison_granularity,
             source_forecast_version_id=used_daily_version_id,
             source_weekly_forecast_version_id=used_weekly_version_id,
         )

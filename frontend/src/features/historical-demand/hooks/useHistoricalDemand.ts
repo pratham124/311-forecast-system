@@ -60,6 +60,12 @@ export function useHistoricalDemand() {
       setIsSubmitting(false);
       return null;
     }
+    if (nextFilters.timeRangeStart > nextFilters.timeRangeEnd) {
+      setError('Select a valid date range. The end date must be on or after the start date.');
+      setResponse(null);
+      setIsSubmitting(false);
+      return null;
+    }
     setIsSubmitting(true);
     setError(null);
     try {

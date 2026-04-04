@@ -20,9 +20,7 @@ class DemandComparisonWarningService:
         if span_days <= 366 and combination_count <= 10:
             return None
         message = (
-            f"Selected scope includes {service_category_count} categories "
-            f"and {span_days} calendar day(s). "
-            "Retrieval has not started because the request exceeds the large-request threshold."
+            "This request spans a large scope and may take longer to load."
         )
         return HighVolumeWarning(
             shown=True,
