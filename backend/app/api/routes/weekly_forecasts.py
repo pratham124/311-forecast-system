@@ -6,8 +6,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import require_forecast_reader, require_forecast_trigger
-from app.clients.geomet_client import GeoMetClient
 from app.clients.nager_date_client import NagerDateClient
+from app.clients.weather_client import build_weather_client
 from app.core.config import get_settings
 from app.core.db import get_db_session, get_session_factory
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
@@ -28,8 +28,8 @@ from app.services.weekly_forecast_training_service import WeeklyForecastTraining
 router = APIRouter(prefix="/api/v1", tags=["weekly-forecast"])
 
 
-def get_geomet_client() -> GeoMetClient:
-    return GeoMetClient()
+def get_weather_client():
+    return build_weather_client()
 
 
 def get_nager_date_client() -> NagerDateClient:
@@ -38,7 +38,7 @@ def get_nager_date_client() -> NagerDateClient:
 
 def build_weekly_forecast_training_service(
     session: Session,
-    geomet_client: GeoMetClient,
+    geomet_client: object,
     nager_date_client: NagerDateClient,
 ) -> WeeklyForecastTrainingService:
     return WeeklyForecastTrainingService(
@@ -53,7 +53,7 @@ def build_weekly_forecast_training_service(
 
 def build_weekly_forecast_service(
     session: Session,
-    geomet_client: GeoMetClient,
+    geomet_client: object,
     nager_date_client: NagerDateClient,
 ) -> WeeklyForecastService:
     return WeeklyForecastService(
@@ -73,7 +73,7 @@ def trigger_weekly_forecast(
     background_tasks: BackgroundTasks,
     payload: WeeklyForecastTriggerRequest | None = None,
     session: Session = Depends(get_db_session),
-    geomet_client: GeoMetClient = Depends(get_geomet_client),
+    geomet_client: object = Depends(get_weather_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),
     _claims: dict = Depends(require_forecast_trigger),
 ) -> WeeklyForecastRunAccepted:
@@ -102,7 +102,7 @@ def trigger_weekly_forecast(
 def get_weekly_forecast_run(
     weekly_forecast_run_id: str,
     session: Session = Depends(get_db_session),
-    geomet_client: GeoMetClient = Depends(get_geomet_client),
+    geomet_client: object = Depends(get_weather_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),
     _claims: dict = Depends(require_forecast_reader),
 ) -> WeeklyForecastRunStatusRead:
@@ -114,7 +114,7 @@ def get_weekly_forecast_run(
 def get_weekly_forecast_model_run(
     forecast_model_run_id: str,
     session: Session = Depends(get_db_session),
-    geomet_client: GeoMetClient = Depends(get_geomet_client),
+    geomet_client: object = Depends(get_weather_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),
     _claims: dict = Depends(require_forecast_reader),
 ) -> WeeklyForecastModelRunStatusRead:
@@ -125,7 +125,7 @@ def get_weekly_forecast_model_run(
 @router.get("/forecast-models/current-weekly", response_model=CurrentWeeklyForecastModelRead)
 def get_current_weekly_forecast_model(
     session: Session = Depends(get_db_session),
-    geomet_client: GeoMetClient = Depends(get_geomet_client),
+    geomet_client: object = Depends(get_weather_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),
     _claims: dict = Depends(require_forecast_reader),
 ) -> CurrentWeeklyForecastModelRead:
@@ -136,7 +136,7 @@ def get_current_weekly_forecast_model(
 @router.get("/forecasts/current-weekly", response_model=CurrentWeeklyForecastRead)
 def get_current_weekly_forecast(
     session: Session = Depends(get_db_session),
-    geomet_client: GeoMetClient = Depends(get_geomet_client),
+    geomet_client: object = Depends(get_weather_client),
     nager_date_client: NagerDateClient = Depends(get_nager_date_client),
     _claims: dict = Depends(require_forecast_reader),
 ) -> CurrentWeeklyForecastRead:

@@ -52,6 +52,11 @@ def test_feature_preparation_zero_fills_history_and_builds_lag_features() -> Non
     latest_hour = next(row for row in prepared["training_rows"] if row["bucket_start"] == datetime(2026, 3, 20, 3, tzinfo=timezone.utc))
 
     assert zero_hour["observed_count"] == 0.0
+    assert zero_hour["weather_temperature_c"] is None
+    assert zero_hour["weather_precipitation_mm"] is None
+    assert zero_hour["weather_snowfall_mm"] is None
+    assert zero_hour["weather_precipitation_probability_pct"] is None
+    assert zero_hour["weather_is_missing"] is True
     assert latest_hour["lag_1h"] == 0.0
     assert latest_hour["lag_24h"] == 0.0
     assert latest_hour["rolling_mean_24h"] == pytest.approx(1.0 / 24.0)
@@ -85,6 +90,8 @@ def test_pipeline_scores_recursively_using_prior_predictions(monkeypatch: pytest
                 "is_holiday": False,
                 "weather_temperature_c": 5.0,
                 "weather_precipitation_mm": 0.0,
+                "weather_snowfall_mm": 0.0,
+                "weather_precipitation_probability_pct": 0.0,
                 "historical_mean": 1.5,
                 "observed_count": 1.0,
                 "bucket_start": datetime(2026, 3, 19, 22, tzinfo=timezone.utc),
@@ -101,6 +108,8 @@ def test_pipeline_scores_recursively_using_prior_predictions(monkeypatch: pytest
                 "is_holiday": False,
                 "weather_temperature_c": 5.0,
                 "weather_precipitation_mm": 0.0,
+                "weather_snowfall_mm": 0.0,
+                "weather_precipitation_probability_pct": 0.0,
                 "historical_mean": 1.5,
                 "observed_count": 2.0,
                 "bucket_start": datetime(2026, 3, 19, 23, tzinfo=timezone.utc),
@@ -119,6 +128,8 @@ def test_pipeline_scores_recursively_using_prior_predictions(monkeypatch: pytest
                 "is_holiday": False,
                 "weather_temperature_c": 4.0,
                 "weather_precipitation_mm": 0.1,
+                "weather_snowfall_mm": 0.2,
+                "weather_precipitation_probability_pct": 25.0,
                 "historical_mean": 1.5,
                 "bucket_start": datetime(2026, 3, 20, 0, tzinfo=timezone.utc),
                 "bucket_end": datetime(2026, 3, 20, 1, tzinfo=timezone.utc),
@@ -134,6 +145,8 @@ def test_pipeline_scores_recursively_using_prior_predictions(monkeypatch: pytest
                 "is_holiday": False,
                 "weather_temperature_c": 4.0,
                 "weather_precipitation_mm": 0.1,
+                "weather_snowfall_mm": 0.2,
+                "weather_precipitation_probability_pct": 25.0,
                 "historical_mean": 1.5,
                 "bucket_start": datetime(2026, 3, 20, 1, tzinfo=timezone.utc),
                 "bucket_end": datetime(2026, 3, 20, 2, tzinfo=timezone.utc),
@@ -149,6 +162,8 @@ def test_pipeline_scores_recursively_using_prior_predictions(monkeypatch: pytest
                 "is_holiday": False,
                 "weather_temperature_c": 4.0,
                 "weather_precipitation_mm": 0.1,
+                "weather_snowfall_mm": 0.2,
+                "weather_precipitation_probability_pct": 25.0,
                 "historical_mean": 1.5,
                 "bucket_start": datetime(2026, 3, 20, 2, tzinfo=timezone.utc),
                 "bucket_end": datetime(2026, 3, 20, 3, tzinfo=timezone.utc),
@@ -189,6 +204,8 @@ def test_pipeline_predict_uses_residual_calibration_for_intervals(monkeypatch: p
                 "is_holiday": False,
                 "weather_temperature_c": 5.0,
                 "weather_precipitation_mm": 0.0,
+                "weather_snowfall_mm": 0.0,
+                "weather_precipitation_probability_pct": 0.0,
                 "historical_mean": 8.0,
                 "observed_count": float(10 + hour),
                 "bucket_start": datetime(2026, 3, 10, tzinfo=timezone.utc) + timedelta(hours=hour),
@@ -208,6 +225,8 @@ def test_pipeline_predict_uses_residual_calibration_for_intervals(monkeypatch: p
                 "is_holiday": False,
                 "weather_temperature_c": 4.0,
                 "weather_precipitation_mm": 0.1,
+                "weather_snowfall_mm": 0.5,
+                "weather_precipitation_probability_pct": 30.0,
                 "historical_mean": 8.0,
                 "bucket_start": datetime(2026, 3, 20, 3, tzinfo=timezone.utc),
                 "bucket_end": datetime(2026, 3, 20, 4, tzinfo=timezone.utc),
@@ -254,6 +273,74 @@ def test_pipeline_outputs_ordered_quantiles_and_24_hour_materialization() -> Non
     assert geography_scope == "category_and_geography"
     assert len(buckets) == 24
     assert all(bucket["quantile_p10"] <= bucket["quantile_p50"] <= bucket["quantile_p90"] for bucket in buckets)
+
+
+@pytest.mark.unit
+def test_hourly_pipeline_supports_scoring_with_older_artifact_feature_names() -> None:
+    class FakeModel:
+        def predict(self, x_score):
+            return np.array([float(x_score.iloc[0]["weather_precipitation_mm"]) + 1.0])
+
+    artifact = type(
+        "Artifact",
+        (),
+        {
+            "geography_scope": "category_only",
+            "category_codes": {"Roads": 0},
+            "geography_codes": {None: 0},
+            "feature_names": [
+                "service_category_code",
+                "geography_code",
+                "hour_of_day",
+                "day_of_week",
+                "day_of_year",
+                "month",
+                "is_weekend",
+                "is_holiday",
+                "weather_temperature_c",
+                "weather_precipitation_mm",
+                "historical_mean",
+                "lag_1h",
+                "lag_24h",
+                "lag_168h",
+                "rolling_mean_24h",
+                "rolling_mean_168h",
+            ],
+            "point_model": FakeModel(),
+            "residual_q10_by_hour": {},
+            "residual_q90_by_hour": {},
+            "model_family": "lightgbm_global",
+            "baseline_method": "historical_hourly_mean",
+        },
+    )()
+
+    generated = HourlyDemandPipeline().predict(
+        artifact,
+        {
+            "training_rows": [],
+            "rows": [
+                {
+                    "service_category": "Roads",
+                    "geography_key": None,
+                    "hour_of_day": 0,
+                    "day_of_week": 4,
+                    "day_of_year": 79,
+                    "month": 3,
+                    "is_weekend": False,
+                    "is_holiday": False,
+                    "weather_temperature_c": 4.0,
+                    "weather_precipitation_mm": 0.25,
+                    "weather_snowfall_mm": 0.5,
+                    "weather_precipitation_probability_pct": 60.0,
+                    "historical_mean": 1.5,
+                    "bucket_start": datetime(2026, 3, 20, 0, tzinfo=timezone.utc),
+                    "bucket_end": datetime(2026, 3, 20, 1, tzinfo=timezone.utc),
+                }
+            ],
+        },
+    )
+
+    assert generated["buckets"][0]["point_forecast"] == 1.25
 
 
 @pytest.mark.unit

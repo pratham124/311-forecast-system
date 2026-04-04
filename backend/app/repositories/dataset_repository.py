@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import logging
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from app.models import CandidateDataset, CurrentDatasetMarker, DatasetRecord, Da
 class DatasetRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
+        self.logger = logging.getLogger("ingestion.dataset_repository")
 
     def create_candidate(self, run_id: str, record_count: int, validation_status: str) -> CandidateDataset:
         candidate = CandidateDataset(
@@ -46,6 +48,13 @@ class DatasetRepository:
         duplicate_group_count: int = 0,
         approved_by_validation_run_id: str | None = None,
     ) -> DatasetVersion:
+        self.logger.info(
+            "dataset_version.create.started source_name=%s run_id=%s dataset_kind=%s record_count=%s",
+            source_name,
+            run_id,
+            dataset_kind,
+            record_count,
+        )
         dataset_version = DatasetVersion(
             source_name=source_name,
             ingestion_run_id=run_id,
@@ -63,10 +72,26 @@ class DatasetRepository:
         self.session.add(dataset_version)
         self.session.flush()
         if records:
+            self.logger.info(
+                "dataset_version.records_insert.started dataset_version_id=%s record_count=%s",
+                dataset_version.dataset_version_id,
+                len(records),
+            )
             self.session.add_all(
                 [DatasetRecord.from_normalized_row(dataset_version.dataset_version_id, record) for record in records]
             )
             self.session.flush()
+            self.logger.info(
+                "dataset_version.records_insert.completed dataset_version_id=%s record_count=%s",
+                dataset_version.dataset_version_id,
+                len(records),
+            )
+        self.logger.info(
+            "dataset_version.create.completed dataset_version_id=%s source_name=%s dataset_kind=%s",
+            dataset_version.dataset_version_id,
+            source_name,
+            dataset_kind,
+        )
         return dataset_version
 
     def activate_dataset(self, source_name: str, dataset_version_id: str, run_id: str) -> CurrentDatasetMarker:

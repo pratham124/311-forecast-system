@@ -15,6 +15,7 @@ from app.repositories.run_repository import RunRepository
 from app.pipelines.ingestion.run_ingestion import IngestionPipeline
 from app.services.activation_guard_service import ActivationGuardService
 from app.services.dataset_validation_service import DatasetValidationService
+from app.services.ingestion_follow_on_jobs import launch_ingestion_follow_on_jobs
 from app.services.ingestion_logging_service import IngestionLoggingService
 from app.services.ingestion_query_service import IngestionQueryService
 from app.services.scheduler_service import SchedulerService, build_ingestion_job
@@ -162,6 +163,38 @@ def test_build_ingestion_job_runs_pipeline(monkeypatch: pytest.MonkeyPatch) -> N
 
     assert result.status == "success"
     assert calls == ["created", "scheduled", "follow_on:False", "committed", "closed"]
+
+
+@pytest.mark.unit
+def test_launch_ingestion_follow_on_jobs_runs_sequentially(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+
+    monkeypatch.setattr("app.services.ingestion_follow_on_jobs.get_session_factory", lambda: "session-factory")
+    monkeypatch.setattr(
+        "app.services.ingestion_follow_on_jobs.build_forecast_training_job",
+        lambda session_factory: lambda: calls.append("forecast-model-training"),
+    )
+    monkeypatch.setattr(
+        "app.services.ingestion_follow_on_jobs.build_forecast_job",
+        lambda session_factory: lambda: calls.append("forecast-generation"),
+    )
+    monkeypatch.setattr(
+        "app.services.ingestion_follow_on_jobs.build_weekly_forecast_training_job",
+        lambda session_factory: lambda: calls.append("weekly-forecast-model-training"),
+    )
+    monkeypatch.setattr(
+        "app.services.ingestion_follow_on_jobs.build_weekly_forecast_job",
+        lambda session_factory: lambda: calls.append("weekly-forecast-generation"),
+    )
+
+    launch_ingestion_follow_on_jobs()
+
+    assert calls == [
+        "forecast-model-training",
+        "forecast-generation",
+        "weekly-forecast-model-training",
+        "weekly-forecast-generation",
+    ]
 
 
 class NoCursorClient(Edmonton311Client):

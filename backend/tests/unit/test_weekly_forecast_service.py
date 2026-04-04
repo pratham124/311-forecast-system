@@ -78,15 +78,100 @@ def test_weekly_pipeline_uses_weather_and_holiday_context() -> None:
         week_end_local=week_start + timedelta(days=6, hours=23, minutes=59, seconds=59),
         timezone_name="America/Edmonton",
         weather_rows=[
-            {"timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc), "temperature_c": 10.0, "precipitation_mm": 4.0},
+            {
+                "timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc),
+                "temperature_c": 10.0,
+                "precipitation_mm": 4.0,
+                "snowfall_mm": 1.5,
+                "precipitation_probability_pct": 80.0,
+            },
         ],
         holidays=[{"date": "2026-03-23", "name": "Holiday"}],
     )
 
-    bucket = WeeklyDemandPipeline().run(prepared)["buckets"][0]
+    generated = WeeklyDemandPipeline().run(prepared)
+    bucket = generated["buckets"][0]
+    first_row = prepared["rows"][0]
     assert prepared["target_context"][week_start.date()]["is_holiday"] is True
     assert prepared["target_context"][week_start.date()]["has_weather"] is True
-    assert bucket["point_forecast"] != bucket["baseline_value"]
+    assert prepared["target_context"][week_start.date()]["total_snowfall_mm"] == 1.5
+    assert prepared["target_context"][week_start.date()]["avg_precipitation_probability_pct"] == 80.0
+    assert first_row["is_holiday"] is True
+    assert first_row["total_snowfall_mm"] == 1.5
+    assert first_row["avg_precipitation_probability_pct"] == 80.0
+    assert len(generated["buckets"]) == 7
+    assert bucket["forecast_date_local"] == week_start.date()
+
+
+@pytest.mark.unit
+def test_weekly_pipeline_adjusts_for_snowfall_and_precipitation_probability(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeModel:
+        def fit(self, x_train, y_train):
+            return self
+
+        def predict(self, x_score):
+            x_score = x_score.fillna(0.0)
+            return (
+                x_score["historical_mean"]
+                + x_score["total_snowfall_mm"] * 0.1
+                + x_score["avg_precipitation_probability_pct"] * 0.01
+            ).to_numpy(dtype=float)
+
+    monkeypatch.setattr("app.pipelines.forecasting.weekly_demand_pipeline.lgb.LGBMRegressor", lambda **kwargs: FakeModel())
+
+    week_start = datetime(2026, 3, 23, 0, 0, tzinfo=timezone.utc)
+    base_prepared = prepare_weekly_forecast_features(
+        dataset_records=[
+            {"category": "Roads", "requested_at": "2026-03-09T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-10T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-16T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-17T10:00:00Z"},
+        ],
+        week_start_local=week_start,
+        week_end_local=week_start + timedelta(days=6, hours=23, minutes=59, seconds=59),
+        timezone_name="America/Edmonton",
+        weather_rows=[],
+    )
+    enriched_prepared = prepare_weekly_forecast_features(
+        dataset_records=[
+            {"category": "Roads", "requested_at": "2026-03-09T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-10T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-16T10:00:00Z"},
+            {"category": "Roads", "requested_at": "2026-03-17T10:00:00Z"},
+        ],
+        week_start_local=week_start,
+        week_end_local=week_start + timedelta(days=6, hours=23, minutes=59, seconds=59),
+        timezone_name="America/Edmonton",
+        weather_rows=[
+            {
+                "timestamp": datetime(2026, 3, 9, 12, tzinfo=timezone.utc),
+                "temperature_c": 0.0,
+                "precipitation_mm": 0.0,
+                "snowfall_mm": 5.0,
+                "precipitation_probability_pct": 60.0,
+            },
+            {
+                "timestamp": datetime(2026, 3, 10, 12, tzinfo=timezone.utc),
+                "temperature_c": 0.0,
+                "precipitation_mm": 0.0,
+                "snowfall_mm": 3.0,
+                "precipitation_probability_pct": 40.0,
+            },
+            {
+                "timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc),
+                "temperature_c": 0.0,
+                "precipitation_mm": 0.0,
+                "snowfall_mm": 10.0,
+                "precipitation_probability_pct": 90.0,
+            },
+        ],
+    )
+
+    pipeline = WeeklyDemandPipeline()
+    base_bucket = pipeline.run(base_prepared)["buckets"][0]
+    enriched_bucket = pipeline.run(enriched_prepared)["buckets"][0]
+
+    assert enriched_bucket["point_forecast"] > base_bucket["point_forecast"]
 
 
 @pytest.mark.unit
@@ -101,7 +186,13 @@ def test_weekly_pipeline_leaves_uncovered_days_without_weather_adjustment() -> N
         week_end_local=week_start + timedelta(days=6, hours=23, minutes=59, seconds=59),
         timezone_name="America/Edmonton",
         weather_rows=[
-            {"timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc), "temperature_c": 10.0, "precipitation_mm": 4.0},
+            {
+                "timestamp": datetime(2026, 3, 23, 12, tzinfo=timezone.utc),
+                "temperature_c": 10.0,
+                "precipitation_mm": 4.0,
+                "snowfall_mm": 0.0,
+                "precipitation_probability_pct": 25.0,
+            },
         ],
     )
 
@@ -113,6 +204,8 @@ def test_weekly_pipeline_leaves_uncovered_days_without_weather_adjustment() -> N
     assert tuesday_context["has_weather"] is False
     assert tuesday_context["avg_temperature_c"] is None
     assert tuesday_context["total_precipitation_mm"] is None
+    assert tuesday_context["total_snowfall_mm"] is None
+    assert tuesday_context["avg_precipitation_probability_pct"] is None
     assert buckets[1]["point_forecast"] == buckets[1]["baseline_value"]
 
 

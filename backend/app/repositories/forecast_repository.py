@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.clients.weather_client import get_weather_enrichment_source
 from app.models import CurrentForecastMarker, ForecastBucket, ForecastVersion
 
 
@@ -33,7 +34,7 @@ class ForecastRepository:
         version = ForecastVersion(
             forecast_run_id=forecast_run_id,
             source_cleaned_dataset_version_id=source_cleaned_dataset_version_id,
-            weather_enrichment_source="msc_geomet",
+            weather_enrichment_source=get_weather_enrichment_source(),
             holiday_enrichment_source="nager_date_canada",
             horizon_start=horizon_start,
             horizon_end=horizon_end,

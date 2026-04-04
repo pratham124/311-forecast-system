@@ -7,8 +7,8 @@ import { ApiError, fetchCurrentEvaluation, fetchEvaluationRunStatus, triggerEval
 import type { CurrentEvaluation, EvaluationRunStatus, ForecastProduct } from '../types/evaluation';
 
 const FORECAST_PRODUCT_LABELS: Record<ForecastProduct, string> = {
-  daily_1_day: 'Daily 1-Day',
-  weekly_7_day: 'Weekly 7-Day',
+  daily_1_day: 'Daily',
+  weekly_7_day: 'Weekly',
 };
 
 const READER_ROLES = new Set(['CityPlanner', 'OperationalManager']);
@@ -16,7 +16,12 @@ const TRIGGER_ROLES = new Set(['OperationalManager']);
 
 export function formatDateTime(value?: string | null): string {
   if (!value) return 'Not available';
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString([], {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+  });
 }
 
 export function formatUpdatedDateTime(value?: string | null): string {
@@ -167,18 +172,18 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
             />
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            {triggerable ? (
-              <button
-                type="button"
-                onClick={() => {
-                  void handleTrigger();
-                }}
-                disabled={isTriggering}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isTriggering ? 'Running evaluation...' : `Trigger ${FORECAST_PRODUCT_LABELS[forecastProduct]} evaluation`}
-              </button>
-            ) : (
+        {triggerable ? (
+          <button
+            type="button"
+            onClick={() => {
+              void handleTrigger();
+            }}
+            disabled={isTriggering}
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isTriggering ? 'Running evaluation...' : `Trigger ${forecastProduct === 'daily_1_day' ? 'daily' : 'weekly'} evaluation`}
+          </button>
+        ) : (
               <span className="text-sm text-muted">Only operational managers can trigger a new evaluation run.</span>
             )}
           </div>
@@ -204,11 +209,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
             <CardTitle className="text-lg text-ink">Latest run status</CardTitle>
             <CardDescription>{describeRunStatus(runStatus)}</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-4">
-            <div>
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Run id</span>
-              <strong className="mt-2 block break-all text-sm text-ink">{runStatus.evaluationRunId}</strong>
-            </div>
+          <CardContent className="grid gap-3 md:grid-cols-3">
             <div>
               <span className="block text-xs uppercase tracking-[0.16em] text-muted">Status</span>
               <strong className="mt-2 block text-sm capitalize text-ink">{runStatus.status}</strong>

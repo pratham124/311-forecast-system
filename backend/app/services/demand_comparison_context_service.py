@@ -10,10 +10,26 @@ class DemandComparisonContextService:
         self.source_name = source_name
 
     def get_context(self) -> DemandComparisonContext:
+        records = self.cleaned_dataset_repository.list_current_cleaned_records(self.source_name)
+        geography_options: dict[str, list[str]] = {}
+        for geography_level, aliases in {
+            "ward": ("ward",),
+            "district": ("district",),
+            "neighbourhood": ("neighbourhood", "neighborhood"),
+            "geography_key": ("geography_key",),
+        }.items():
+            values = {
+                str(record.get(alias)).strip()
+                for record in records
+                for alias in aliases
+                if isinstance(record.get(alias), str) and str(record.get(alias)).strip()
+            }
+            if values:
+                geography_options[geography_level] = sorted(values)
         return DemandComparisonContext(
             serviceCategories=self.cleaned_dataset_repository.list_current_categories(self.source_name),
-            geographyLevels=[],
-            geographyOptions={},
+            geographyLevels=sorted(geography_options),
+            geographyOptions=geography_options,
             summary="Comparison filters are sourced from the approved cleaned dataset lineage.",
         )
 

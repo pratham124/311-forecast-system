@@ -146,8 +146,12 @@ def test_context_service_collects_categories_and_geography_levels() -> None:
     context = service.get_context()
 
     assert context.service_categories == ["Roads", "Waste"]
-    assert context.geography_levels == []
-    assert context.geography_options == {}
+    assert context.geography_levels == ["district", "neighbourhood", "ward"]
+    assert context.geography_options == {
+        "ward": ["Ward 1"],
+        "district": ["North"],
+        "neighbourhood": ["Oliver"],
+    }
     assert DemandComparisonContextService.extract_geography_value({"neighborhood": "Downtown"}, "neighbourhood") == "Downtown"
     assert DemandComparisonContextService.extract_geography_value({"ward": "Ward 1"}, None) is None
     assert DemandComparisonContextService.extract_geography_value({}, "ward") is None

@@ -66,6 +66,7 @@ def _build_row(
     lag_features: dict[str, float] | None = None,
 ) -> dict[str, object]:
     weather = weather_by_hour.get(bucket_start, {})
+    weather_is_missing = not weather
     row = {
         "bucket_start": bucket_start,
         "bucket_end": bucket_start + timedelta(hours=1),
@@ -73,8 +74,15 @@ def _build_row(
         "geography_key": geography_key,
         "observed_count": float(observed_count),
         "historical_mean": historical_mean,
-        "weather_temperature_c": float(weather.get("temperature_c", 5.0)),
-        "weather_precipitation_mm": float(weather.get("precipitation_mm", 0.0)),
+        "weather_temperature_c": (float(weather.get("temperature_c")) if "temperature_c" in weather else None),
+        "weather_precipitation_mm": (float(weather.get("precipitation_mm")) if "precipitation_mm" in weather else None),
+        "weather_snowfall_mm": (float(weather.get("snowfall_mm")) if "snowfall_mm" in weather else None),
+        "weather_precipitation_probability_pct": (
+            float(weather.get("precipitation_probability_pct"))
+            if "precipitation_probability_pct" in weather
+            else None
+        ),
+        "weather_is_missing": weather_is_missing,
         "is_holiday": bucket_start.date().isoformat() in holiday_dates,
         "hour_of_day": bucket_start.hour,
         "day_of_week": bucket_start.weekday(),

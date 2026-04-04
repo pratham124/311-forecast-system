@@ -6,8 +6,8 @@ import logging
 from pathlib import Path
 import pickle
 
-from app.clients.geomet_client import GeoMetClient, GeoMetClientError
 from app.clients.nager_date_client import NagerDateClient, NagerDateClientError
+from app.clients.weather_client import WeatherClientError
 from app.core.logging import summarize_status
 from app.pipelines.forecasting.feature_preparation import prepare_forecast_features
 from app.pipelines.forecasting.hourly_demand_pipeline import HourlyDemandPipeline, TrainedHourlyDemandArtifact
@@ -35,11 +35,11 @@ def _ensure_utc(value: datetime) -> datetime:
     return value.astimezone(timezone.utc)
 
 
-def _fetch_historical_weather(geomet_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
-    if hasattr(geomet_client, "fetch_historical_hourly_conditions"):
-        return list(geomet_client.fetch_historical_hourly_conditions(start, end))
-    if hasattr(geomet_client, "fetch_hourly_conditions"):
-        return list(geomet_client.fetch_hourly_conditions(start, end))
+def _fetch_historical_weather(weather_client: object, start: datetime, end: datetime) -> list[dict[str, object]]:
+    if hasattr(weather_client, "fetch_historical_hourly_conditions"):
+        return list(weather_client.fetch_historical_hourly_conditions(start, end))
+    if hasattr(weather_client, "fetch_hourly_conditions"):
+        return list(weather_client.fetch_hourly_conditions(start, end))
     return []
 
 
@@ -47,7 +47,7 @@ def _fetch_historical_weather(geomet_client: object, start: datetime, end: datet
 class ForecastTrainingService:
     cleaned_dataset_repository: CleanedDatasetRepository
     forecast_model_repository: ForecastModelRepository
-    geomet_client: GeoMetClient
+    geomet_client: object
     nager_date_client: NagerDateClient
     settings: object
     logger: logging.Logger | None = None
@@ -82,6 +82,7 @@ class ForecastTrainingService:
         run = self.forecast_model_repository.get_run(forecast_model_run_id)
         if run is None:
             raise ValueError("Forecast model run not found")
+        run_id = run.forecast_model_run_id
 
         training_window_start = _ensure_utc(run.training_window_start)
         training_window_end = _ensure_utc(run.training_window_end)
@@ -166,7 +167,7 @@ class ForecastTrainingService:
             )
             print(
                 "[debug][forecast] training artifact stored "
-                f"run_id={run.forecast_model_run_id} "
+                f"run_id={run_id} "
                 f"artifact_id={stored_artifact.forecast_model_artifact_id} "
                 f"path={artifact_path}"
             )
@@ -179,38 +180,41 @@ class ForecastTrainingService:
                 updated_by_run_id=run.forecast_model_run_id,
                 geography_scope=artifact.geography_scope,
             )
-        except (GeoMetClientError, NagerDateClientError) as exc:
+        except (WeatherClientError, NagerDateClientError) as exc:
+            self._rollback_repository_session()
             print(
                 "[debug][forecast] training fail "
-                f"run_id={run.forecast_model_run_id} reason=engine_failure detail={exc}"
+                f"run_id={run_id} reason=engine_failure detail={exc}"
             )
-            self._log("forecast_model.failed", run_id=run.forecast_model_run_id, result_type="engine_failure")
+            self._log("forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="engine_failure",
                 failure_reason=str(exc),
                 summary="forecast model training failed",
             )
         except (OSError, pickle.PickleError, ForecastModelStorageError) as exc:
+            self._rollback_repository_session()
             print(
                 "[debug][forecast] training fail "
-                f"run_id={run.forecast_model_run_id} reason=storage_failure detail={exc}"
+                f"run_id={run_id} reason=storage_failure detail={exc}"
             )
-            self._log("forecast_model.failed", run_id=run.forecast_model_run_id, result_type="storage_failure")
+            self._log("forecast_model.failed", run_id=run_id, result_type="storage_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="storage_failure",
                 failure_reason=str(exc),
                 summary="forecast model storage failed",
             )
         except Exception as exc:
+            self._rollback_repository_session()
             print(
                 "[debug][forecast] training fail "
-                f"run_id={run.forecast_model_run_id} reason=engine_failure detail={exc}"
+                f"run_id={run_id} reason=engine_failure detail={exc}"
             )
-            self._log("forecast_model.failed", run_id=run.forecast_model_run_id, result_type="engine_failure")
+            self._log("forecast_model.failed", run_id=run_id, result_type="engine_failure")
             return self.forecast_model_repository.finalize_failed(
-                run.forecast_model_run_id,
+                run_id,
                 result_type="engine_failure",
                 failure_reason=str(exc),
                 summary="forecast model training failed",
@@ -218,13 +222,13 @@ class ForecastTrainingService:
 
         print(
             "[debug][forecast] training end "
-            f"run_id={run.forecast_model_run_id} "
+            f"run_id={run_id} "
             f"artifact_id={stored_artifact.forecast_model_artifact_id} "
             f"artifact_path={stored_artifact.artifact_path}"
         )
-        self._log("forecast_model.trained", run_id=run.forecast_model_run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
+        self._log("forecast_model.trained", run_id=run_id, artifact_id=stored_artifact.forecast_model_artifact_id)
         return self.forecast_model_repository.finalize_trained(
-            run.forecast_model_run_id,
+            run_id,
             forecast_model_artifact_id=stored_artifact.forecast_model_artifact_id,
             geography_scope=artifact.geography_scope,
             summary="forecast model trained and stored",
@@ -262,6 +266,11 @@ class ForecastTrainingService:
     def _store_artifact(self, artifact: TrainedHourlyDemandArtifact, artifact_path: Path) -> None:
         with artifact_path.open("wb") as handle:
             pickle.dump(artifact, handle)
+
+    def _rollback_repository_session(self) -> None:
+        session = getattr(self.forecast_model_repository, "session", None)
+        if session is not None:
+            session.rollback()
 
     def _log(self, message: str, **fields: object) -> None:
         self.logger.info("%s", summarize_status(message, **fields))

@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from app.clients.weather_client import get_weather_enrichment_source
 from app.models import ForecastRun
 
 
@@ -47,7 +48,7 @@ class ForecastRunRepository:
         run.forecast_version_id = forecast_version_id
         run.geography_scope = geography_scope
         run.summary = summary
-        run.weather_enrichment_source = "msc_geomet"
+        run.weather_enrichment_source = get_weather_enrichment_source()
         run.holiday_enrichment_source = "nager_date_canada"
         run.completed_at = datetime.utcnow()
         self.session.flush()

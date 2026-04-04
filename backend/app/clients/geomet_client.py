@@ -6,10 +6,11 @@ from typing import Any, Protocol
 
 import httpx
 
+from app.clients.weather_client import WeatherClientError
 from app.core.config import get_settings
 
 
-class GeoMetClientError(RuntimeError):
+class GeoMetClientError(WeatherClientError):
     pass
 
 

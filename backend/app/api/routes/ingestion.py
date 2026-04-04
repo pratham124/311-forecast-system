@@ -48,11 +48,12 @@ def trigger_ingestion(
 
     def execute() -> None:
         background_session = get_session_factory()()
+        logger = logging.getLogger("ingestion")
         try:
             background_pipeline = IngestionPipeline(
                 background_session,
                 client,
-                IngestionLoggingService(logging.getLogger("ingestion")),
+                IngestionLoggingService(logger),
             )
             result = background_pipeline.run(
                 trigger_type="on_demand",
@@ -63,7 +64,23 @@ def trigger_ingestion(
             )
             background_session.commit()
             if result.status == "success" and result.result_type == "new_data":
+                logger.info("ingestion.follow_on.launch.started run_id=%s", run_id)
                 launch_ingestion_follow_on_jobs()
+                logger.info("ingestion.follow_on.launch.completed run_id=%s", run_id)
+        except Exception as exc:
+            logger.exception("ingestion.background_task.failed run_id=%s", run_id)
+            try:
+                background_session.rollback()
+                failure_pipeline = IngestionPipeline(
+                    background_session,
+                    client,
+                    IngestionLoggingService(logger),
+                )
+                failure_pipeline.fail_unexpected_run(run_id, str(exc), previous_marker)
+                background_session.commit()
+            except Exception:
+                background_session.rollback()
+                logger.exception("ingestion.background_task.fail_finalize_failed run_id=%s", run_id)
         finally:
             background_session.close()
 

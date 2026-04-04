@@ -13,6 +13,7 @@ import pytest
 from app.api.routes import forecasts as forecast_routes
 from app.clients.geomet_client import GeoMetClient, GeoMetClientError, GeoMetHttpTransport
 from app.clients.nager_date_client import NagerDateClient, NagerDateClientError, NagerDateHttpTransport
+from app.clients.open_meteo_client import OpenMeteoClient
 from app.main import create_app
 from app import main as main_module
 from app.models import CleanedCurrentRecord, CurrentDatasetMarker, DatasetRecord, DatasetVersion, ForecastRun, ForecastVersion
@@ -28,7 +29,7 @@ from app.services.forecast_service import ForecastService
 
 @pytest.mark.unit
 def test_forecast_route_helpers_and_invalid_payload(session) -> None:
-    assert isinstance(forecast_routes.get_geomet_client(), GeoMetClient)
+    assert isinstance(forecast_routes.get_weather_client(), OpenMeteoClient)
     assert isinstance(forecast_routes.get_nager_date_client(), NagerDateClient)
 
     with pytest.raises(HTTPException) as exc:
