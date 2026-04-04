@@ -6,9 +6,16 @@ from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 
+from app.clients.nager_date_client import NagerDateClientError
+from app.clients.weather_client import WeatherClientError
 from app.pipelines.ingestion.approved_pipeline import ApprovedPipeline
 from app.pipelines.ingestion.blocked_outcome_pipeline import BlockedOutcomePipeline
 from app.pipelines.ingestion.rejection_pipeline import RejectionPipeline
+from app.pipelines.ingestion.validation_pipeline import (
+    ValidationPipeline,
+    _ApprovalHolidayClient,
+    _ApprovalWeatherClient,
+)
 from app.services.activation_guard_service import ActivationGuardService
 from app.services.approval_status_service import ApprovalStatusService
 from app.services.candidate_dataset_service import CandidateDatasetService
@@ -443,3 +450,50 @@ def test_uc02_pipelines_call_repositories_with_expected_payloads():
     rejection.reject("validation-2", "bad schema")
     assert rejection_calls[0][1]["status"] == "rejected"
     assert rejection_calls[0][1]["failure_stage"] == "schema_validation"
+
+
+def test_validation_pipeline_approval_clients_cover_fallback_paths(session, monkeypatch: pytest.MonkeyPatch):
+    class WeatherMissingHistorical:
+        def fetch_hourly_conditions(self, start, end):
+            return [{"timestamp": "fallback"}]
+
+    class WeatherFailure:
+        def fetch_hourly_conditions(self, start, end):
+            raise WeatherClientError("weather boom")
+
+    class HolidayFailure:
+        def fetch_holidays(self, year, country_code="CA"):
+            raise NagerDateClientError("holiday boom")
+
+    weather_client = _ApprovalWeatherClient(WeatherMissingHistorical(), RepoStub(warning=lambda *args, **kwargs: None))
+    assert weather_client.fetch_historical_hourly_conditions("start", "end") == [{"timestamp": "fallback"}]
+    assert weather_client.fetch_hourly_conditions("start", "end") == [{"timestamp": "fallback"}]
+    assert _ApprovalWeatherClient(object(), RepoStub(warning=lambda *args, **kwargs: None)).fetch_hourly_conditions("start", "end") == []
+
+    weather_logs: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    failing_weather_client = _ApprovalWeatherClient(
+        WeatherFailure(),
+        RepoStub(warning=lambda *args, **kwargs: weather_logs.append((args, kwargs))),
+    )
+    assert failing_weather_client.fetch_hourly_conditions("start", "end") == []
+    assert "approval.follow_on.weather_fallback" in str(weather_logs[0][0][0])
+
+    holiday_logs: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    holiday_client = _ApprovalHolidayClient(
+        HolidayFailure(),
+        RepoStub(warning=lambda *args, **kwargs: holiday_logs.append((args, kwargs))),
+    )
+    assert holiday_client.fetch_holidays(2026) == []
+    assert "approval.follow_on.holiday_fallback" in str(holiday_logs[0][0][0])
+
+    monkeypatch.setattr(
+        "app.pipelines.ingestion.validation_pipeline.build_weather_client",
+        lambda: WeatherMissingHistorical(),
+    )
+    monkeypatch.setattr(
+        "app.pipelines.ingestion.validation_pipeline.NagerDateClient",
+        lambda: RepoStub(fetch_holidays=lambda year, country_code="CA": []),
+    )
+    pipeline = ValidationPipeline(session)
+    assert isinstance(pipeline.forecast_training_service.geomet_client, _ApprovalWeatherClient)
+    assert isinstance(pipeline.forecast_training_service.nager_date_client, _ApprovalHolidayClient)
