@@ -52,6 +52,12 @@ from app.models.demand_comparison_models import (
     DemandComparisonResult,
     DemandComparisonSeriesPoint,
 )
+from app.models.public_forecast_portal import (
+    PublicForecastDisplayEvent,
+    PublicForecastPortalRequest,
+    PublicForecastSanitizationOutcome,
+    PublicForecastVisualizationPayload,
+)
 
 __all__ = [
     "CandidateDataset",
@@ -87,6 +93,10 @@ __all__ = [
     "HistoricalDemandAnalysisResult",
     "HistoricalDemandSummaryPoint",
     "MetricComparisonValue",
+    "PublicForecastDisplayEvent",
+    "PublicForecastPortalRequest",
+    "PublicForecastSanitizationOutcome",
+    "PublicForecastVisualizationPayload",
     "ReviewNeededRecord",
     "SuccessfulPullCursor",
     "UserAccount",

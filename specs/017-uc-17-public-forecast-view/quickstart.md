@@ -56,6 +56,14 @@ Map implementation and tests directly to [UC-17](/Users/sahmed/Documents/311-for
 - Contract tests for [public-forecast-api.yaml](/Users/sahmed/Documents/311-forecast-system/specs/017-uc-17-public-forecast-view/contracts/public-forecast-api.yaml)
 - Frontend interaction tests for portal load, understandable summary display, incomplete-coverage messaging, missing-data state, sanitized display, and render-failure handling
 
+## Verification Steps
+
+1. Open the public route and confirm the page shows a loading state before data arrives.
+2. Verify an `available` response renders service-category cards, forecast-window text, and a publication timestamp.
+3. Verify a sanitized response shows the sanitization summary and an explicit incomplete-coverage notice instead of inventing missing categories.
+4. Verify an `unavailable` response shows a clear public message and no category summaries.
+5. Force a render failure and confirm the error state replaces the public view while a `render_failed` event is submitted for the same `publicForecastRequestId`.
+
 ## Exit Conditions
 
 Implementation is ready for task breakdown when:

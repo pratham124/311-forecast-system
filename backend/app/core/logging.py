@@ -95,3 +95,15 @@ def summarize_historical_demand_no_data(event: str, **fields: Any) -> dict[str, 
 
 def summarize_historical_demand_failure(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_historical_demand_event(event, outcome="failure", **fields)
+
+
+def summarize_public_forecast_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_public_forecast_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_public_forecast_event(event, outcome="success", **fields)
+
+
+def summarize_public_forecast_error(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_public_forecast_event(event, outcome="error", **fields)

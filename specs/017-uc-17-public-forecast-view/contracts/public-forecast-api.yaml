@@ -29,6 +29,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicForecastView'
+              examples:
+                available:
+                  value:
+                    publicForecastRequestId: 7d8fd08f-4601-4812-9f9c-1473028eb4f2
+                    status: available
+                    forecastWindowLabel: 2026-03-20 to 2026-03-21
+                    publishedAt: '2026-03-20T00:00:00Z'
+                    coverageStatus: complete
+                    sanitizationStatus: passed_as_is
+                    categorySummaries:
+                      - serviceCategory: Roads
+                        forecastDemandValue: 22
+                        demandLevelSummary: Moderate demand expected
+                incomplete:
+                  value:
+                    publicForecastRequestId: 41c0923a-f096-46ef-9ea9-0015b1d3421a
+                    status: available
+                    forecastWindowLabel: 2026-03-20 to 2026-03-21
+                    publishedAt: '2026-03-20T00:00:00Z'
+                    coverageStatus: incomplete
+                    coverageMessage: Some categories are not shown in this public forecast: Transit.
+                    sanitizationStatus: sanitized
+                    sanitizationSummary: Removed 1 restricted forecast detail records before publication.
+                    categorySummaries:
+                      - serviceCategory: Roads
+                        forecastDemandValue: 22
+                        demandLevelSummary: Moderate demand expected
+                unavailable:
+                  value:
+                    publicForecastRequestId: a350ecf3-c630-45b2-bf6a-d3182a25e913
+                    status: unavailable
+                    statusMessage: No approved public forecast is currently available.
+                error:
+                  value:
+                    publicForecastRequestId: 01163a07-c2bd-45d4-bcc6-251102dfc728
+                    status: error
+                    statusMessage: The public forecast is temporarily unavailable.
   /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events:
     post:
       summary: Record the final client display outcome for an anonymous public forecast request
@@ -51,6 +88,11 @@ paths:
       responses:
         '202':
           description: Display outcome accepted for processing and persistence.
+          content:
+            application/json:
+              examples:
+                rendered:
+                  value: {}
         '404':
           description: Public forecast request was not found.
         '422':

@@ -42,6 +42,10 @@ vi.mock('./pages/HistoricalDemandPage', () => ({
   HistoricalDemandPage: () => <div>Historical demand route content</div>,
 }));
 
+vi.mock('./pages/PublicForecastPage', () => ({
+  PublicForecastPage: () => <div aria-label="public forecast page">Public forecast route content</div>,
+}));
+
 function renderApp(initialEntries: string[] = ['/']) {
   return render(
     <MemoryRouter initialEntries={initialEntries}>
@@ -67,7 +71,7 @@ describe('App', () => {
     renderApp();
     expect(await screen.findByRole('heading', { name: /sign in to view internal forecasts/i })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^sign in$/i })).toHaveLength(2);
-    expect(screen.getByRole('button', { name: /view as guest/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /view public forecast/i })).toBeInTheDocument();
   });
 
   it('signs in and opens the internal dashboard route', async () => {
@@ -432,11 +436,8 @@ describe('App', () => {
     renderApp();
     await screen.findByRole('heading', { name: /sign in to view internal forecasts/i });
 
-    await user.click(screen.getByRole('button', { name: /view as guest/i }));
-    expect(await screen.findByLabelText(/guest placeholder page/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /back/i }));
-    expect(await screen.findByRole('button', { name: /view as guest/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /view public forecast/i }));
+    expect(await screen.findByLabelText(/public forecast page/i)).toBeInTheDocument();
   });
 
   it('redirects unauthorized app routes back to entry', async () => {
