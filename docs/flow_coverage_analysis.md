@@ -84,3 +84,16 @@ Overall, the implementation covers all flows from the use case.
 8. Acceptance Scenario 8 (Required historical data or forecast outputs unavailable preserves previous valid evaluation) -> backend/tests/integration/test_evaluation_failures.py, backend/tests/contract/test_evaluation_api.py
 9. Acceptance Scenario 9 (Baseline method failure does not publish new official evaluation) -> backend/tests/integration/test_evaluation_failures.py
 10. Acceptance Scenario 10 (Storage failure preserves previous official evaluation) -> backend/tests/integration/test_evaluation_failures.py
+
+## Use Case 17
+
+Overall, the implementation covers all flows from the use case.
+
+1. Acceptance Scenario 1 (Public forecast portal loads) -> frontend/tests/public-forecast-success.test.tsx
+2. Acceptance Scenario 2 (System retrieves approved forecast demand data by service category) -> backend/tests/contract/test_public_forecast_api.py, backend/tests/integration/test_public_forecast_success.py
+3. Acceptance Scenario 3 (System prepares data for public visualization) -> backend/tests/unit/test_public_forecast_service.py, backend/tests/integration/test_public_forecast_success.py
+4. Acceptance Scenario 4 (Charts/summaries render showing expected demand levels by category) -> frontend/tests/public-forecast-success.test.tsx, backend/tests/contract/test_public_forecast_api.py
+5. Acceptance Scenario 5 (Successful public display is logged) -> backend/tests/integration/test_public_forecast_success.py, frontend/tests/public-forecast-success.test.tsx
+6. Acceptance Scenario 6 (Forecast data unavailable logs missing data and displays error message) -> backend/tests/integration/test_public_forecast_failures.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-error-states.test.tsx
+7. Acceptance Scenario 7 (Public-safety filtering fails, system sanitizes data and displays safe summary) -> backend/tests/integration/test_public_forecast_sanitized.py, backend/tests/unit/test_public_forecast_sanitization.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-sanitized.test.tsx
+8. Acceptance Scenario 8 (Visualization rendering error logs failure and displays error state) -> backend/tests/integration/test_public_forecast_failures.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-error-states.test.tsx

@@ -30,9 +30,9 @@ const IngestionPage = lazy(async () => {
   const module = await import('./pages/IngestionPage');
   return { default: module.IngestionPage };
 });
-const GuestPlaceholderPage = lazy(async () => {
-  const module = await import('./pages/GuestPlaceholderPage');
-  return { default: module.GuestPlaceholderPage };
+const PublicForecastPage = lazy(async () => {
+  const module = await import('./pages/PublicForecastPage');
+  return { default: module.PublicForecastPage };
 });
 
 function RouteFallback() {
@@ -201,7 +201,7 @@ function AppShell() {
           path="/"
           element={session ? <Navigate to="/app/forecasts" replace /> : <EntryPage onAuthenticate={handleAuthenticate} onGuestView={() => navigate('/guest')} onModeChange={() => setAuthError(null)} isSubmitting={isSubmitting} errorMessage={authError} />}
         />
-        <Route path="/guest" element={<GuestPlaceholderPage onBack={() => navigate('/')} />} />
+        <Route path="/guest" element={<PublicForecastPage />} />
         <Route path="/app" element={session ? <InternalLayout session={session} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
           <Route index element={<Navigate to="forecasts" replace />} />
           <Route path="forecasts" element={<ForecastVisualizationPage />} />

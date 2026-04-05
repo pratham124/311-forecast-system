@@ -36,7 +36,7 @@ export function EntryPage({ onAuthenticate, onGuestView, onModeChange, isSubmitt
         <section className="space-y-6">
           <p className="text-xs uppercase tracking-[0.24em] text-accent">311 Forecast System</p>
           <h1 className="max-w-3xl text-5xl font-semibold leading-[0.92] text-ink sm:text-6xl">
-            Sign in to view internal forecasts, or continue as a guest.
+            Sign in to view internal forecasts, or continue to the public forecast.
           </h1>
           <p className="max-w-2xl text-base leading-7 text-muted sm:text-lg">
             Use your approved email to sign in. If your email has already been approved, you can create your account here.
@@ -106,7 +106,7 @@ export function EntryPage({ onAuthenticate, onGuestView, onModeChange, isSubmitt
               onClick={onGuestView}
               className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
             >
-              View as guest
+              View public forecast
             </button>
           </CardContent>
         </Card>

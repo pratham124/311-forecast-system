@@ -17,9 +17,9 @@
 
 **Purpose**: Create the planned backend, frontend, and test scaffolding for the anonymous public forecast portal.
 
-- [ ] T001 Create the planned backend, frontend, and test directories in `backend/app/api/routes/`, `backend/app/schemas/`, `backend/app/repositories/`, `backend/app/services/`, `backend/app/models/`, `backend/app/core/`, `frontend/src/api/`, `frontend/src/features/public-forecast/components/`, `frontend/src/features/public-forecast/hooks/`, `frontend/src/pages/`, `frontend/src/types/`, `backend/tests/contract/`, `backend/tests/integration/`, `backend/tests/unit/`, and `frontend/tests/`
-- [ ] T002 Create backend module scaffolding for the public forecast portal in `backend/app/api/routes/public_forecast.py`, `backend/app/schemas/public_forecast.py`, `backend/app/repositories/public_forecast_repository.py`, `backend/app/services/public_forecast_service.py`, and `backend/app/models/public_forecast_portal.py`
-- [ ] T003 [P] Create frontend module scaffolding for anonymous public forecast retrieval and display in `frontend/src/api/publicForecastApi.ts`, `frontend/src/types/publicForecast.ts`, `frontend/src/features/public-forecast/hooks/usePublicForecast.ts`, and `frontend/src/pages/PublicForecastPage.tsx`
+- [X] T001 Create the planned backend, frontend, and test directories in `backend/app/api/routes/`, `backend/app/schemas/`, `backend/app/repositories/`, `backend/app/services/`, `backend/app/models/`, `backend/app/core/`, `frontend/src/api/`, `frontend/src/features/public-forecast/components/`, `frontend/src/features/public-forecast/hooks/`, `frontend/src/pages/`, `frontend/src/types/`, `backend/tests/contract/`, `backend/tests/integration/`, `backend/tests/unit/`, and `frontend/tests/`
+- [X] T002 Create backend module scaffolding for the public forecast portal in `backend/app/api/routes/public_forecast.py`, `backend/app/schemas/public_forecast.py`, `backend/app/repositories/public_forecast_repository.py`, `backend/app/services/public_forecast_service.py`, and `backend/app/models/public_forecast_portal.py`
+- [X] T003 [P] Create frontend module scaffolding for anonymous public forecast retrieval and display in `frontend/src/api/publicForecastApi.ts`, `frontend/src/types/publicForecast.ts`, `frontend/src/features/public-forecast/hooks/usePublicForecast.ts`, and `frontend/src/pages/PublicForecastPage.tsx`
 
 ---
 
@@ -29,15 +29,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create the UC-17 persistence models and canonical vocabularies for `PublicForecastPortalRequest`, `PublicForecastSanitizationOutcome`, `PublicForecastVisualizationPayload`, and `PublicForecastDisplayEvent` in `backend/app/models/public_forecast_portal.py`
-- [ ] T005 [P] Create the UC-17 migration for portal requests, sanitization outcomes, payload records, and display events in `backend/app/models/migrations/017_public_forecast_portal.py`
-- [ ] T006 [P] Implement repository methods for approved public-forecast lookup, request creation, sanitization persistence, payload persistence, and display-event writes in `backend/app/repositories/public_forecast_repository.py`
-- [ ] T007 [P] Define typed request and response schemas for `PublicForecastView` and display-event reporting in `backend/app/schemas/public_forecast.py`
-- [ ] T008 [P] Register anonymous public forecast routes in `backend/app/api/routes/__init__.py` and implement any public-route dependency helpers in `backend/app/api/routes/public_forecast.py`
-- [ ] T009 [P] Implement structured logging helpers for request start, retrieval success, sanitization outcome, incomplete coverage, missing data, and render failure in `backend/app/core/logging.py`
-- [ ] T010 [P] Implement backend helpers for approved-version resolution, public-safety field filtering, and coverage-status derivation in `backend/app/services/public_forecast_source_service.py` and `backend/app/services/public_forecast_sanitization_service.py`
-- [ ] T011 [P] Create frontend typed models and API client support for anonymous `GET` and display-event `POST` calls in `frontend/src/types/publicForecast.ts` and `frontend/src/api/publicForecastApi.ts`
-- [ ] T012 Implement the shared public forecast orchestration service skeleton and response assembly entrypoint in `backend/app/services/public_forecast_service.py`
+- [X] T004 Create the UC-17 persistence models and canonical vocabularies for `PublicForecastPortalRequest`, `PublicForecastSanitizationOutcome`, `PublicForecastVisualizationPayload`, and `PublicForecastDisplayEvent` in `backend/app/models/public_forecast_portal.py`
+- [X] T005 [P] Create the UC-17 migration for portal requests, sanitization outcomes, payload records, and display events in `backend/app/models/migrations/017_public_forecast_portal.py`
+- [X] T006 [P] Implement repository methods for approved public-forecast lookup, request creation, sanitization persistence, payload persistence, and display-event writes in `backend/app/repositories/public_forecast_repository.py`
+- [X] T007 [P] Define typed request and response schemas for `PublicForecastView` and display-event reporting in `backend/app/schemas/public_forecast.py`
+- [X] T008 [P] Register anonymous public forecast routes in `backend/app/api/routes/__init__.py` and implement any public-route dependency helpers in `backend/app/api/routes/public_forecast.py`
+- [X] T009 [P] Implement structured logging helpers for request start, retrieval success, sanitization outcome, incomplete coverage, missing data, and render failure in `backend/app/core/logging.py`
+- [X] T010 [P] Implement backend helpers for approved-version resolution, public-safety field filtering, and coverage-status derivation in `backend/app/services/public_forecast_source_service.py` and `backend/app/services/public_forecast_sanitization_service.py`
+- [X] T011 [P] Create frontend typed models and API client support for anonymous `GET` and display-event `POST` calls in `frontend/src/types/publicForecast.ts` and `frontend/src/api/publicForecastApi.ts`
+- [X] T012 Implement the shared public forecast orchestration service skeleton and response assembly entrypoint in `backend/app/services/public_forecast_service.py`
 
 **Checkpoint**: Shared persistence, source resolution, sanitization, logging, and typed contracts are ready. User story implementation can begin.
 
@@ -51,19 +51,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Add contract tests for anonymous `GET /api/v1/public/forecast-categories/current` available responses and schema shape in `backend/tests/contract/test_public_forecast_api.py`
-- [ ] T014 [P] [US1] Add backend unit tests for category-summary normalization, approved-version consistency, and available-status view assembly in `backend/tests/unit/test_public_forecast_service.py`
-- [ ] T015 [P] [US1] Add integration tests for successful approved public forecast retrieval, payload persistence, and request completion logging in `backend/tests/integration/test_public_forecast_success.py`
-- [ ] T016 [P] [US1] Add frontend interaction tests for public page load, loading state, category summary rendering, and render-success reporting in `frontend/tests/public-forecast-success.test.tsx`
+- [X] T013 [P] [US1] Add contract tests for anonymous `GET /api/v1/public/forecast-categories/current` available responses and schema shape in `backend/tests/contract/test_public_forecast_api.py`
+- [X] T014 [P] [US1] Add backend unit tests for category-summary normalization, approved-version consistency, and available-status view assembly in `backend/tests/unit/test_public_forecast_service.py`
+- [X] T015 [P] [US1] Add integration tests for successful approved public forecast retrieval, payload persistence, and request completion logging in `backend/tests/integration/test_public_forecast_success.py`
+- [X] T016 [P] [US1] Add frontend interaction tests for public page load, loading state, category summary rendering, and render-success reporting in `frontend/tests/public-forecast-success.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implement approved public-safe forecast selection and immutable request-scoped version binding in `backend/app/services/public_forecast_source_service.py`
-- [ ] T018 [P] [US1] Implement category-level public payload normalization with forecast window and publication metadata in `backend/app/services/public_forecast_service.py`
-- [ ] T019 [US1] Implement the anonymous `GET /api/v1/public/forecast-categories/current` endpoint with thin request handling and normalized `PublicForecastView` responses in `backend/app/api/routes/public_forecast.py`
-- [ ] T020 [P] [US1] Implement the public forecast page content view for category summaries, forecast window labeling, and publication timestamp display in `frontend/src/features/public-forecast/components/PublicForecastView.tsx`
-- [ ] T021 [P] [US1] Implement the public forecast loading-state UI in `frontend/src/features/public-forecast/components/PublicForecastLoadingState.tsx`
-- [ ] T022 [US1] Implement the public forecast data hook and page composition for anonymous loading, successful-response handling, and render-success submission in `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/pages/PublicForecastPage.tsx`
+- [X] T017 [P] [US1] Implement approved public-safe forecast selection and immutable request-scoped version binding in `backend/app/services/public_forecast_source_service.py`
+- [X] T018 [P] [US1] Implement category-level public payload normalization with forecast window and publication metadata in `backend/app/services/public_forecast_service.py`
+- [X] T019 [US1] Implement the anonymous `GET /api/v1/public/forecast-categories/current` endpoint with thin request handling and normalized `PublicForecastView` responses in `backend/app/api/routes/public_forecast.py`
+- [X] T020 [P] [US1] Implement the public forecast page content view for category summaries, forecast window labeling, and publication timestamp display in `frontend/src/features/public-forecast/components/PublicForecastView.tsx`
+- [X] T021 [P] [US1] Implement the public forecast loading-state UI in `frontend/src/features/public-forecast/components/PublicForecastLoadingState.tsx`
+- [X] T022 [US1] Implement the public forecast data hook and page composition for anonymous loading, successful-response handling, and render-success submission in `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/pages/PublicForecastPage.tsx`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -77,17 +77,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Extend contract tests for sanitized available responses and incomplete-coverage payload requirements in `backend/tests/contract/test_public_forecast_api.py`
-- [ ] T024 [P] [US2] Add backend unit tests for sanitization-status assignment, removed-detail counting, and incomplete-coverage message derivation in `backend/tests/unit/test_public_forecast_sanitization.py`
-- [ ] T025 [P] [US2] Add integration tests for restricted-detail sanitization and partial-category-coverage responses with persisted sanitization outcomes in `backend/tests/integration/test_public_forecast_sanitized.py`
-- [ ] T026 [P] [US2] Add frontend interaction tests for sanitized summary rendering and incomplete-coverage messaging in `frontend/tests/public-forecast-sanitized.test.tsx`
+- [X] T023 [P] [US2] Extend contract tests for sanitized available responses and incomplete-coverage payload requirements in `backend/tests/contract/test_public_forecast_api.py`
+- [X] T024 [P] [US2] Add backend unit tests for sanitization-status assignment, removed-detail counting, and incomplete-coverage message derivation in `backend/tests/unit/test_public_forecast_sanitization.py`
+- [X] T025 [P] [US2] Add integration tests for restricted-detail sanitization and partial-category-coverage responses with persisted sanitization outcomes in `backend/tests/integration/test_public_forecast_sanitized.py`
+- [X] T026 [P] [US2] Add frontend interaction tests for sanitized summary rendering and incomplete-coverage messaging in `frontend/tests/public-forecast-sanitized.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Implement restricted-detail filtering, sanitization outcome persistence, and blocked-field exclusion in `backend/app/services/public_forecast_sanitization_service.py` and `backend/app/services/public_forecast_service.py`
-- [ ] T028 [P] [US2] Implement incomplete-category-coverage detection and coverage-message persistence in `backend/app/services/public_forecast_service.py` and `backend/app/repositories/public_forecast_repository.py`
-- [ ] T029 [P] [US2] Implement UI treatment for sanitization summaries and explicit incomplete-coverage messaging in `frontend/src/features/public-forecast/components/PublicForecastCoverageNotice.tsx`
-- [ ] T030 [US2] Integrate sanitized-response handling and coverage notice rendering into `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/features/public-forecast/components/PublicForecastView.tsx`
+- [X] T027 [US2] Implement restricted-detail filtering, sanitization outcome persistence, and blocked-field exclusion in `backend/app/services/public_forecast_sanitization_service.py` and `backend/app/services/public_forecast_service.py`
+- [X] T028 [P] [US2] Implement incomplete-category-coverage detection and coverage-message persistence in `backend/app/services/public_forecast_service.py` and `backend/app/repositories/public_forecast_repository.py`
+- [X] T029 [P] [US2] Implement UI treatment for sanitization summaries and explicit incomplete-coverage messaging in `frontend/src/features/public-forecast/components/PublicForecastCoverageNotice.tsx`
+- [X] T030 [US2] Integrate sanitized-response handling and coverage notice rendering into `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/features/public-forecast/components/PublicForecastView.tsx`
 
 **Checkpoint**: User Stories 1 and 2 are independently functional and testable.
 
@@ -101,18 +101,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Extend contract tests for `unavailable` and `error` `PublicForecastView` responses plus `POST /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events` success, `404`, and `422` flows in `backend/tests/contract/test_public_forecast_api.py`
-- [ ] T032 [P] [US3] Add backend unit tests for missing-data status mapping, preparation-failure escalation, and display-event validation in `backend/tests/unit/test_public_forecast_error_states.py`
-- [ ] T033 [P] [US3] Add integration tests for unavailable approved forecast data, retrieval/preparation failures, and persisted display-event outcomes in `backend/tests/integration/test_public_forecast_failures.py`
-- [ ] T034 [P] [US3] Add frontend interaction tests for unavailable-state rendering, error-state rendering, and render-failure reporting in `frontend/tests/public-forecast-error-states.test.tsx`
+- [X] T031 [P] [US3] Extend contract tests for `unavailable` and `error` `PublicForecastView` responses plus `POST /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events` success, `404`, and `422` flows in `backend/tests/contract/test_public_forecast_api.py`
+- [X] T032 [P] [US3] Add backend unit tests for missing-data status mapping, preparation-failure escalation, and display-event validation in `backend/tests/unit/test_public_forecast_error_states.py`
+- [X] T033 [P] [US3] Add integration tests for unavailable approved forecast data, retrieval/preparation failures, and persisted display-event outcomes in `backend/tests/integration/test_public_forecast_failures.py`
+- [X] T034 [P] [US3] Add frontend interaction tests for unavailable-state rendering, error-state rendering, and render-failure reporting in `frontend/tests/public-forecast-error-states.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Implement unavailable-status and error-status response assembly, including missing-data and preparation-failure reason mapping, in `backend/app/services/public_forecast_service.py`
-- [ ] T036 [P] [US3] Persist missing-data, preparation-failure, and render-failure terminal outcomes in `backend/app/repositories/public_forecast_repository.py`
-- [ ] T037 [US3] Implement `POST /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events` in `backend/app/api/routes/public_forecast.py`
-- [ ] T038 [P] [US3] Implement explicit unavailable and error-state UI that withholds blank, partial, stale, corrupted, or unsanitized visuals in `frontend/src/features/public-forecast/components/PublicForecastErrorState.tsx`
-- [ ] T039 [US3] Integrate render-failure reporting and terminal error handling into `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/pages/PublicForecastPage.tsx`
+- [X] T035 [US3] Implement unavailable-status and error-status response assembly, including missing-data and preparation-failure reason mapping, in `backend/app/services/public_forecast_service.py`
+- [X] T036 [P] [US3] Persist missing-data, preparation-failure, and render-failure terminal outcomes in `backend/app/repositories/public_forecast_repository.py`
+- [X] T037 [US3] Implement `POST /api/v1/public/forecast-categories/{publicForecastRequestId}/display-events` in `backend/app/api/routes/public_forecast.py`
+- [X] T038 [P] [US3] Implement explicit unavailable and error-state UI that withholds blank, partial, stale, corrupted, or unsanitized visuals in `frontend/src/features/public-forecast/components/PublicForecastErrorState.tsx`
+- [X] T039 [US3] Integrate render-failure reporting and terminal error handling into `frontend/src/features/public-forecast/hooks/usePublicForecast.ts` and `frontend/src/pages/PublicForecastPage.tsx`
 
 **Checkpoint**: All user stories are independently functional and reviewable.
 
@@ -122,10 +122,10 @@
 
 **Purpose**: Finish acceptance alignment, contract consistency, and end-to-end verification across success, sanitization, coverage, and failure states.
 
-- [ ] T040 [P] Align quickstart verification steps with delivered available, sanitized, incomplete-coverage, unavailable, and render-failure behavior in `specs/017-uc-17-public-forecast-view/quickstart.md`
-- [ ] T041 [P] Align response examples and vocabulary consistency in `specs/017-uc-17-public-forecast-view/contracts/public-forecast-api.yaml`
-- [ ] T042 [P] Add correlation-id and terminal-outcome assertions across successful, sanitized, unavailable, and render-failure integration flows in `backend/tests/integration/test_public_forecast_success.py`, `backend/tests/integration/test_public_forecast_sanitized.py`, and `backend/tests/integration/test_public_forecast_failures.py`
-- [ ] T043 Run end-to-end readiness validation against [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/017-uc-17-public-forecast-view/spec.md), [UC-17.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-17.md), and [UC-17-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-17-AT.md)
+- [X] T040 [P] Align quickstart verification steps with delivered available, sanitized, incomplete-coverage, unavailable, and render-failure behavior in `specs/017-uc-17-public-forecast-view/quickstart.md`
+- [X] T041 [P] Align response examples and vocabulary consistency in `specs/017-uc-17-public-forecast-view/contracts/public-forecast-api.yaml`
+- [X] T042 [P] Add correlation-id and terminal-outcome assertions across successful, sanitized, unavailable, and render-failure integration flows in `backend/tests/integration/test_public_forecast_success.py`, `backend/tests/integration/test_public_forecast_sanitized.py`, and `backend/tests/integration/test_public_forecast_failures.py`
+- [X] T043 Run end-to-end readiness validation against [spec.md](/Users/sahmed/Documents/311-forecast-system/specs/017-uc-17-public-forecast-view/spec.md), [UC-17.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-17.md), and [UC-17-AT.md](/Users/sahmed/Documents/311-forecast-system/docs/UC-17-AT.md)
 
 ---
 
