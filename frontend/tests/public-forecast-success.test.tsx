@@ -4,6 +4,16 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PublicForecastPage } from '../src/pages/PublicForecastPage';
 
+/** Mirrors `formatPublishedAt` in PublicForecastView so assertions match any host timezone. */
+function formatPublishedAtForTest(iso: string): string {
+  return new Date(iso).toLocaleString([], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+  });
+}
+
 const availablePayload = {
   publicForecastRequestId: 'request-1',
   status: 'available',
@@ -62,7 +72,7 @@ describe('PublicForecastPage success', () => {
     expect(screen.getByRole('button', { name: /lowest demand/i })).toBeInTheDocument();
     expect(await screen.findByText('Roads')).toBeInTheDocument();
     expect(screen.getByText('Waste')).toBeInTheDocument();
-    expect(screen.getByText(/mar .* 6 pm/i)).toBeInTheDocument();
+    expect(screen.getByText(formatPublishedAtForTest(availablePayload.publishedAt))).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent)).toEqual(['Waste', 'Roads']);
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
