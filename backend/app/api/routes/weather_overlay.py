@@ -32,8 +32,8 @@ def get_weather_overlay(
 ) -> WeatherOverlayResponse:
     if time_range_end <= time_range_start:
         raise HTTPException(status_code=422, detail="timeRangeEnd must be later than timeRangeStart")
-    if weather_measure not in {None, "temperature", "snowfall"}:
-        raise HTTPException(status_code=422, detail="weatherMeasure must be one of temperature or snowfall")
+    if weather_measure not in {None, "temperature", "snowfall", "precipitation"}:
+        raise HTTPException(status_code=422, detail="weatherMeasure must be one of temperature, snowfall, or precipitation")
     service = build_weather_overlay_service()
     return service.get_overlay(
         geography_id=geography_id,

@@ -21,5 +21,8 @@ describe('WeatherOverlayControls', () => {
 
     fireEvent.change(screen.getByLabelText('Weather measure'), { target: { value: 'snowfall' } });
     expect(onMeasureChange).toHaveBeenCalledWith('snowfall');
+
+    fireEvent.change(screen.getByLabelText('Weather measure'), { target: { value: 'precipitation' } });
+    expect(onMeasureChange).toHaveBeenCalledWith('precipitation');
   });
 });

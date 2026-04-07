@@ -161,6 +161,15 @@ def test_service_record_render_event_errors_and_map_observation_branches():
     assert mapped[0].value == 2.0
     assert mapped[1].value == 0.7
 
+    mapped_precipitation = WeatherOverlayService._map_observations(
+        rows=[{"timestamp": "2026-03-20T01:30:00Z", "precipitation_mm": 1.4}],
+        weather_measure="precipitation",
+        start=start,
+        end=end,
+    )
+    assert len(mapped_precipitation) == 1
+    assert mapped_precipitation[0].value == 1.4
+
 
 def test_overlay_models_dataclass_instantiation():
     requested_at = datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc)

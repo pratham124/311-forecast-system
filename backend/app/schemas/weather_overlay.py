@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-WeatherMeasure = Literal["temperature", "snowfall"]
+WeatherMeasure = Literal["temperature", "snowfall", "precipitation"]
 OverlayStatus = Literal[
     "disabled",
     "loading",

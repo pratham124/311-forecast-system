@@ -43,6 +43,7 @@ export function WeatherOverlayControls({
         >
           <option value="temperature">Temperature</option>
           <option value="snowfall">Snowfall</option>
+          <option value="precipitation">Precipitation</option>
         </select>
       </div>
     </section>

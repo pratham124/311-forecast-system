@@ -193,7 +193,12 @@ class WeatherOverlayService:
             # Keep points inside the requested window [start, end).
             if timestamp < start or timestamp >= end:
                 continue
-            key = "temperature_c" if weather_measure == "temperature" else "snowfall_mm"
+            if weather_measure == "temperature":
+                key = "temperature_c"
+            elif weather_measure == "snowfall":
+                key = "snowfall_mm"
+            else:
+                key = "precipitation_mm"
             value = row.get(key)
             if value is None and weather_measure == "snowfall":
                 value = row.get("precipitation_mm")

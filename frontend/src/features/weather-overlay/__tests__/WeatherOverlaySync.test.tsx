@@ -24,7 +24,7 @@ describe('useWeatherOverlay sync', () => {
       timeRangeStart: string;
       timeRangeEnd: string;
       overlayEnabled: boolean;
-      weatherMeasure: 'temperature' | 'snowfall';
+      weatherMeasure: 'temperature' | 'snowfall' | 'precipitation';
       requestEnabled: boolean;
     };
 

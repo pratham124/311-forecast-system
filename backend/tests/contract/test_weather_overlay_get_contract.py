@@ -19,8 +19,8 @@ class FakeGeoMetClient:
         if self.mode == "empty":
             return []
         return [
-            {"timestamp": horizon_start, "temperature_c": 3.5, "snowfall_mm": 0.2},
-            {"timestamp": horizon_end - timedelta(hours=1), "temperature_c": 4.0, "snowfall_mm": 0.0},
+            {"timestamp": horizon_start, "temperature_c": 3.5, "snowfall_mm": 0.2, "precipitation_mm": 0.1},
+            {"timestamp": horizon_end - timedelta(hours=1), "temperature_c": 4.0, "snowfall_mm": 0.0, "precipitation_mm": 0.3},
         ]
 
 
@@ -52,6 +52,20 @@ def test_get_weather_overlay_visible_and_disabled(app_client, operational_manage
         body = response.json()
         assert body["overlayStatus"] == "visible"
         assert len(body["observations"]) == 2
+
+        precipitation = app_client.get(
+            "/api/v1/forecast-explorer/weather-overlay",
+            params={
+                "geographyId": "citywide",
+                "timeRangeStart": "2026-03-20T00:00:00Z",
+                "timeRangeEnd": "2026-03-20T02:00:00Z",
+                "weatherMeasure": "precipitation",
+            },
+            headers=operational_manager_headers,
+        )
+        assert precipitation.status_code == 200
+        assert precipitation.json()["overlayStatus"] == "visible"
+        assert precipitation.json()["observations"][0]["value"] == 0.1
 
         disabled = app_client.get(
             "/api/v1/forecast-explorer/weather-overlay",

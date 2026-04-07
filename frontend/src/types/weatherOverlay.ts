@@ -1,4 +1,4 @@
-export type WeatherMeasure = 'temperature' | 'snowfall';
+export type WeatherMeasure = 'temperature' | 'snowfall' | 'precipitation';
 export type WeatherOverlayStatus =
   | 'disabled'
   | 'loading'
