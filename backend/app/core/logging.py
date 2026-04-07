@@ -107,3 +107,15 @@ def summarize_public_forecast_success(event: str, **fields: Any) -> dict[str, An
 
 def summarize_public_forecast_error(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_public_forecast_event(event, outcome="error", **fields)
+
+
+def summarize_user_guide_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_user_guide_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_user_guide_event(event, outcome="success", **fields)
+
+
+def summarize_user_guide_error(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_user_guide_event(event, outcome="error", **fields)

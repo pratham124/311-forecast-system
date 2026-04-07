@@ -17,12 +17,12 @@
 
 **Purpose**: Create the feature scaffolding required by all user stories.
 
-- [ ] T001 Create or validate the backend application structure in `backend/app/`
-- [ ] T002 [P] Create or validate the frontend application structure in `frontend/src/`
-- [ ] T003 [P] Create the user-guide API route module in `backend/app/api/routes/user_guide.py`
-- [ ] T004 [P] Create backend schemas for user-guide contracts in `backend/app/schemas/user_guide.py`
-- [ ] T005 [P] Create frontend API client scaffolding for guide requests in `frontend/src/api/userGuide.ts`
-- [ ] T006 [P] Create the frontend feature barrel for the user guide in `frontend/src/features/user-guide/index.ts`
+- [X] T001 Create or validate the backend application structure in `backend/app/`
+- [X] T002 [P] Create or validate the frontend application structure in `frontend/src/`
+- [X] T003 [P] Create the user-guide API route module in `backend/app/api/routes/user_guide.py`
+- [X] T004 [P] Create backend schemas for user-guide contracts in `backend/app/schemas/user_guide.py`
+- [X] T005 [P] Create frontend API client scaffolding for guide requests in `frontend/src/api/userGuide.ts`
+- [X] T006 [P] Create the frontend feature barrel for the user guide in `frontend/src/features/user-guide/index.ts`
 
 ---
 
@@ -32,13 +32,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T007 Create guide access and render-outcome persistence models in `backend/app/models/user_guide.py`
-- [ ] T008 [P] Create repository methods for current guide lookup and guide event persistence in `backend/app/repositories/user_guide_repository.py`
-- [ ] T009 [P] Create backend service scaffolding for guide retrieval and outcome recording in `backend/app/services/user_guide_service.py`
-- [ ] T010 [P] Add structured logging and failure-category helpers for UC-18 in `backend/app/core/logging.py`
-- [ ] T011 [P] Add shared frontend types for guide payloads and render outcomes in `frontend/src/types/userGuide.ts`
-- [ ] T012 [P] Register authenticated user-guide routes in `backend/app/api/routes/__init__.py`
-- [ ] T013 [P] Add request/response and persistence-schema validation coverage for UC-18 models and contracts in `backend/tests/unit/test_user_guide_schema_validation.py`
+- [X] T007 Create guide access and render-outcome persistence models in `backend/app/models/user_guide.py`
+- [X] T008 [P] Create repository methods for current guide lookup and guide event persistence in `backend/app/repositories/user_guide_repository.py`
+- [X] T009 [P] Create backend service scaffolding for guide retrieval and outcome recording in `backend/app/services/user_guide_service.py`
+- [X] T010 [P] Add structured logging and failure-category helpers for UC-18 in `backend/app/core/logging.py`
+- [X] T011 [P] Add shared frontend types for guide payloads and render outcomes in `frontend/src/types/userGuide.ts`
+- [X] T012 [P] Register authenticated user-guide routes in `backend/app/api/routes/__init__.py`
+- [X] T013 [P] Add request/response and persistence-schema validation coverage for UC-18 models and contracts in `backend/tests/unit/test_user_guide_schema_validation.py`
 
 **Checkpoint**: Foundation ready. User story work can begin.
 
@@ -52,19 +52,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Add contract tests for `GET /api/v1/help/user-guide` success and auth failures in `backend/tests/contract/test_user_guide_api.py`
-- [ ] T015 [P] [US1] Add backend integration tests for guide retrieval, loading-state transition, and successful access-event logging in `backend/tests/integration/test_user_guide_open.py`
-- [ ] T016 [P] [US1] Add frontend interaction tests for opening, loading, and displaying the guide in `frontend/tests/user-guide-open.test.tsx`
-- [ ] T017 [P] [US1] Review and update UC-18 acceptance-test alignment in `docs/UC-18-AT.md`
+- [X] T014 [P] [US1] Add contract tests for `GET /api/v1/help/user-guide` success and auth failures in `backend/tests/contract/test_user_guide_api.py`
+- [X] T015 [P] [US1] Add backend integration tests for guide retrieval, loading-state transition, and successful access-event logging in `backend/tests/integration/test_user_guide_open.py`
+- [X] T016 [P] [US1] Add frontend interaction tests for opening, loading, and displaying the guide in `frontend/tests/user-guide-open.test.tsx`
+- [X] T017 [P] [US1] Review and update UC-18 acceptance-test alignment in `docs/UC-18-AT.md`
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Implement current published guide retrieval and successful access-event creation in `backend/app/services/user_guide_service.py`
-- [ ] T019 [US1] Implement `GET /api/v1/help/user-guide` with signed-in access enforcement and normalized `UserGuideView` responses in `backend/app/api/routes/user_guide.py` (depends on T018, T012)
-- [ ] T020 [P] [US1] Implement frontend query and response mapping for guide open requests in `frontend/src/api/userGuide.ts` (depends on T019)
-- [ ] T021 [P] [US1] Implement guide viewer UI for title, ordered section labels, readable body content, and metadata display in `frontend/src/features/user-guide/UserGuidePanel.tsx`
-- [ ] T022 [P] [US1] Implement the guide loading-state UI in `frontend/src/features/user-guide/UserGuideLoadingState.tsx`
-- [ ] T023 [US1] Integrate the single MVP help-entry host surface with the guide panel in `frontend/src/pages/UserGuideHostPage.tsx` (depends on T020, T021, T022)
+- [X] T018 [US1] Implement current published guide retrieval and successful access-event creation in `backend/app/services/user_guide_service.py`
+- [X] T019 [US1] Implement `GET /api/v1/help/user-guide` with signed-in access enforcement and normalized `UserGuideView` responses in `backend/app/api/routes/user_guide.py` (depends on T018, T012)
+- [X] T020 [P] [US1] Implement frontend query and response mapping for guide open requests in `frontend/src/api/userGuide.ts` (depends on T019)
+- [X] T021 [P] [US1] Implement guide viewer UI for title, ordered section labels, readable body content, and metadata display in `frontend/src/features/user-guide/UserGuidePanel.tsx`
+- [X] T022 [P] [US1] Implement the guide loading-state UI in `frontend/src/features/user-guide/UserGuideLoadingState.tsx`
+- [X] T023 [US1] Integrate the single MVP help-entry host surface with the guide panel in `frontend/src/pages/UserGuideHostPage.tsx` (depends on T020, T021, T022)
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -78,15 +78,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Extend backend integration coverage for ordered section metadata, repeat navigation stability, and section-transition timing in `backend/tests/integration/test_user_guide_navigation.py`
-- [ ] T025 [P] [US2] Add frontend interaction tests for section and page navigation in `frontend/tests/user-guide-navigation.test.tsx`
-- [ ] T029 [P] [US2] Add backend and frontend timing verification for guide open and section navigation latency in `backend/tests/integration/test_user_guide_performance.py` (depends on T026, T028)
+- [X] T024 [P] [US2] Extend backend integration coverage for ordered section metadata, repeat navigation stability, and section-transition timing in `backend/tests/integration/test_user_guide_navigation.py`
+- [X] T025 [P] [US2] Add frontend interaction tests for section and page navigation in `frontend/tests/user-guide-navigation.test.tsx`
+- [X] T029 [P] [US2] Add backend and frontend timing verification for guide open and section navigation latency in `backend/tests/integration/test_user_guide_performance.py` (depends on T026, T028)
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement ordered section and page normalization, including anchors and labels, in `backend/app/services/user_guide_service.py`
-- [ ] T027 [P] [US2] Implement section navigation UI and current-section state management in `frontend/src/features/user-guide/UserGuideNavigation.tsx`
-- [ ] T028 [US2] Connect navigation state to the guide viewer so section changes preserve readability and availability in `frontend/src/features/user-guide/UserGuidePanel.tsx` (depends on T021, T027, T026)
+- [X] T026 [US2] Implement ordered section and page normalization, including anchors and labels, in `backend/app/services/user_guide_service.py`
+- [X] T027 [P] [US2] Implement section navigation UI and current-section state management in `frontend/src/features/user-guide/UserGuideNavigation.tsx`
+- [X] T028 [US2] Connect navigation state to the guide viewer so section changes preserve readability and availability in `frontend/src/features/user-guide/UserGuidePanel.tsx` (depends on T021, T027, T026)
 
 **Checkpoint**: User Stories 1 and 2 are both independently functional and testable.
 
@@ -100,17 +100,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T030 [P] [US3] Extend contract tests for unavailable, render-event, and not-found flows in `backend/tests/contract/test_user_guide_api.py`
-- [ ] T031 [P] [US3] Add backend integration tests for retrieval-failure and render-failure event recording in `backend/tests/integration/test_user_guide_failures.py`
-- [ ] T032 [P] [US3] Add frontend interaction tests for unavailable and render-error states in `frontend/tests/user-guide-error-states.test.tsx`
+- [X] T030 [P] [US3] Extend contract tests for unavailable, render-event, and not-found flows in `backend/tests/contract/test_user_guide_api.py`
+- [X] T031 [P] [US3] Add backend integration tests for retrieval-failure and render-failure event recording in `backend/tests/integration/test_user_guide_failures.py`
+- [X] T032 [P] [US3] Add frontend interaction tests for unavailable and render-error states in `frontend/tests/user-guide-error-states.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Implement retrieval-failure and render-failure outcome handling in `backend/app/services/user_guide_service.py`
-- [ ] T034 [US3] Implement `POST /api/v1/help/user-guide/{guideAccessEventId}/render-events` in `backend/app/api/routes/user_guide.py` (depends on T033, T018, T019)
-- [ ] T035 [P] [US3] Implement frontend render-outcome reporting and failure-message mapping in `frontend/src/api/userGuide.ts` (depends on T034)
-- [ ] T036 [P] [US3] Implement explicit unavailable and error-state UI that withholds blank, stale, partial, and corrupted content in `frontend/src/features/user-guide/UserGuideErrorState.tsx`
-- [ ] T037 [US3] Integrate failure-state handling and render reporting into the guide panel flow in `frontend/src/features/user-guide/UserGuidePanel.tsx` (depends on T035, T036, T021)
+- [X] T033 [US3] Implement retrieval-failure and render-failure outcome handling in `backend/app/services/user_guide_service.py`
+- [X] T034 [US3] Implement `POST /api/v1/help/user-guide/{guideAccessEventId}/render-events` in `backend/app/api/routes/user_guide.py` (depends on T033, T018, T019)
+- [X] T035 [P] [US3] Implement frontend render-outcome reporting and failure-message mapping in `frontend/src/api/userGuide.ts` (depends on T034)
+- [X] T036 [P] [US3] Implement explicit unavailable and error-state UI that withholds blank, stale, partial, and corrupted content in `frontend/src/features/user-guide/UserGuideErrorState.tsx`
+- [X] T037 [US3] Integrate failure-state handling and render reporting into the guide panel flow in `frontend/src/features/user-guide/UserGuidePanel.tsx` (depends on T035, T036, T021)
 
 **Checkpoint**: All user stories are independently functional and testable.
 
@@ -120,11 +120,17 @@
 
 **Purpose**: Improvements that affect multiple user stories.
 
-- [ ] T038 [P] Update the quickstart verification steps and implementation notes for delivered behavior in `specs/018-uc-18-user-guide/quickstart.md`
-- [ ] T039 [P] Add unit coverage for guide outcome vocabulary, failure-message normalization, and section ordering helpers in `backend/tests/unit/test_user_guide_service.py`
-- [ ] T040 [P] Add frontend feature-level smoke coverage for full guide lifecycle states in `frontend/tests/user-guide-lifecycle.test.tsx` (depends on T023, T028, T037)
-- [ ] T041 [P] Add post-release measurement instrumentation for support-request trend tracking in `backend/app/core/metrics.py`
-- [ ] T042 Run the UC-18 quickstart validation after completed shipped-story work and relevant validation tasks, then document any follow-up findings in `specs/018-uc-18-user-guide/tasks.md`
+- [X] T038 [P] Update the quickstart verification steps and implementation notes for delivered behavior in `specs/018-uc-18-user-guide/quickstart.md`
+- [X] T039 [P] Add unit coverage for guide outcome vocabulary, failure-message normalization, and section ordering helpers in `backend/tests/unit/test_user_guide_service.py`
+- [X] T040 [P] Add frontend feature-level smoke coverage for full guide lifecycle states in `frontend/tests/user-guide-lifecycle.test.tsx` (depends on T023, T028, T037)
+- [X] T041 [P] Add post-release measurement instrumentation for support-request trend tracking in `backend/app/core/metrics.py`
+- [X] T042 Run the UC-18 quickstart validation after completed shipped-story work and relevant validation tasks, then document any follow-up findings in `specs/018-uc-18-user-guide/tasks.md`
+
+## Validation Notes
+
+- 2026-04-06: Ran `backend/.venv/bin/python -m pytest backend/tests/unit/test_user_guide_schema_validation.py backend/tests/unit/test_user_guide_service.py backend/tests/contract/test_user_guide_api.py backend/tests/integration/test_user_guide_open.py backend/tests/integration/test_user_guide_navigation.py backend/tests/integration/test_user_guide_performance.py backend/tests/integration/test_user_guide_failures.py` and all 14 tests passed.
+- 2026-04-06: Ran `npm test -- --run tests/user-guide-open.test.tsx tests/user-guide-navigation.test.tsx tests/user-guide-error-states.test.tsx tests/user-guide-lifecycle.test.tsx` from `frontend/` and all 5 tests passed.
+- Follow-up note: the backend currently uses a normalized in-repo current-guide source with persistent access and render-outcome records. If the product later adds external documentation storage, `UserGuideRepository.get_current_guide()` is the seam to replace.
 
 ---
 

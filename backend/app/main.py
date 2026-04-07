@@ -15,6 +15,7 @@ from app.api.routes.demand_comparisons import router as demand_comparison_router
 from app.api.routes.historical_demand import router as historical_demand_router
 from app.api.routes.public_forecast import router as public_forecast_router
 from app.api.routes.review_needed_status import router as review_needed_router
+from app.api.routes.user_guide import router as user_guide_router
 from app.api.routes.validation_run_status import router as validation_run_router
 from app.api.routes.weather_overlay import router as weather_overlay_router
 from app.api.routes.weekly_forecasts import router as weekly_forecast_router
@@ -166,6 +167,7 @@ def create_app() -> FastAPI:
     app.include_router(historical_demand_router)
     app.include_router(demand_comparison_router)
     app.include_router(public_forecast_router)
+    app.include_router(user_guide_router)
     app.include_router(weather_overlay_router)
     app.include_router(weekly_forecast_router)
     return app
