@@ -18,10 +18,17 @@ from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_model_repository import ForecastModelRepository
 from app.repositories.forecast_repository import ForecastRepository
 from app.repositories.forecast_run_repository import ForecastRunRepository
+from app.repositories.notification_event_repository import NotificationEventRepository
+from app.repositories.threshold_configuration_repository import ThresholdConfigurationRepository
+from app.repositories.threshold_evaluation_repository import ThresholdEvaluationRepository
+from app.repositories.threshold_state_repository import ThresholdStateRepository
+from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
 from app.schemas.forecast import CurrentForecastRead, ForecastBucketRead, ForecastRunStatusRead
+from app.services.forecast_scope_service import ForecastScopeService
 from app.services.forecast_activation_service import ForecastActivationService, ForecastStorageError
 from app.services.forecast_bucket_service import ForecastBucketService
 from app.services.forecast_training_service import ForecastModelStorageError, ForecastTrainingService
+from app.pipelines.threshold_alert_evaluation_pipeline import ThresholdAlertEvaluationPipeline
 
 
 class ForecastModelUnavailableError(RuntimeError):
@@ -256,6 +263,7 @@ class ForecastService:
                 summary="forecast generated and activated",
                 buckets=buckets,
             )
+            self._run_threshold_alert_evaluation(run.forecast_run_id, forecast_version_id)
         except ForecastModelUnavailableError as exc:
             print(
                 "[debug][forecast] forecast fail "
@@ -307,6 +315,37 @@ class ForecastService:
             geography_scope=geography_scope,
             summary="forecast generated and activated",
         )
+
+    def _run_threshold_alert_evaluation(self, forecast_run_id: str, forecast_version_id: str) -> None:
+        session = self.forecast_repository.session
+        pipeline = ThresholdAlertEvaluationPipeline(
+            forecast_scope_service=ForecastScopeService(
+                forecast_repository=self.forecast_repository,
+                weekly_forecast_repository=WeeklyForecastRepository(session),
+            ),
+            threshold_configuration_repository=ThresholdConfigurationRepository(session),
+            threshold_evaluation_repository=ThresholdEvaluationRepository(session),
+            threshold_state_repository=ThresholdStateRepository(session),
+            notification_event_repository=NotificationEventRepository(session),
+            logger=logging.getLogger("forecast.alerts"),
+        )
+        try:
+            pipeline.evaluate(
+                forecast_reference_id=forecast_version_id,
+                forecast_product="daily",
+                trigger_source="forecast_publish",
+                forecast_run_id=forecast_run_id,
+            )
+        except Exception as exc:
+            self.logger.warning(
+                "%s",
+                summarize_status(
+                    "threshold_alert.evaluation.failed",
+                    forecast_run_id=forecast_run_id,
+                    forecast_version_id=forecast_version_id,
+                    error=str(exc),
+                ),
+            )
 
     def get_run_status(self, forecast_run_id: str) -> ForecastRunStatusRead:
         run = self.forecast_run_repository.get_run(forecast_run_id)

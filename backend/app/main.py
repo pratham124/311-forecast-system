@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.approved_dataset_status import router as approved_dataset_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.evaluations import router as evaluation_router
+from app.api.routes.forecast_alerts import router as forecast_alert_router
 from app.api.routes.forecasts import router as forecast_router
 from app.api.routes.forecast_visualizations import router as forecast_visualization_router
 from app.api.routes.ingestion import router as ingestion_router
@@ -29,12 +30,21 @@ from app.services.scheduler_service import SchedulerService, build_ingestion_job
 from app.services.weekly_forecast_scheduler import build_weekly_forecast_job, build_weekly_forecast_training_job, build_weekly_regeneration_job
 
 
-def _expand_local_frontend_origins(origin: str) -> list[str]:
-    origins = {origin}
-    if origin.startswith("http://localhost:"):
-        origins.add(origin.replace("http://localhost:", "http://127.0.0.1:", 1))
-    elif origin.startswith("http://127.0.0.1:"):
-        origins.add(origin.replace("http://127.0.0.1:", "http://localhost:", 1))
+def _normalize_origin(origin: str) -> str:
+    return origin.strip().rstrip("/")
+
+
+def _expand_local_frontend_origins(raw_origins: str) -> list[str]:
+    origins: set[str] = set()
+    for token in raw_origins.split(","):
+        origin = _normalize_origin(token)
+        if not origin:
+            continue
+        origins.add(origin)
+        if origin.startswith("http://localhost:"):
+            origins.add(origin.replace("http://localhost:", "http://127.0.0.1:", 1))
+        elif origin.startswith("http://127.0.0.1:"):
+            origins.add(origin.replace("http://127.0.0.1:", "http://localhost:", 1))
     return sorted(origins)
 
 
@@ -162,6 +172,7 @@ def create_app() -> FastAPI:
     app.include_router(review_needed_router)
     app.include_router(forecast_router)
     app.include_router(evaluation_router)
+    app.include_router(forecast_alert_router)
     app.include_router(forecast_visualization_router)
     app.include_router(historical_demand_router)
     app.include_router(demand_comparison_router)

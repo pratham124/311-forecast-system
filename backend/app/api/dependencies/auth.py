@@ -4,6 +4,8 @@ require_forecast_trigger = require_operational_manager
 require_forecast_reader = require_planner_or_manager
 require_evaluation_trigger = require_operational_manager
 require_evaluation_reader = require_planner_or_manager
+require_forecast_alert_trigger = require_operational_manager
+require_forecast_alert_reader = require_planner_or_manager
 
 require_visualization_reader = require_planner_or_manager
 require_visualization_writer = require_operational_manager

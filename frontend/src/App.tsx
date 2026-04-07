@@ -34,6 +34,10 @@ const PublicForecastPage = lazy(async () => {
   const module = await import('./pages/PublicForecastPage');
   return { default: module.PublicForecastPage };
 });
+const ForecastAlertsPage = lazy(async () => {
+  const module = await import('./pages/ForecastAlertsPage');
+  return { default: module.ForecastAlertsPage };
+});
 
 function RouteFallback() {
   return <main className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-muted">Loading page...</main>;
@@ -89,6 +93,14 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
                   className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
                 >
                   Ingestion
+                </NavLink>
+              ) : null}
+              {showEvaluationPage ? (
+                <NavLink
+                  to="/app/alerts"
+                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+                >
+                  Alerts
                 </NavLink>
               ) : null}
             </nav>
@@ -214,6 +226,10 @@ function AppShell() {
           <Route
             path="ingestion"
             element={showIngestionPage ? <IngestionPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
+          />
+          <Route
+            path="alerts"
+            element={showEvaluationPage ? <ForecastAlertsPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
           />
         </Route>
         <Route path="*" element={<Navigate to={session ? '/app/forecasts' : '/'} replace />} />
