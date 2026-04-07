@@ -9,6 +9,11 @@ import { TimeRangeSelect } from '../features/forecast-visualization/components/T
 import { VisualizationFallbackBanner } from '../features/forecast-visualization/components/VisualizationFallbackBanner';
 import { VisualizationStatusPanel } from '../features/forecast-visualization/components/VisualizationStatusPanel';
 import { useForecastVisualization } from '../features/forecast-visualization/hooks/useForecastVisualization';
+import { WeatherOverlayControls } from '../features/weather-overlay/components/WeatherOverlayControls';
+import { WeatherOverlayLayer } from '../features/weather-overlay/components/WeatherOverlayLayer';
+import { WeatherOverlayStatus } from '../features/weather-overlay/components/WeatherOverlayStatus';
+import { useWeatherOverlay } from '../features/weather-overlay/hooks/useWeatherOverlay';
+import type { WeatherMeasure } from '../types/weatherOverlay';
 
 export function formatUpdatedDateTime(value?: string | null): string {
   if (!value) return 'Not available';
@@ -22,6 +27,8 @@ export function formatUpdatedDateTime(value?: string | null): string {
 
 export function ForecastVisualizationPage() {
   const [openDropdown, setOpenDropdown] = useState<'timeRange' | 'serviceAreas' | null>(null);
+  const [overlayEnabled, setOverlayEnabled] = useState(false);
+  const [weatherMeasure, setWeatherMeasure] = useState<WeatherMeasure>('temperature');
   const timeRangeRef = useRef<HTMLDivElement>(null);
   const serviceAreasRef = useRef<HTMLDivElement>(null);
   const {
@@ -35,6 +42,22 @@ export function ForecastVisualizationPage() {
     error,
     reportRenderEvent,
   } = useForecastVisualization();
+  const overlayWindowStart = visualization?.forecastWindowStart ?? visualization?.historyWindowStart ?? new Date().toISOString();
+  const overlayWindowEnd = visualization?.forecastWindowEnd ?? visualization?.historyWindowEnd ?? new Date().toISOString();
+  const {
+    overlay,
+    isLoading: overlayLoading,
+    error: overlayError,
+    reportRenderSuccess,
+    reportRenderFailure,
+    clearOverlay,
+  } = useWeatherOverlay({
+    geographyId: 'citywide',
+    timeRangeStart: overlayWindowStart,
+    timeRangeEnd: overlayWindowEnd,
+    overlayEnabled,
+    weatherMeasure,
+  });
 
   useEffect(() => {
     if (!openDropdown) return;
@@ -58,7 +81,13 @@ export function ForecastVisualizationPage() {
 
   const handleRenderFailure = (chartError: Error) => {
     void reportRenderEvent({ renderStatus: 'render_failed', failureReason: chartError.message });
+    void reportRenderFailure(chartError.message);
   };
+
+  useEffect(() => {
+    if (!overlay || overlay.overlayStatus !== 'visible') return;
+    void reportRenderSuccess();
+  }, [overlay, reportRenderSuccess]);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8">
@@ -101,11 +130,24 @@ export function ForecastVisualizationPage() {
               containerRef={serviceAreasRef}
             />
           </div>
+          <WeatherOverlayControls
+            enabled={overlayEnabled}
+            selectedMeasure={weatherMeasure}
+            onEnabledChange={(next) => {
+              setOverlayEnabled(next);
+              if (!next) {
+                clearOverlay();
+              }
+            }}
+            onMeasureChange={setWeatherMeasure}
+          />
         </CardContent>
       </Card>
 
       {isLoading ? <Alert className="mt-5"><AlertDescription>Loading the forecast...</AlertDescription></Alert> : null}
       {error ? <Alert variant="destructive" className="mt-5"><AlertDescription>{error}</AlertDescription></Alert> : null}
+      {overlayLoading ? <Alert className="mt-5"><AlertDescription>Loading weather overlay...</AlertDescription></Alert> : null}
+      {overlayError ? <Alert variant="destructive" className="mt-5"><AlertDescription>{overlayError}</AlertDescription></Alert> : null}
 
       {visualization ? (
         <>
@@ -134,6 +176,8 @@ export function ForecastVisualizationPage() {
           </section>
 
           <VisualizationStatusPanel visualization={visualization} />
+          <WeatherOverlayStatus overlay={overlay} />
+          {overlay ? <WeatherOverlayLayer overlay={overlay} /> : null}
 
           {visualization.viewStatus === 'unavailable' ? (
             <Alert variant="destructive" className="mt-5">

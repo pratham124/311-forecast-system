@@ -17,9 +17,9 @@
 
 **Purpose**: Create the planned backend, frontend, and test scaffolding for the feature.
 
-- [ ] T001 Create the planned project directories in `backend/src/api/dependencies/`, `backend/src/api/routes/`, `backend/src/api/schemas/`, `backend/src/clients/`, `backend/src/models/`, `backend/src/repositories/`, `backend/src/services/`, `frontend/src/api/`, `frontend/src/components/`, `frontend/src/features/weather-overlay/components/`, `frontend/src/features/weather-overlay/hooks/`, `frontend/src/features/weather-overlay/state/`, `frontend/src/features/forecast-explorer/`, `frontend/src/hooks/`, `frontend/src/pages/`, `frontend/src/types/`, `frontend/src/utils/`, `frontend/tests/weather-overlay/`, `tests/contract/`, `tests/integration/`, and `tests/unit/`
-- [ ] T002 Create backend Python project scaffolding in `backend/pyproject.toml`, `backend/src/__init__.py`, and `backend/src/api/__init__.py`
-- [ ] T003 [P] Create frontend TypeScript project scaffolding in `frontend/package.json`, `frontend/tsconfig.json`, and `frontend/tailwind.config.ts`
+- [X] T001 Create the planned project directories in `backend/src/api/dependencies/`, `backend/src/api/routes/`, `backend/src/api/schemas/`, `backend/src/clients/`, `backend/src/models/`, `backend/src/repositories/`, `backend/src/services/`, `frontend/src/api/`, `frontend/src/components/`, `frontend/src/features/weather-overlay/components/`, `frontend/src/features/weather-overlay/hooks/`, `frontend/src/features/weather-overlay/state/`, `frontend/src/features/forecast-explorer/`, `frontend/src/hooks/`, `frontend/src/pages/`, `frontend/src/types/`, `frontend/src/utils/`, `frontend/tests/weather-overlay/`, `tests/contract/`, `tests/integration/`, and `tests/unit/`
+- [X] T002 Create backend Python project scaffolding in `backend/pyproject.toml`, `backend/src/__init__.py`, and `backend/src/api/__init__.py`
+- [X] T003 [P] Create frontend TypeScript project scaffolding in `frontend/package.json`, `frontend/tsconfig.json`, and `frontend/tailwind.config.ts`
 
 ---
 
@@ -29,16 +29,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create canonical backend overlay domain models in `backend/src/models/weather_overlay.py`
-- [ ] T005 [P] Create backend request and response schema models for overlay `GET` and render-event `POST` in `backend/src/api/schemas/weather_overlay.py`
-- [ ] T006 [P] Implement the normalized MSC GeoMet client interface in `backend/src/clients/geomet_client.py`
-- [ ] T007 [P] Implement approved geography-to-Edmonton-station alignment rules plus explicit unsupported-geography detection in `backend/src/services/weather_overlay_alignment.py`
-- [ ] T008 [P] Create overlay state and observability repository interfaces in `backend/src/repositories/weather_overlay_repository.py`
-- [ ] T009 [P] Add authenticated and authorized route dependencies for weather-overlay endpoints in `backend/src/api/dependencies/auth.py`
-- [ ] T010 Implement the shared weather overlay orchestration service skeleton in `backend/src/services/weather_overlay_service.py`
-- [ ] T011 [P] Create frontend overlay contract types matching the OpenAPI schema in `frontend/src/types/weatherOverlay.ts`
-- [ ] T012 [P] Create the frontend API client for overlay `GET` and render-event `POST` calls in `frontend/src/api/weatherOverlayApi.ts`
-- [ ] T013 Configure shared overlay error/status mapping for unsupported geography, alignment failure, and other non-visible states in `backend/src/api/errors.py` and `frontend/src/features/weather-overlay/state/statusMessages.ts`
+- [X] T004 Create canonical backend overlay domain models in `backend/src/models/weather_overlay.py`
+- [X] T005 [P] Create backend request and response schema models for overlay `GET` and render-event `POST` in `backend/src/api/schemas/weather_overlay.py`
+- [X] T006 [P] Implement the normalized MSC GeoMet client interface in `backend/src/clients/geomet_client.py`
+- [X] T007 [P] Implement approved geography-to-Edmonton-station alignment rules plus explicit unsupported-geography detection in `backend/src/services/weather_overlay_alignment.py`
+- [X] T008 [P] Create overlay state and observability repository interfaces in `backend/src/repositories/weather_overlay_repository.py`
+- [X] T009 [P] Add authenticated and authorized route dependencies for weather-overlay endpoints in `backend/src/api/dependencies/auth.py`
+- [X] T010 Implement the shared weather overlay orchestration service skeleton in `backend/src/services/weather_overlay_service.py`
+- [X] T011 [P] Create frontend overlay contract types matching the OpenAPI schema in `frontend/src/types/weatherOverlay.ts`
+- [X] T012 [P] Create the frontend API client for overlay `GET` and render-event `POST` calls in `frontend/src/api/weatherOverlayApi.ts`
+- [X] T013 Configure shared overlay error/status mapping for unsupported geography, alignment failure, and other non-visible states in `backend/src/api/errors.py` and `frontend/src/features/weather-overlay/state/statusMessages.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -52,20 +52,20 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Add contract tests for authenticated `GET /api/v1/forecast-explorer/weather-overlay` visible responses, including `401` and `403` cases, in `tests/contract/test_weather_overlay_get_contract.py`
-- [ ] T015 [P] [US1] Add contract tests for invalid weather-overlay `GET` query inputs and schema validation failures in `tests/contract/test_weather_overlay_get_validation.py`
-- [ ] T016 [P] [US1] Add backend integration tests for successful supported-selection retrieval and alignment in `tests/integration/test_weather_overlay_visible_flow.py`
-- [ ] T017 [P] [US1] Add backend integration tests for successful `POST /render-events` logging and persisted render-success context in `tests/integration/test_weather_overlay_render_event_success.py`
-- [ ] T018 [P] [US1] Add frontend interaction tests for enabling the overlay and selecting one measure in `frontend/tests/weather-overlay/WeatherOverlayControls.test.tsx`
+- [X] T014 [P] [US1] Add contract tests for authenticated `GET /api/v1/forecast-explorer/weather-overlay` visible responses, including `401` and `403` cases, in `tests/contract/test_weather_overlay_get_contract.py`
+- [X] T015 [P] [US1] Add contract tests for invalid weather-overlay `GET` query inputs and schema validation failures in `tests/contract/test_weather_overlay_get_validation.py`
+- [X] T016 [P] [US1] Add backend integration tests for successful supported-selection retrieval and alignment in `tests/integration/test_weather_overlay_visible_flow.py`
+- [X] T017 [P] [US1] Add backend integration tests for successful `POST /render-events` logging and persisted render-success context in `tests/integration/test_weather_overlay_render_event_success.py`
+- [X] T018 [P] [US1] Add frontend interaction tests for enabling the overlay and selecting one measure in `frontend/tests/weather-overlay/WeatherOverlayControls.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Implement successful supported-selection retrieval, alignment, and visible-state assembly in `backend/src/services/weather_overlay_service.py`
-- [ ] T020 [US1] Implement schema-validated and auth-protected weather overlay API routes, including the initial successful `POST /render-events` ingestion path, in `backend/src/api/routes/weather_overlay.py`
-- [ ] T021 [P] [US1] Build the overlay toggle and single-measure selector in `frontend/src/features/weather-overlay/components/WeatherOverlayControls.tsx`
-- [ ] T022 [P] [US1] Build the aligned weather layer renderer in `frontend/src/features/weather-overlay/components/WeatherOverlayLayer.tsx`
-- [ ] T023 [US1] Create the overlay data hook that reads the stable response and posts render success in `frontend/src/features/weather-overlay/hooks/useWeatherOverlay.ts`
-- [ ] T024 [US1] Integrate the weather overlay controls and layer into the real page entrypoint in `frontend/src/pages/ForecastExplorerPage.tsx`
+- [X] T019 [US1] Implement successful supported-selection retrieval, alignment, and visible-state assembly in `backend/src/services/weather_overlay_service.py`
+- [X] T020 [US1] Implement schema-validated and auth-protected weather overlay API routes, including the initial successful `POST /render-events` ingestion path, in `backend/src/api/routes/weather_overlay.py`
+- [X] T021 [P] [US1] Build the overlay toggle and single-measure selector in `frontend/src/features/weather-overlay/components/WeatherOverlayControls.tsx`
+- [X] T022 [P] [US1] Build the aligned weather layer renderer in `frontend/src/features/weather-overlay/components/WeatherOverlayLayer.tsx`
+- [X] T023 [US1] Create the overlay data hook that reads the stable response and posts render success in `frontend/src/features/weather-overlay/hooks/useWeatherOverlay.ts`
+- [X] T024 [US1] Integrate the weather overlay controls and layer into the real page entrypoint in `frontend/src/pages/ForecastExplorerPage.tsx`
 
 **Checkpoint**: User Story 1 is fully functional and testable on its own
 
@@ -79,19 +79,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Add contract tests for `unavailable`, `retrieval-failed`, `misaligned`, and `failed-to-render` `WeatherOverlayResponse` states in `tests/contract/test_weather_overlay_non_visible_contract.py`
-- [ ] T026 [P] [US2] Add contract tests for authenticated `POST /render-events` success, failure, `401`, `403`, and invalid body handling in `tests/contract/test_weather_overlay_render_event_contract.py`
-- [ ] T027 [P] [US2] Add backend integration tests for missing-data, unsupported-geography, and post-match alignment-failure flows in `tests/integration/test_weather_overlay_non_visible_flow.py`
-- [ ] T028 [P] [US2] Add backend integration tests for `failed-to-render` render-event persistence and logged failure context in `tests/integration/test_weather_overlay_render_event_failure.py`
-- [ ] T029 [P] [US2] Add frontend interaction tests for non-visible status messaging and base-view preservation in `frontend/tests/weather-overlay/WeatherOverlayStatus.test.tsx`
+- [X] T025 [P] [US2] Add contract tests for `unavailable`, `retrieval-failed`, `misaligned`, and `failed-to-render` `WeatherOverlayResponse` states in `tests/contract/test_weather_overlay_non_visible_contract.py`
+- [X] T026 [P] [US2] Add contract tests for authenticated `POST /render-events` success, failure, `401`, `403`, and invalid body handling in `tests/contract/test_weather_overlay_render_event_contract.py`
+- [X] T027 [P] [US2] Add backend integration tests for missing-data, unsupported-geography, and post-match alignment-failure flows in `tests/integration/test_weather_overlay_non_visible_flow.py`
+- [X] T028 [P] [US2] Add backend integration tests for `failed-to-render` render-event persistence and logged failure context in `tests/integration/test_weather_overlay_render_event_failure.py`
+- [X] T029 [P] [US2] Add frontend interaction tests for non-visible status messaging and base-view preservation in `frontend/tests/weather-overlay/WeatherOverlayStatus.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] Implement backend classification for `unavailable`, `retrieval-failed`, unsupported-geography, and post-match `misaligned` outcomes in `backend/src/services/weather_overlay_service.py`
-- [ ] T031 [P] [US2] Persist failure categories, unsupported-geography diagnostics, and non-visible overlay states in `backend/src/repositories/weather_overlay_repository.py`
-- [ ] T032 [US2] Implement schema-validated render-event ingestion and `failed-to-render` state updates in `backend/src/api/routes/weather_overlay.py` and `backend/src/services/weather_overlay_service.py`
-- [ ] T033 [P] [US2] Build explicit non-visible overlay status rendering with separate geography-match and alignment-failure messages in `frontend/src/features/weather-overlay/components/WeatherOverlayStatus.tsx`
-- [ ] T034 [US2] Integrate non-visible overlay handling so the base explorer stays authoritative in `frontend/src/pages/ForecastExplorerPage.tsx`
+- [X] T030 [US2] Implement backend classification for `unavailable`, `retrieval-failed`, unsupported-geography, and post-match `misaligned` outcomes in `backend/src/services/weather_overlay_service.py`
+- [X] T031 [P] [US2] Persist failure categories, unsupported-geography diagnostics, and non-visible overlay states in `backend/src/repositories/weather_overlay_repository.py`
+- [X] T032 [US2] Implement schema-validated render-event ingestion and `failed-to-render` state updates in `backend/src/api/routes/weather_overlay.py` and `backend/src/services/weather_overlay_service.py`
+- [X] T033 [P] [US2] Build explicit non-visible overlay status rendering with separate geography-match and alignment-failure messages in `frontend/src/features/weather-overlay/components/WeatherOverlayStatus.tsx`
+- [X] T034 [US2] Integrate non-visible overlay handling so the base explorer stays authoritative in `frontend/src/pages/ForecastExplorerPage.tsx`
 
 **Checkpoint**: User Stories 1 and 2 both work independently, and all required non-visible states preserve the base explorer
 
@@ -105,16 +105,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] Add backend integration tests for disabled `GET` read-model responses and superseded overlay requests in `tests/integration/test_weather_overlay_supersession_flow.py`
-- [ ] T036 [P] [US3] Add frontend interaction tests for toggle and filter synchronization in `frontend/tests/weather-overlay/WeatherOverlaySync.test.tsx`
+- [X] T035 [P] [US3] Add backend integration tests for disabled `GET` read-model responses and superseded overlay requests in `tests/integration/test_weather_overlay_supersession_flow.py`
+- [X] T036 [P] [US3] Add frontend interaction tests for toggle and filter synchronization in `frontend/tests/weather-overlay/WeatherOverlaySync.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Implement disabled-state and superseded-request transitions in `backend/src/services/weather_overlay_service.py`
-- [ ] T038 [P] [US3] Update repository handling for latest-selection tracking and supersession logging in `backend/src/repositories/weather_overlay_repository.py`
-- [ ] T039 [P] [US3] Implement request cancellation and latest-selection handling in `frontend/src/features/weather-overlay/hooks/useWeatherOverlay.ts`
-- [ ] T040 [US3] Update overlay controls and the real forecast-explorer page entrypoint to clear stale layers on disable or filter changes in `frontend/src/features/weather-overlay/components/WeatherOverlayControls.tsx` and `frontend/src/pages/ForecastExplorerPage.tsx`
-- [ ] T041 [US3] Reject render-event submission for disabled or superseded requests in `frontend/src/api/weatherOverlayApi.ts` and `backend/src/api/routes/weather_overlay.py`
+- [X] T037 [US3] Implement disabled-state and superseded-request transitions in `backend/src/services/weather_overlay_service.py`
+- [X] T038 [P] [US3] Update repository handling for latest-selection tracking and supersession logging in `backend/src/repositories/weather_overlay_repository.py`
+- [X] T039 [P] [US3] Implement request cancellation and latest-selection handling in `frontend/src/features/weather-overlay/hooks/useWeatherOverlay.ts`
+- [X] T040 [US3] Update overlay controls and the real forecast-explorer page entrypoint to clear stale layers on disable or filter changes in `frontend/src/features/weather-overlay/components/WeatherOverlayControls.tsx` and `frontend/src/pages/ForecastExplorerPage.tsx`
+- [X] T041 [US3] Reject render-event submission for disabled or superseded requests in `frontend/src/api/weatherOverlayApi.ts` and `backend/src/api/routes/weather_overlay.py`
 
 **Checkpoint**: All user stories are independently functional and synchronized correctly
 
@@ -124,9 +124,9 @@
 
 **Purpose**: Final hardening, coverage completion, and feature-level verification across stories
 
-- [ ] T042 [P] Add backend unit tests for alignment rules, unsupported-geography handling, and overlay state selection in `tests/unit/test_weather_overlay_service.py`
+- [X] T042 [P] Add backend unit tests for alignment rules, unsupported-geography handling, and overlay state selection in `tests/unit/test_weather_overlay_service.py`
 - [ ] T043 [P] Add frontend component tests for weather-layer readability and render-failure fallback in `frontend/tests/weather-overlay/WeatherOverlayLayer.test.tsx`
-- [ ] T044 Add supported-selection latency validation for the 5-second target in `tests/integration/test_weather_overlay_latency.py`
+- [X] T044 Add supported-selection latency validation for the 5-second target in `tests/integration/test_weather_overlay_latency.py`
 - [ ] T045 Update quickstart verification steps for SC-001 through SC-004, including SC-002 usability validation, in `specs/009-add-weather-overlay/quickstart.md`
 
 ---
