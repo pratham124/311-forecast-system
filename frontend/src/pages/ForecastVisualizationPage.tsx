@@ -57,6 +57,7 @@ export function ForecastVisualizationPage() {
     timeRangeEnd: overlayWindowEnd,
     overlayEnabled,
     weatherMeasure,
+    requestEnabled: Boolean(visualization) && overlayEnabled,
   });
 
   useEffect(() => {

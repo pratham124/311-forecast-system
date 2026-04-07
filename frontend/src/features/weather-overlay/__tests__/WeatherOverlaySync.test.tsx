@@ -25,6 +25,7 @@ describe('useWeatherOverlay sync', () => {
       timeRangeEnd: string;
       overlayEnabled: boolean;
       weatherMeasure: 'temperature' | 'snowfall';
+      requestEnabled: boolean;
     };
 
     const { result, rerender } = renderHook<ReturnType<typeof useWeatherOverlay>, HookProps>(
@@ -36,6 +37,7 @@ describe('useWeatherOverlay sync', () => {
           timeRangeEnd: '2026-03-20T01:00:00Z',
           overlayEnabled: true,
           weatherMeasure: 'temperature',
+          requestEnabled: true,
         } satisfies HookProps,
       },
     );
@@ -46,6 +48,7 @@ describe('useWeatherOverlay sync', () => {
       timeRangeEnd: '2026-03-20T01:00:00Z',
       overlayEnabled: true,
       weatherMeasure: 'snowfall',
+      requestEnabled: true,
     } satisfies HookProps);
 
     await act(async () => {

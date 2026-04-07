@@ -8,15 +8,29 @@ interface UseWeatherOverlayInput {
   timeRangeEnd: string;
   overlayEnabled: boolean;
   weatherMeasure: WeatherMeasure;
+  requestEnabled: boolean;
 }
 
-export function useWeatherOverlay({ geographyId, timeRangeStart, timeRangeEnd, overlayEnabled, weatherMeasure }: UseWeatherOverlayInput) {
+export function useWeatherOverlay({
+  geographyId,
+  timeRangeStart,
+  timeRangeEnd,
+  overlayEnabled,
+  weatherMeasure,
+  requestEnabled,
+}: UseWeatherOverlayInput) {
   const [overlay, setOverlay] = useState<WeatherOverlayResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const selectionIdRef = useRef(0);
 
   useEffect(() => {
+    if (!requestEnabled) {
+      setOverlay(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
     const controller = new AbortController();
     const currentSelectionId = ++selectionIdRef.current;
 
@@ -52,7 +66,7 @@ export function useWeatherOverlay({ geographyId, timeRangeStart, timeRangeEnd, o
     return () => {
       controller.abort();
     };
-  }, [geographyId, overlayEnabled, timeRangeEnd, timeRangeStart, weatherMeasure]);
+  }, [geographyId, overlayEnabled, requestEnabled, timeRangeEnd, timeRangeStart, weatherMeasure]);
 
   const reportRenderSuccess = async () => {
     if (!overlay) return;
