@@ -58,6 +58,7 @@ from app.models.public_forecast_portal import (
     PublicForecastSanitizationOutcome,
     PublicForecastVisualizationPayload,
 )
+from app.models.user_guide import GuideAccessEvent, GuideRenderOutcomeRecord
 
 __all__ = [
     "CandidateDataset",
@@ -87,6 +88,8 @@ __all__ = [
     "ForecastRun",
     "RefreshSession",
     "ForecastVersion",
+    "GuideAccessEvent",
+    "GuideRenderOutcomeRecord",
     "IngestionRun",
     "HistoricalAnalysisOutcomeRecord",
     "HistoricalDemandAnalysisRequest",

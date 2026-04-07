@@ -64,3 +64,15 @@ Implementation is ready for task breakdown when:
 - successful access, retrieval failures, and render failures are all queryable outcomes
 - retrieval failures never show blank, stale, or partial guide content
 - render failures never leave corrupted or partially rendered content visible
+
+## Verification Notes
+
+- Backend targeted validation:
+  - `backend/.venv/bin/python -m pytest backend/tests/unit/test_user_guide_schema_validation.py backend/tests/unit/test_user_guide_service.py`
+  - `backend/.venv/bin/python -m pytest backend/tests/contract/test_user_guide_api.py backend/tests/integration/test_user_guide_open.py backend/tests/integration/test_user_guide_navigation.py backend/tests/integration/test_user_guide_performance.py backend/tests/integration/test_user_guide_failures.py`
+- Frontend targeted validation:
+  - `npm test -- --run frontend/tests/user-guide-open.test.tsx frontend/tests/user-guide-navigation.test.tsx frontend/tests/user-guide-error-states.test.tsx frontend/tests/user-guide-lifecycle.test.tsx`
+- Manual check:
+  - Sign in, open `Help`, confirm the loading state appears before content or an explicit error.
+  - Switch between sections and verify content changes without another network load for the guide payload.
+  - Force a render crash in a test harness and confirm the fallback state appears and a render-failure event is posted.

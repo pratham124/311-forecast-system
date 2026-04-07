@@ -34,6 +34,10 @@ const PublicForecastPage = lazy(async () => {
   const module = await import('./pages/PublicForecastPage');
   return { default: module.PublicForecastPage };
 });
+const UserGuideHostPage = lazy(async () => {
+  const module = await import('./pages/UserGuideHostPage');
+  return { default: module.UserGuideHostPage };
+});
 
 function RouteFallback() {
   return <main className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-muted">Loading page...</main>;
@@ -91,6 +95,12 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
                   Ingestion
                 </NavLink>
               ) : null}
+              <NavLink
+                to="/app/user-guide"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Help
+              </NavLink>
             </nav>
           </div>
           <button
@@ -215,6 +225,7 @@ function AppShell() {
             path="ingestion"
             element={showIngestionPage ? <IngestionPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
           />
+          <Route path="user-guide" element={<UserGuideHostPage />} />
         </Route>
         <Route path="*" element={<Navigate to={session ? '/app/forecasts' : '/'} replace />} />
       </Routes>

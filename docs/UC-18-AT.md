@@ -146,3 +146,9 @@
 | AT-05 | Main Success Scenario (5)  |
 | AT-06 | Extension 2a; Failed End Condition  |
 | AT-07 | Extension 3a; Failed End Condition  |
+
+## Implementation Alignment Notes
+- The MVP host surface is the authenticated `/app/user-guide` page reached from the internal header Help navigation.
+- Retrieval success is represented by `GET /api/v1/help/user-guide` returning `status=available` plus a `guideAccessEventId`.
+- Final user-visible render outcomes are reported with `POST /api/v1/help/user-guide/{guideAccessEventId}/render-events`.
+- Section navigation is client-side within the loaded guide payload and does not trigger a second guide retrieval.
