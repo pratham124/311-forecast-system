@@ -87,20 +87,18 @@ Overall, the implementation covers all flows from the use case.
 
 ## Use Case 9
 
-Overall, the implementation covers most flows from the use case, with one remaining frontend polish coverage gap.
+Overall, the implementation covers alls flows from the use case:
 
-1. Acceptance Scenario 1 (Forecast explorer loads with weather-overlay controls available) -> frontend/src/features/weather-overlay/__tests__/WeatherOverlayControls.test.tsx, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx
-2. Acceptance Scenario 2 (Enable overlay and retrieve weather data for selected geography/time range) -> backend/tests/contract/test_weather_overlay_get_contract.py, backend/tests/integration/test_weather_overlay_flows.py
-3. Acceptance Scenario 3 (Weather observations are aligned to approved geography/time-bucket rules) -> backend/tests/unit/test_weather_overlay_service.py, backend/tests/integration/test_weather_overlay_flows.py
-4. Acceptance Scenario 4 (Overlay remains optional and base forecast explorer is preserved) -> backend/tests/contract/test_weather_overlay_get_contract.py, backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
-5. Acceptance Scenario 5 (Successful render outcome is accepted and logged via render-events API) -> backend/tests/contract/test_weather_overlay_render_event_contract.py, backend/tests/integration/test_weather_overlay_flows.py
-6. Acceptance Scenario 6 (Missing weather data returns explicit non-visible `unavailable` state while preserving base view) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
-7. Acceptance Scenario 7 (Provider retrieval failure returns `retrieval-failed` without breaking base explorer) -> backend/tests/integration/test_weather_overlay_flows.py
-8. Acceptance Scenario 8 (Unsupported geography/alignment failure returns `misaligned` and suppresses overlay) -> backend/tests/integration/test_weather_overlay_flows.py, backend/tests/unit/test_weather_overlay_service.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
-9. Acceptance Scenario 9 (Client render failure is recorded and transitions to `failed-to-render`) -> backend/tests/contract/test_weather_overlay_render_event_contract.py, backend/tests/integration/test_weather_overlay_flows.py
-10. Acceptance Scenario 10 (Disable and supersede behavior prevents stale overlays and blocks invalid render-event submissions) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx, frontend/src/api/__tests__/weatherOverlayApi.test.ts
-11. Supported-selection latency target validation (5-second path for supported selections) -> backend/tests/integration/test_weather_overlay_latency.py
-12. Remaining gap (weather-layer readability and explicit frontend render-failure fallback component behavior) -> No clear dedicated frontend component test found; tracked by `T043` in `specs/009-add-weather-overlay/tasks.md`
+1. Acceptance Scenario 1 (Forecast explorer loads) -> frontend/src/features/weather-overlay/__tests__/WeatherOverlayControls.test.tsx, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx
+2. Acceptance Scenario 2 (Enable overlay and retrieve weather data) -> backend/tests/contract/test_weather_overlay_get_contract.py, backend/tests/integration/test_weather_overlay_flows.py
+3. Acceptance Scenario 3 (Weather observations are aligned) -> backend/tests/unit/test_weather_overlay_service.py, backend/tests/integration/test_weather_overlay_flows.py
+4. Acceptance Scenario 4 (Overlay remains optional) -> backend/tests/contract/test_weather_overlay_get_contract.py, backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
+5. Acceptance Scenario 5 (Successful render outcome) -> backend/tests/contract/test_weather_overlay_render_event_contract.py, backend/tests/integration/test_weather_overlay_flows.py
+6. Acceptance Scenario 6 (Missing weather data) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
+7. Acceptance Scenario 7 (Provider retrieval failure) -> backend/tests/integration/test_weather_overlay_flows.py
+8. Acceptance Scenario 8 (Unsupported geography/alignment failure) -> backend/tests/integration/test_weather_overlay_flows.py, backend/tests/unit/test_weather_overlay_service.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
+9. Acceptance Scenario 9 (Client render failure is recorded) -> backend/tests/contract/test_weather_overlay_render_event_contract.py, backend/tests/integration/test_weather_overlay_flows.py
+10. Acceptance Scenario 10 (Disable and supersede behavior prevents stale overlays) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx, frontend/src/api/__tests__/weatherOverlayApi.test.ts
 
 ## Use Case 17
 

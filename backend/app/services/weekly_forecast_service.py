@@ -16,9 +16,16 @@ from app.pipelines.forecasting.weekly_demand_pipeline import WeeklyDemandPipelin
 from app.pipelines.forecasting.weekly_feature_preparation import prepare_weekly_forecast_features
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_model_repository import ForecastModelRepository
+from app.repositories.forecast_repository import ForecastRepository
+from app.repositories.notification_event_repository import NotificationEventRepository
+from app.repositories.threshold_configuration_repository import ThresholdConfigurationRepository
+from app.repositories.threshold_evaluation_repository import ThresholdEvaluationRepository
+from app.repositories.threshold_state_repository import ThresholdStateRepository
 from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
 from app.repositories.weekly_forecast_run_repository import WeeklyForecastRunRepository
 from app.schemas.weekly_forecast import CurrentWeeklyForecastRead, WeeklyForecastBucketRead, WeeklyForecastRunStatusRead
+from app.services.forecast_scope_service import ForecastScopeService
+from app.pipelines.threshold_alert_evaluation_pipeline import ThresholdAlertEvaluationPipeline
 from app.services.week_window_service import WeekWindowService
 from app.services.forecast_service import ForecastModelUnavailableError
 from app.services.forecast_training_service import ForecastModelStorageError
@@ -142,6 +149,7 @@ class WeeklyForecastService:
                 summary="weekly forecast generated and activated",
                 buckets=buckets,
             )
+            self._run_threshold_alert_evaluation(run.weekly_forecast_run_id, weekly_forecast_version_id)
         except (WeatherClientError, NagerDateClientError) as exc:
             self._log("weekly_forecast.failed", run_id=run.weekly_forecast_run_id, result_type="engine_failure")
             return self.weekly_forecast_run_repository.finalize_failed(
@@ -182,6 +190,34 @@ class WeeklyForecastService:
             geography_scope=geography_scope,
             summary="weekly forecast generated and activated",
         )
+
+    def _run_threshold_alert_evaluation(self, weekly_forecast_run_id: str, weekly_forecast_version_id: str) -> None:
+        session = self.weekly_forecast_repository.session
+        pipeline = ThresholdAlertEvaluationPipeline(
+            forecast_scope_service=ForecastScopeService(
+                forecast_repository=ForecastRepository(session),
+                weekly_forecast_repository=self.weekly_forecast_repository,
+            ),
+            threshold_configuration_repository=ThresholdConfigurationRepository(session),
+            threshold_evaluation_repository=ThresholdEvaluationRepository(session),
+            threshold_state_repository=ThresholdStateRepository(session),
+            notification_event_repository=NotificationEventRepository(session),
+            logger=logging.getLogger("weekly_forecast.alerts"),
+        )
+        try:
+            pipeline.evaluate(
+                forecast_reference_id=weekly_forecast_version_id,
+                forecast_product="weekly",
+                trigger_source="forecast_publish",
+                weekly_forecast_run_id=weekly_forecast_run_id,
+            )
+        except Exception as exc:
+            self.logger.warning(
+                "weekly_forecast.threshold_alert_evaluation_failed run_id=%s version_id=%s error=%s",
+                weekly_forecast_run_id,
+                weekly_forecast_version_id,
+                exc,
+            )
 
     def get_run_status(self, weekly_forecast_run_id: str) -> WeeklyForecastRunStatusRead:
         run = self.weekly_forecast_run_repository.get_run(weekly_forecast_run_id)

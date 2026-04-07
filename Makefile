@@ -58,7 +58,7 @@ db-up:
 	POSTGRES_PORT=$(POSTGRES_PORT) docker compose up -d postgres
 
 db-down:
-	docker compose down
+	docker compose down -v
 
 backend-venv:
 	cd $(BACKEND_DIR) && python3 -m venv .venv
