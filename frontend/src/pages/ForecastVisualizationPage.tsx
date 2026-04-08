@@ -10,7 +10,6 @@ import { VisualizationFallbackBanner } from '../features/forecast-visualization/
 import { VisualizationStatusPanel } from '../features/forecast-visualization/components/VisualizationStatusPanel';
 import { useForecastVisualization } from '../features/forecast-visualization/hooks/useForecastVisualization';
 import { WeatherOverlayControls } from '../features/weather-overlay/components/WeatherOverlayControls';
-import { WeatherOverlayLayer } from '../features/weather-overlay/components/WeatherOverlayLayer';
 import { WeatherOverlayStatus } from '../features/weather-overlay/components/WeatherOverlayStatus';
 import { useWeatherOverlay } from '../features/weather-overlay/hooks/useWeatherOverlay';
 import type { WeatherMeasure } from '../types/weatherOverlay';
@@ -26,11 +25,12 @@ export function formatUpdatedDateTime(value?: string | null): string {
 }
 
 export function ForecastVisualizationPage() {
-  const [openDropdown, setOpenDropdown] = useState<'timeRange' | 'serviceAreas' | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<'timeRange' | 'serviceAreas' | 'weatherMeasure' | null>(null);
   const [overlayEnabled, setOverlayEnabled] = useState(false);
   const [weatherMeasure, setWeatherMeasure] = useState<WeatherMeasure>('temperature');
   const timeRangeRef = useRef<HTMLDivElement>(null);
   const serviceAreasRef = useRef<HTMLDivElement>(null);
+  const weatherMeasureRef = useRef<HTMLDivElement>(null);
   const {
     forecastProduct,
     setForecastProduct,
@@ -66,7 +66,7 @@ export function ForecastVisualizationPage() {
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
-      if (timeRangeRef.current?.contains(target) || serviceAreasRef.current?.contains(target)) return;
+      if (timeRangeRef.current?.contains(target) || serviceAreasRef.current?.contains(target) || weatherMeasureRef.current?.contains(target)) return;
       setOpenDropdown(null);
     };
 
@@ -141,6 +141,9 @@ export function ForecastVisualizationPage() {
               }
             }}
             onMeasureChange={setWeatherMeasure}
+            isOpen={openDropdown === 'weatherMeasure'}
+            onOpenChange={(isOpen) => setOpenDropdown(isOpen ? 'weatherMeasure' : null)}
+            containerRef={weatherMeasureRef}
           />
         </CardContent>
       </Card>
@@ -178,7 +181,6 @@ export function ForecastVisualizationPage() {
 
           <VisualizationStatusPanel visualization={visualization} />
           <WeatherOverlayStatus overlay={overlay} />
-          {overlay ? <WeatherOverlayLayer overlay={overlay} /> : null}
 
           {visualization.viewStatus === 'unavailable' ? (
             <Alert variant="destructive" className="mt-5">
@@ -195,7 +197,7 @@ export function ForecastVisualizationPage() {
                 </Alert>
               }
             >
-              <ForecastVisualizationChart visualization={visualization} />
+              <ForecastVisualizationChart visualization={visualization} overlay={overlay} />
             </ChartErrorBoundary>
           )}
         </>

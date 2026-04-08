@@ -135,7 +135,7 @@ class WeatherOverlayService:
             timeRangeStart=start,
             timeRangeEnd=end,
             weatherMeasure=weather_measure,
-            measurementUnit="degC" if weather_measure == "temperature" else "mm",
+            measurementUnit="°C" if weather_measure == "temperature" else "mm",
             overlayStatus="visible",
             baseForecastPreserved=True,
             userVisible=True,

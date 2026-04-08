@@ -7,7 +7,7 @@ describe('WeatherOverlayControls', () => {
   it('toggles enable and changes measure', () => {
     const onEnabledChange = vi.fn();
     const onMeasureChange = vi.fn();
-    render(
+    const { rerender } = render(
       <WeatherOverlayControls
         enabled={false}
         selectedMeasure="temperature"
@@ -19,10 +19,32 @@ describe('WeatherOverlayControls', () => {
     fireEvent.click(screen.getByLabelText('Enable weather overlay'));
     expect(onEnabledChange).toHaveBeenCalledWith(true);
 
-    fireEvent.change(screen.getByLabelText('Weather measure'), { target: { value: 'snowfall' } });
+    // Re-render with enabled=true
+    rerender(
+      <WeatherOverlayControls
+        enabled={true}
+        selectedMeasure="temperature"
+        onEnabledChange={onEnabledChange}
+        onMeasureChange={onMeasureChange}
+        isOpen={true}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Snowfall' }));
     expect(onMeasureChange).toHaveBeenCalledWith('snowfall');
 
-    fireEvent.change(screen.getByLabelText('Weather measure'), { target: { value: 'precipitation' } });
+    // Re-render with selectedMeasure="snowfall"
+    rerender(
+      <WeatherOverlayControls
+        enabled={true}
+        selectedMeasure="snowfall"
+        onEnabledChange={onEnabledChange}
+        onMeasureChange={onMeasureChange}
+        isOpen={true}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Precipitation' }));
     expect(onMeasureChange).toHaveBeenCalledWith('precipitation');
   });
 });

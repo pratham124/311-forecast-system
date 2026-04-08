@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { ForecastVisualization } from '../../../types/forecastVisualization';
+import type { WeatherOverlayResponse } from '../../../types/weatherOverlay';
 
 type ChartDatum = {
   timestamp: string;
@@ -18,10 +19,12 @@ type ChartDatum = {
   forecast?: number;
   p10?: number;
   p90?: number;
+  overlay?: number;
 };
 
 interface ForecastVisualizationChartProps {
   visualization: ForecastVisualization;
+  overlay?: WeatherOverlayResponse | null;
 }
 
 export function formatTick(timestamp: string, granularity: ForecastVisualization['forecastGranularity']): string {
@@ -36,7 +39,7 @@ export function formatTooltipLabel(label: unknown): string {
   return typeof label === 'string' ? label : 'Chart point';
 }
 
-export function buildChartData(visualization: ForecastVisualization): ChartDatum[] {
+export function buildChartData(visualization: ForecastVisualization, overlay?: WeatherOverlayResponse | null): ChartDatum[] {
   const byTimestamp = new Map<string, ChartDatum>();
 
   for (const point of visualization.historicalSeries) {
@@ -70,11 +73,23 @@ export function buildChartData(visualization: ForecastVisualization): ChartDatum
     });
   }
 
+  if (overlay && overlay.overlayStatus === 'visible') {
+    for (const point of overlay.observations) {
+      byTimestamp.set(point.timestamp, {
+        ...(byTimestamp.get(point.timestamp) ?? {
+          timestamp: point.timestamp,
+          label: formatTick(point.timestamp, visualization.forecastGranularity),
+        }),
+        overlay: point.value,
+      });
+    }
+  }
+
   return Array.from(byTimestamp.values()).sort((left, right) => left.timestamp.localeCompare(right.timestamp));
 }
 
-export function ForecastVisualizationChart({ visualization }: ForecastVisualizationChartProps) {
-  const data = buildChartData(visualization);
+export function ForecastVisualizationChart({ visualization, overlay }: ForecastVisualizationChartProps) {
+  const data = buildChartData(visualization, overlay);
 
   return (
     <figure className="glass-panel mt-5 rounded-[28px] p-6" aria-labelledby="chart-title">
@@ -93,12 +108,25 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
               tickLine={{ stroke: 'rgba(25,58,90,0.2)' }}
             />
             <YAxis
+              yAxisId="left"
               tick={{ fill: '#5a6172', fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               allowDecimals={false}
               width={40}
             />
+            {overlay && overlay.overlayStatus === 'visible' ? (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: '#0369a1', fontSize: 12 }} // sky-700
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+                width={40}
+                domain={['auto', 'auto']}
+              />
+            ) : null}
             <Tooltip
               labelFormatter={formatTooltipLabel}
               contentStyle={{
@@ -134,6 +162,7 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
               activeDot={false}
             />
             <Line
+              yAxisId="left"
               type="monotone"
               dataKey="history"
               stroke="#193A5A"
@@ -143,6 +172,7 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
               isAnimationActive={false}
             />
             <Line
+              yAxisId="left"
               type="monotone"
               dataKey="forecast"
               stroke="#0081BC"
@@ -151,6 +181,19 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
               connectNulls
               isAnimationActive={false}
             />
+            {overlay && overlay.overlayStatus === 'visible' ? (
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="overlay"
+                stroke="#38bdf8"
+                strokeWidth={2}
+                dot={false}
+                opacity={0.8}
+                connectNulls
+                isAnimationActive={false}
+              />
+            ) : null}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -158,6 +201,9 @@ export function ForecastVisualizationChart({ visualization }: ForecastVisualizat
         <span><i className="mr-2 inline-block h-3.5 w-3.5 rounded-full bg-history align-middle" />Recent demand</span>
         <span><i className="mr-2 inline-block h-3.5 w-3.5 rounded-full bg-forecast align-middle" />Forecast</span>
         <span><i className="mr-2 inline-block h-3.5 w-3.5 rounded-full border border-forecast bg-[rgba(217,95,2,0.2)] align-middle" />Range</span>
+        {overlay && overlay.overlayStatus === 'visible' ? (
+          <span><i className="mr-2 inline-block h-3.5 w-3.5 rounded-full bg-sky-400 align-middle" /><span className="capitalize">{overlay.weatherMeasure}</span> ({overlay.measurementUnit})</span>
+        ) : null}
       </div>
     </figure>
   );

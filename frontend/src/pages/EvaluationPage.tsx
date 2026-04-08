@@ -34,6 +34,27 @@ export function formatUpdatedDateTime(value?: string | null): string {
   });
 }
 
+function formatSegmentKey(segmentType: CurrentEvaluation['segments'][number]['segmentType'], segmentKey: string): string {
+  if (segmentType !== 'time_period') return segmentKey;
+  const date = new Date(segmentKey);
+  if (Number.isNaN(date.getTime())) return segmentKey;
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hour24 = date.getUTCHours();
+  const meridiem = hour24 >= 12 ? 'PM' : 'AM';
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${year}-${month}-${day} ${hour12} ${meridiem}`;
+}
+
+function formatDisplayLabel(value: string): string {
+  return value
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 export function canReadEvaluation(roles: string[]): boolean {
   return roles.some((role) => READER_ROLES.has(role));
 }
@@ -47,6 +68,36 @@ export function describeRunStatus(status: EvaluationRunStatus | null): string {
   if (status.status === 'running') return 'Evaluation is running.';
   if (status.status === 'failed') return status.failureReason || status.summary || 'Evaluation failed.';
   return status.summary || 'Evaluation completed.';
+}
+
+type ParsedRunSummary = {
+  headline: string;
+  excludedCategories: string[];
+};
+
+function parseRunSummary(summary?: string | null): ParsedRunSummary | null {
+  if (!summary) return null;
+  const marker = 'excluded categories without baseline history:';
+  const markerIndex = summary.toLowerCase().indexOf(marker);
+
+  if (markerIndex === -1) {
+    return {
+      headline: summary,
+      excludedCategories: [],
+    };
+  }
+
+  const headline = summary.slice(0, markerIndex).trim().replace(/;\s*$/, '');
+  const categoryText = summary.slice(markerIndex + marker.length).trim();
+  const excludedCategories = categoryText
+    .split(',')
+    .map((category) => category.trim())
+    .filter(Boolean);
+
+  return {
+    headline: headline || 'Evaluation summary',
+    excludedCategories,
+  };
 }
 
 export async function wait(ms: number): Promise<void> {
@@ -76,6 +127,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
         ? 'border-amber-200 bg-amber-50 text-amber-800'
         : 'border-emerald-200 bg-emerald-50 text-emerald-800';
   const runResultLabel = runStatus?.resultType ? runStatus.resultType.replace(/_/g, ' ') : 'pending';
+  const parsedRunSummary = parseRunSummary(runStatus?.summary);
 
   useEffect(() => {
     if (!isProductPickerOpen) return;
@@ -218,15 +270,31 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
         <Card className="mt-5 rounded-[22px]" tone={runStatus.status === 'failed' ? 'danger' : 'accent'}>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg text-ink">Latest run status</CardTitle>
-            <CardDescription>{describeRunStatus(runStatus)}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${runStatusTone}`}>
                 {runStatus.status}
               </span>
-              <p className="m-0 text-sm leading-6 text-muted">{runStatus.summary ?? 'Evaluation status updated.'}</p>
+              {runStatus.status === 'failed' ? (
+                <p className="m-0 text-sm leading-6 text-muted">
+                  {runStatus.failureReason || runStatus.summary || 'Evaluation failed.'}
+                </p>
+              ) : null}
             </div>
+            {parsedRunSummary && parsedRunSummary.excludedCategories.length > 0 ? (
+              <div className="rounded-[18px] border border-amber-200 bg-amber-50/80 p-4">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">Excluded categories</span>
+                <p className="mt-1 text-sm text-amber-900">No baseline history was available for these categories:</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {parsedRunSummary.excludedCategories.map((category) => (
+                    <span key={category} className="rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-medium text-amber-900">
+                      {category}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-[18px] border border-slate-200 bg-white/80 p-4">
                 <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-muted">Run status</span>
@@ -263,7 +331,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
             <Card className="rounded-[22px]">
               <CardContent className="p-5">
                 <span className="block text-sm text-muted">Baselines</span>
-                <strong className="mt-2 block text-lg text-ink">{evaluation.baselineMethods.join(', ')}</strong>
+                <strong className="mt-2 block text-lg text-ink">{evaluation.baselineMethods.map(formatDisplayLabel).join(', ')}</strong>
               </CardContent>
             </Card>
             <Card className="rounded-[22px]">
@@ -296,7 +364,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
                 <div className="mt-4 space-y-4">
                   {(overallSegment?.methodMetrics ?? []).map((method) => (
                     <div key={method.methodName} className="rounded-[18px] border border-slate-200 bg-slate-50/80 p-4">
-                      <h3 className="m-0 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">{method.methodName}</h3>
+                      <h3 className="m-0 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">{formatDisplayLabel(method.methodName)}</h3>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         {method.metrics.map((metric) => (
                           <div key={`${method.methodName}-${metric.metricName}`} className="rounded-2xl bg-white px-3 py-3 shadow-sm">
@@ -325,7 +393,7 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
                 <div key={`${segment.segmentType}-${segment.segmentKey}`} className="rounded-[22px] border border-slate-200 bg-white/80 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="m-0 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">{segment.segmentType.replace('_', ' ')} · {segment.segmentKey}</h3>
+                      <h3 className="m-0 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">{segment.segmentType.replace('_', ' ')} · {formatSegmentKey(segment.segmentType, segment.segmentKey)}</h3>
                       <p className="mt-1 text-sm text-muted">{segment.comparisonRowCount} rows · {segment.excludedMetricCount} excluded metrics</p>
                     </div>
                     <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
