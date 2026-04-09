@@ -98,7 +98,7 @@ export function ForecastVisualizationChart({ visualization, overlay }: ForecastV
       </figcaption>
       <div role="img" aria-label="Demand forecast chart" className="h-[360px] w-full overflow-hidden rounded-[24px] bg-white/70 p-3">
         <ResponsiveContainer width="100%" height="100%" minWidth={320} minHeight={320}>
-          <ComposedChart data={data} margin={{ top: 20, right: 16, bottom: 20, left: 0 }}>
+          <ComposedChart data={data} margin={{ top: 20, right: 16, bottom: 20, left: 35 }}>
             <CartesianGrid stroke="rgba(25,58,90,0.12)" strokeDasharray="4 4" vertical={false} />
             <XAxis
               dataKey="label"
@@ -113,7 +113,8 @@ export function ForecastVisualizationChart({ visualization, overlay }: ForecastV
               axisLine={false}
               tickLine={false}
               allowDecimals={false}
-              width={40}
+              width={35}
+              label={{ value: '# of 311 Requests', angle: -90, position: 'insideLeft', offset: -10, fill: '#193A5A', fontSize: 13, fontWeight: 600 }}
             />
             {overlay && overlay.overlayStatus === 'visible' ? (
               <YAxis
