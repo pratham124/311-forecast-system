@@ -9,4 +9,5 @@ require_visualization_reader = require_planner_or_manager
 require_visualization_writer = require_operational_manager
 require_historical_demand_reader = require_planner_or_manager
 require_demand_comparison_reader = require_planner_or_manager
+require_feedback_review_reader = require_planner_or_manager
 require_authenticated_user = get_current_claims

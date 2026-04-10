@@ -22,6 +22,14 @@ const DemandComparisonPage = lazy(async () => {
   const module = await import('./pages/DemandComparisonPage');
   return { default: module.DemandComparisonPage };
 });
+const FeedbackReviewPage = lazy(async () => {
+  const module = await import('./pages/FeedbackReviewPage');
+  return { default: module.FeedbackReviewPage };
+});
+const FeedbackSubmissionPage = lazy(async () => {
+  const module = await import('./pages/FeedbackSubmissionPage');
+  return { default: module.FeedbackSubmissionPage };
+});
 const HistoricalDemandPage = lazy(async () => {
   const module = await import('./pages/HistoricalDemandPage');
   return { default: module.HistoricalDemandPage };
@@ -100,6 +108,18 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
                 className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
               >
                 Help
+              </NavLink>
+              <NavLink
+                to="/feedback"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Report Issue
+              </NavLink>
+              <NavLink
+                to="/app/feedback-review"
+                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+              >
+                Feedback Inbox
               </NavLink>
             </nav>
           </div>
@@ -209,13 +229,15 @@ function AppShell() {
       <Routes>
         <Route
           path="/"
-          element={session ? <Navigate to="/app/forecasts" replace /> : <EntryPage onAuthenticate={handleAuthenticate} onGuestView={() => navigate('/guest')} onModeChange={() => setAuthError(null)} isSubmitting={isSubmitting} errorMessage={authError} />}
+          element={session ? <Navigate to="/app/forecasts" replace /> : <EntryPage onAuthenticate={handleAuthenticate} onGuestView={() => navigate('/guest')} onFeedbackView={() => navigate('/feedback')} onModeChange={() => setAuthError(null)} isSubmitting={isSubmitting} errorMessage={authError} />}
         />
+        <Route path="/feedback" element={<FeedbackSubmissionPage isAuthenticated={Boolean(session)} />} />
         <Route path="/guest" element={<PublicForecastPage />} />
         <Route path="/app" element={session ? <InternalLayout session={session} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
           <Route index element={<Navigate to="forecasts" replace />} />
           <Route path="forecasts" element={<ForecastVisualizationPage />} />
           <Route path="demand-comparisons" element={<DemandComparisonPage />} />
+          <Route path="feedback-review" element={session ? <FeedbackReviewPage roles={session.user.roles} /> : <Navigate to="/" replace />} />
           <Route path="historical-demand" element={<HistoricalDemandPage />} />
           <Route
             path="evaluations"

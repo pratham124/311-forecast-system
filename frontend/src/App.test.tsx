@@ -72,6 +72,7 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: /sign in to view internal forecasts/i })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^sign in$/i })).toHaveLength(2);
     expect(screen.getByRole('button', { name: /view public forecast/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /report an issue/i })).toBeInTheDocument();
   });
 
   it('signs in and opens the internal dashboard route', async () => {
