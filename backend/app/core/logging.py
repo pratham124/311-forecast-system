@@ -131,3 +131,19 @@ def summarize_feedback_success(event: str, **fields: Any) -> dict[str, Any]:
 
 def summarize_feedback_error(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_feedback_event(event, outcome="error", **fields)
+
+
+def summarize_threshold_alert_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_threshold_alert_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_threshold_alert_event(event, outcome="success", **fields)
+
+
+def summarize_threshold_alert_warning(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_threshold_alert_event(event, outcome="warning", **fields)
+
+
+def summarize_threshold_alert_failure(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_threshold_alert_event(event, outcome="failure", **fields)

@@ -37,6 +37,23 @@ class WeatherOverlayService:
         self.geomet_client = geomet_client
         self.alignment_service = alignment_service
 
+    def _fetch_weather_rows(self, start: datetime, end: datetime, *, historical: bool) -> list[dict[str, object]]:
+        preferred = (
+            "fetch_historical_hourly_conditions"
+            if historical
+            else "fetch_forecast_hourly_conditions"
+        )
+        fallbacks = (
+            "fetch_forecast_hourly_conditions",
+            "fetch_historical_hourly_conditions",
+            "fetch_hourly_conditions",
+        )
+        for method_name in (preferred, *fallbacks):
+            method = getattr(self.geomet_client, method_name, None)
+            if callable(method):
+                return list(method(start, end))
+        return []
+
     def get_overlay(
         self,
         *,
@@ -88,7 +105,16 @@ class WeatherOverlayService:
             return response
 
         try:
-            weather_rows = list(self.geomet_client.fetch_forecast_hourly_conditions(start, end))
+            now = _utc_now()
+            weather_rows: list[dict[str, object]] = []
+            # Fetch historical weather for the portion before "now"
+            if start < now:
+                hist_end = min(end, now)
+                weather_rows.extend(self._fetch_weather_rows(start, hist_end, historical=True))
+            # Fetch forecast weather for the portion after "now"
+            if end > now:
+                fcast_start = max(start, now)
+                weather_rows.extend(self._fetch_weather_rows(fcast_start, end, historical=False))
         except GeoMetClientError:
             response = WeatherOverlayResponse(
                 overlayRequestId=request_id,

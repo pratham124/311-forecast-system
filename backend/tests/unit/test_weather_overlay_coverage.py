@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from types import SimpleNamespace
+
+import pytest
 
 from app.api.routes import weather_overlay as route
+from app.clients.geomet_client import GeoMetClientError
 from app.models.weather_overlay import OverlaySelection, OverlayStateRecord
 from app.repositories.weather_overlay_repository import WeatherOverlayRepository
 from app.schemas.weather_overlay import WeatherOverlayRenderEvent, WeatherOverlayResponse
@@ -192,3 +196,136 @@ def test_overlay_models_dataclass_instantiation():
     )
     assert selection.overlay_request_id == "req"
     assert state_record.state_source == "overlay-assembly"
+
+
+def test_render_event_schema_requires_failure_reason() -> None:
+    with pytest.raises(ValueError, match="failureReason is required"):
+        WeatherOverlayRenderEvent(renderStatus="failed-to-render", reportedAt="2026-03-20T03:00:00Z")
+
+
+def test_weather_overlay_service_covers_visible_unavailable_misaligned_and_rendered_paths(monkeypatch: pytest.MonkeyPatch):
+    WeatherOverlayRepository.reset_for_tests()
+
+    class MixedGeoMet:
+        def fetch_historical_hourly_conditions(self, horizon_start: datetime, horizon_end: datetime):
+            return [{"timestamp": horizon_start + timedelta(minutes=30), "temperature_c": 1.5}]
+
+        def fetch_forecast_hourly_conditions(self, horizon_start: datetime, horizon_end: datetime):
+            return [{"timestamp": horizon_start + timedelta(minutes=30), "temperature_c": 2.5}]
+
+    repo = WeatherOverlayRepository()
+    service = WeatherOverlayService(
+        repository=repo,
+        geomet_client=MixedGeoMet(),
+        alignment_service=WeatherOverlayAlignmentService(),
+    )
+    monkeypatch.setattr("app.services.weather_overlay_service._utc_now", lambda: datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc))
+
+    visible = service.get_overlay(
+        geography_id="citywide",
+        time_range_start=datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 20, 2, 0, tzinfo=timezone.utc),
+        weather_measure="temperature",
+    )
+    assert visible.overlay_status == "visible"
+    assert visible.source is not None
+    assert visible.source.station_id == "edmonton-hourly"
+    assert visible.measurement_unit == "°C"
+
+    service.record_render_event(
+        visible.overlay_request_id,
+        WeatherOverlayRenderEvent(renderStatus="rendered", reportedAt="2026-03-20T03:00:00Z"),
+    )
+    rendered_state = repo.get_state(visible.overlay_request_id)
+    assert rendered_state is not None
+    assert rendered_state.state_source == "render-event"
+    assert rendered_state.rendered_at == datetime(2026, 3, 20, 3, 0, tzinfo=timezone.utc)
+
+    unavailable = WeatherOverlayService(
+        repository=WeatherOverlayRepository(),
+        geomet_client=NoopGeoMet(),
+        alignment_service=WeatherOverlayAlignmentService(),
+    ).get_overlay(
+        geography_id="citywide",
+        time_range_start=datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+        weather_measure="temperature",
+    )
+    assert unavailable.overlay_status == "unavailable"
+    assert unavailable.failure_category == "weather-missing"
+
+    misaligned = service.get_overlay(
+        geography_id="unsupported",
+        time_range_start=datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+        weather_measure="temperature",
+    )
+    assert misaligned.overlay_status == "misaligned"
+    assert misaligned.source is not None
+    assert misaligned.source.station_id is None
+
+    forecast_only = service.get_overlay(
+        geography_id="citywide",
+        time_range_start=datetime(2026, 3, 20, 1, 30, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 20, 2, 30, tzinfo=timezone.utc),
+        weather_measure="temperature",
+    )
+    assert forecast_only.overlay_status == "visible"
+    assert len(forecast_only.observations) == 1
+
+
+def test_weather_overlay_service_retrieval_failure_and_fetch_fallbacks(monkeypatch: pytest.MonkeyPatch):
+    WeatherOverlayRepository.reset_for_tests()
+
+    class ErrorGeoMet:
+        def fetch_historical_hourly_conditions(self, horizon_start: datetime, horizon_end: datetime):
+            raise GeoMetClientError("boom")
+
+    service = WeatherOverlayService(
+        repository=WeatherOverlayRepository(),
+        geomet_client=ErrorGeoMet(),
+        alignment_service=WeatherOverlayAlignmentService(),
+    )
+    monkeypatch.setattr("app.services.weather_overlay_service._utc_now", lambda: datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc))
+
+    failed = service.get_overlay(
+        geography_id="citywide",
+        time_range_start=datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        time_range_end=datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+        weather_measure="temperature",
+    )
+    assert failed.overlay_status == "retrieval-failed"
+    assert failed.failure_category == "retrieval-failed"
+
+    with pytest.raises(GeoMetClientError):
+        service._fetch_weather_rows(
+            datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+            datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+            historical=True,
+        )
+
+    fallback_service = WeatherOverlayService(
+        repository=WeatherOverlayRepository(),
+        geomet_client=SimpleNamespace(),
+        alignment_service=WeatherOverlayAlignmentService(),
+    )
+    fallback_rows = fallback_service._fetch_weather_rows(
+        datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+        historical=True,
+    )
+    assert fallback_rows == []
+
+    hourly_only = WeatherOverlayService(
+        repository=WeatherOverlayRepository(),
+        geomet_client=SimpleNamespace(
+            fetch_hourly_conditions=lambda start, end: [{"timestamp": start, "temperature_c": 4.0}],
+        ),
+        alignment_service=WeatherOverlayAlignmentService(),
+    )
+    rows = hourly_only._fetch_weather_rows(
+        datetime(2026, 3, 20, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 3, 20, 1, 0, tzinfo=timezone.utc),
+        historical=False,
+    )
+    assert rows[0]["temperature_c"] == 4.0

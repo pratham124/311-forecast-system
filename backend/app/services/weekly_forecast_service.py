@@ -25,6 +25,13 @@ from app.services.forecast_training_service import ForecastModelStorageError
 from app.services.weekly_forecast_activation_service import WeeklyForecastActivationService, WeeklyForecastStorageError
 from app.services.weekly_forecast_bucket_service import WeeklyForecastBucketService
 from app.services.weekly_forecast_training_service import WeeklyForecastTrainingService
+from app.services.threshold_alert_trigger_service import run_threshold_alert_evaluation
+
+
+def _map_alert_trigger_source(trigger_type: str) -> str:
+    if trigger_type == "scheduled":
+        return "forecast_refresh"
+    return "forecast_publish"
 
 
 @dataclass
@@ -142,6 +149,19 @@ class WeeklyForecastService:
                 summary="weekly forecast generated and activated",
                 buckets=buckets,
             )
+            try:
+                run_threshold_alert_evaluation(
+                    self.weekly_forecast_repository.session,
+                    forecast_reference_id=weekly_forecast_version_id,
+                    forecast_product="weekly",
+                    trigger_source=_map_alert_trigger_source(run.trigger_type),
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning(
+                    "threshold alert evaluation failed for weekly_forecast_version_id=%s: %s",
+                    weekly_forecast_version_id,
+                    exc,
+                )
         except (WeatherClientError, NagerDateClientError) as exc:
             self._log("weekly_forecast.failed", run_id=run.weekly_forecast_run_id, result_type="engine_failure")
             return self.weekly_forecast_run_repository.finalize_failed(

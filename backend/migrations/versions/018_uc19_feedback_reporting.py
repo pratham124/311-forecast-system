@@ -1,7 +1,7 @@
 """uc19 feedback reporting
 
 Revision ID: 018_uc19_feedback_reporting
-Revises: 016_uc17_public_forecast_portal
+Revises: 017_uc10_threshold_alerts
 Create Date: 2026-04-09
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 revision = "018_uc19_feedback_reporting"
-down_revision = "016_uc17_public_forecast_portal"
+down_revision = "017_uc10_threshold_alerts"
 branch_labels = None
 depends_on = None
 

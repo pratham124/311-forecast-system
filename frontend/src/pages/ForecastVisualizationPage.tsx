@@ -42,7 +42,7 @@ export function ForecastVisualizationPage() {
     error,
     reportRenderEvent,
   } = useForecastVisualization();
-  const overlayWindowStart = visualization?.forecastWindowStart ?? visualization?.historyWindowStart ?? new Date().toISOString();
+  const overlayWindowStart = visualization?.historyWindowStart ?? visualization?.forecastWindowStart ?? new Date().toISOString();
   const overlayWindowEnd = visualization?.forecastWindowEnd ?? visualization?.historyWindowEnd ?? new Date().toISOString();
   const {
     overlay,

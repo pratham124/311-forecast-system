@@ -191,8 +191,9 @@ describe('HistoricalDemandResults', () => {
       ],
     } as unknown as HistoricalDemandResponse;
     render(<HistoricalDemandResults response={response} />);
-    expect(screen.getByText('Date')).toBeInTheDocument();
-    expect(screen.queryByText('Geography')).not.toBeInTheDocument();
+    expect(screen.getByText(/historical demand pattern/i)).toBeInTheDocument();
+    expect(screen.getByText(/demand count/i)).toBeInTheDocument();
+    expect(screen.queryByText('Ward 1')).not.toBeInTheDocument();
     expect(screen.getAllByText('2026-03-05').length).toBeGreaterThan(0);
   });
 });

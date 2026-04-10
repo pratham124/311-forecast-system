@@ -57,6 +57,14 @@ Map implementation and tests directly to [UC-10](/root/311-forecast-system/docs/
 - Contract tests for [threshold-alerts-api.yaml](/root/311-forecast-system/specs/010-demand-threshold-alerts/contracts/threshold-alerts-api.yaml)
 - Frontend interaction tests for authenticated alert-status viewing and channel-failure trace presentation when UI surfaces them
 
+## Operational Usage
+
+1. Seed or configure active threshold records for the relevant service category and forecast window type.
+2. Trigger evaluation with `POST /api/v1/forecast-alerts/evaluations` using a published daily or weekly forecast reference id.
+3. Review recorded outcomes with `GET /api/v1/forecast-alerts/events` and `GET /api/v1/forecast-alerts/events/{notificationEventId}`.
+4. Use the internal Alert Review page to inspect overall delivery state and per-channel failures.
+5. Treat `retry_pending` as an automated follow-up state and `manual_review_required` as an operator action state.
+
 ## Exit Conditions
 
 Implementation is ready for task breakdown when:
