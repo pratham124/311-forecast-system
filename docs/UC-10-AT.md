@@ -201,14 +201,20 @@
 ---
 
 ## Traceability Matrix
-| Acceptance Test | UC-10 Flow Covered |
-|---|---|
-| AT-01 | Main Success Scenario (1–2) |
-| AT-02 | Main Success Scenario (2–4) |
-| AT-03 | Main Success Scenario (2–4) with optional geography |
-| AT-04 | Main Success Scenario (5); Success End Condition |
-| AT-05 | Main Success Scenario (6); Success End Condition |
-| AT-06 | Extension 2a |
-| AT-07 | Extension 3a |
-| AT-08 | Extension 5a; Failed End Condition |
-| AT-09 | “Configurable threshold” behavior across updates |
+| Acceptance Test | UC-10 Flow Covered | Test File(s) |
+|---|---|---|
+| AT-01 | Main Success Scenario (1–2) | `test_threshold_alert_evaluations.py` |
+| AT-02 | Main Success Scenario (2–4) | `test_threshold_crossing_alerts.py` |
+| AT-03 | Main Success Scenario (2–4) with optional geography | `test_geography_threshold_precedence.py` |
+| AT-04 | Main Success Scenario (5); Success End Condition | `test_threshold_crossing_alerts.py` |
+| AT-05 | Main Success Scenario (6); Success End Condition | `test_threshold_alert_evaluations.py` |
+| AT-06 | Extension 2a | `test_threshold_alert_failures.py::test_missing_threshold_records_configuration_gap` |
+| AT-07 | Extension 3a | `test_threshold_alert_failures.py::test_equal_to_threshold_does_not_trigger_alert` |
+| AT-08 | Extension 5a; Failed End Condition | `test_threshold_alert_failures.py::test_total_delivery_failure_records_manual_review` |
+| AT-09 | “Configurable threshold” behavior across updates | `test_threshold_state_transitions.py::test_threshold_change_uses_new_value` |
+| AT-10 | Extension 3b; Duplicate suppression | `test_threshold_alert_failures.py::test_duplicate_suppressed_while_above_threshold` |
+| AT-11 | Extension 3b; Re-arm after returning below | `test_threshold_alert_failures.py::test_rearm_after_returning_below_threshold` |
+| AT-12 | Extension 5b; Partial multi-channel delivery | `test_threshold_alert_failures.py::test_partial_delivery_when_one_channel_fails` |
+| AT-13 | SC-002; 5-minute delivery target | `test_alert_delivery_latency.py` |
+| AT-14 | FR-012a; Alert review fields | `test_threshold_alert_review_payload.py` |
+| AT-15 | FR-003a; Daily and weekly window types | `test_forecast_window_type_evaluation.py` |

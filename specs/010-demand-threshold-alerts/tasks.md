@@ -94,9 +94,9 @@
 
 ### Tests for User Story 3
 
-- [ ] T024 [P] [US3] Add integration tests for missing-threshold, suppressed-duplicate, and total-failure outcomes in `tests/integration/test_threshold_alert_failures.py`
-- [ ] T025 [P] [US3] Add unit tests for threshold-state transitions after threshold changes in `tests/unit/test_threshold_state_transitions.py`
-- [ ] T026 [P] [US3] Add performance validation for the 5-minute successful delivery target in `tests/integration/test_alert_delivery_latency.py`
+- [X] T024 [P] [US3] Add integration tests for missing-threshold, suppressed-duplicate, and total-failure outcomes in `tests/integration/test_threshold_alert_failures.py`
+- [X] T025 [P] [US3] Add unit tests for threshold-state transitions after threshold changes in `tests/unit/test_threshold_state_transitions.py`
+- [X] T026 [P] [US3] Add performance validation for the 5-minute successful delivery target in `tests/integration/test_alert_delivery_latency.py`
 
 ### Implementation for User Story 3
 
@@ -137,10 +137,10 @@
 
 **Purpose**: Final alignment, documentation, and end-to-end validation across stories.
 
-- [ ] T039 [P] Update quickstart and operational usage guidance in `specs/010-demand-threshold-alerts/quickstart.md`
-- [ ] T040 [P] Update use-case and acceptance-test traceability references in `docs/UC-10.md` and `docs/UC-10-AT.md`
-- [ ] T041 Run end-to-end validation for contract, integration, and frontend test suites in `tests/contract/`, `tests/integration/`, `tests/unit/`, and `frontend/tests/`
-- [ ] T042 Perform final observability and security review for authenticated alert evaluation and review flows in `backend/src/core/logging.py`, `backend/src/core/auth.py`, and `backend/src/api/routes/forecast_alerts.py`
+- [X] T039 [P] Update quickstart and operational usage guidance in `specs/010-demand-threshold-alerts/quickstart.md`
+- [X] T040 [P] Update use-case and acceptance-test traceability references in `docs/UC-10.md` and `docs/UC-10-AT.md`
+- [X] T041 Run end-to-end validation for contract, integration, and frontend test suites in `tests/contract/`, `tests/integration/`, `tests/unit/`, and `frontend/tests/`
+- [X] T042 Perform final observability and security review for authenticated alert evaluation and review flows in `backend/src/core/logging.py`, `backend/src/core/auth.py`, and `backend/src/api/routes/forecast_alerts.py`
 
 ---
 
