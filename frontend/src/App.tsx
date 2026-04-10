@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { fetchCurrentUser, loginUser, logoutSession, refreshStoredSession, registerUser } from './api/auth';
 import { clearAuthSession, getStoredAuthSession, saveAuthSession } from './lib/authSession';
 import type { AuthSession } from './types/auth';
@@ -121,12 +121,12 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
               >
                 Help
               </NavLink>
-              <NavLink
+              <Link
                 to="/feedback"
-                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+                className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
               >
                 Report Issue
-              </NavLink>
+              </Link>
               <NavLink
                 to="/app/feedback-review"
                 className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}

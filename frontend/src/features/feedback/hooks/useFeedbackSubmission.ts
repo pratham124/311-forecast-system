@@ -69,6 +69,7 @@ export function useFeedbackSubmission() {
         contactEmail: values.contactEmail.trim() || null,
       });
       setResult(response);
+      setIsSubmitting(false);
       return true;
     } catch (error) {
       if (error instanceof FeedbackApiError) {
@@ -80,9 +81,8 @@ export function useFeedbackSubmission() {
         setErrors({ form: error instanceof Error ? error.message : 'Feedback submission failed.' });
       }
       setResult(null);
-      return false;
-    } finally {
       setIsSubmitting(false);
+      return false;
     }
   };
 

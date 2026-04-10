@@ -75,7 +75,7 @@ async function fetchWithAuthRetry(input: string, init: RequestInit = {}): Promis
   });
 }
 
-function normalizeFieldMessage(field: string, detail: ValidationDetail): string {
+function normalizeFieldMessage(field: 'reportType' | 'description' | 'contactEmail', detail: ValidationDetail): string {
   if (field === 'reportType' && detail.type === 'missing') {
     return 'Choose whether you are sending feedback or a bug report.';
   }
@@ -88,7 +88,6 @@ function normalizeFieldMessage(field: string, detail: ValidationDetail): string 
   if (field === 'contactEmail') {
     return detail.msg ?? 'Enter a valid contact email or leave it blank.';
   }
-  return detail.msg ?? 'Please review this field.';
 }
 
 function normalizeFieldErrors(details: ValidationDetail[]): FeedbackSubmissionFieldErrors {
