@@ -88,6 +88,7 @@ function normalizeFieldMessage(field: 'reportType' | 'description' | 'contactEma
   if (field === 'contactEmail') {
     return detail.msg ?? 'Enter a valid contact email or leave it blank.';
   }
+  return detail.msg ?? 'Please review this field.';
 }
 
 function normalizeFieldErrors(details: ValidationDetail[]): FeedbackSubmissionFieldErrors {

@@ -68,6 +68,13 @@ from app.models.threshold_alert_models import (
     ThresholdScopeEvaluation,
     ThresholdState,
 )
+from app.models.forecast_accuracy import (
+    ForecastAccuracyAlignedBucket,
+    ForecastAccuracyComparisonResult,
+    ForecastAccuracyMetricResolution,
+    ForecastAccuracyRenderEvent,
+    ForecastAccuracyRequest,
+)
 
 __all__ = [
     "CandidateDataset",
@@ -95,6 +102,11 @@ __all__ = [
     "ForecastBucket",
     "ForecastModelArtifact",
     "ForecastModelRun",
+    "ForecastAccuracyAlignedBucket",
+    "ForecastAccuracyComparisonResult",
+    "ForecastAccuracyMetricResolution",
+    "ForecastAccuracyRenderEvent",
+    "ForecastAccuracyRequest",
     "ForecastRun",
     "RefreshSession",
     "ForecastVersion",

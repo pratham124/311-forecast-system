@@ -147,3 +147,15 @@ def summarize_threshold_alert_warning(event: str, **fields: Any) -> dict[str, An
 
 def summarize_threshold_alert_failure(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_threshold_alert_event(event, outcome="failure", **fields)
+
+
+def summarize_forecast_accuracy_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_forecast_accuracy_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_forecast_accuracy_event(event, outcome="success", **fields)
+
+
+def summarize_forecast_accuracy_failure(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_forecast_accuracy_event(event, outcome="failure", **fields)

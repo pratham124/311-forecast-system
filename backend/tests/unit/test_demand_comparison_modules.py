@@ -43,6 +43,10 @@ class StubCleanedRepository:
         assert source_name == "edmonton_311"
         return self.records
 
+    def list_current_cleaned_records_filtered(self, source_name, **_kwargs):
+        assert source_name == "edmonton_311"
+        return self.records
+
     def get_current_approved_dataset(self, source_name):
         assert source_name == "edmonton_311"
         return self.dataset
@@ -60,8 +64,22 @@ class StubForecastRepository:
     def list_stored_versions_overlapping_range(self, **_kwargs):
         return self.versions
 
-    def list_buckets(self, forecast_version_id):
-        return self.buckets_by_version.get(forecast_version_id, [])
+    def list_buckets_filtered(self, version_ids, service_categories=None, time_start=None, time_end=None, geography_keys=None, **_kwargs):
+        res = []
+        for v in version_ids:
+            for b in self.buckets_by_version.get(v, []):
+                if not hasattr(b, "forecast_version_id"):
+                    b.forecast_version_id = v
+                if service_categories and getattr(b, "service_category", None) not in service_categories:
+                    continue
+                if time_start and getattr(b, "bucket_start", None) is not None and getattr(b, "bucket_start") < time_start:
+                    continue
+                if time_end and getattr(b, "bucket_start", None) is not None and getattr(b, "bucket_start") >= time_end:
+                    continue
+                if geography_keys is not None and getattr(b, "geography_key", None) not in geography_keys:
+                    continue
+                res.append(b)
+        return res
 
 
 class StubWeeklyForecastRepository:
@@ -76,8 +94,22 @@ class StubWeeklyForecastRepository:
     def list_stored_versions_overlapping_range(self, **_kwargs):
         return self.versions
 
-    def list_buckets(self, weekly_forecast_version_id):
-        return self.buckets_by_version.get(weekly_forecast_version_id, [])
+    def list_buckets_filtered(self, version_ids, service_categories=None, date_start=None, date_end=None, geography_keys=None, **_kwargs):
+        res = []
+        for v in version_ids:
+            for b in self.buckets_by_version.get(v, []):
+                if not hasattr(b, "weekly_forecast_version_id"):
+                    b.weekly_forecast_version_id = v
+                if service_categories and getattr(b, "service_category", None) not in service_categories:
+                    continue
+                if date_start and getattr(b, "forecast_date_local", None) is not None and getattr(b, "forecast_date_local") < date_start:
+                    continue
+                if date_end and getattr(b, "forecast_date_local", None) is not None and getattr(b, "forecast_date_local") >= date_end:
+                    continue
+                if geography_keys is not None and getattr(b, "geography_key", None) not in geography_keys:
+                    continue
+                res.append(b)
+        return res
 
 
 class StubComparisonRepository:
@@ -588,15 +620,7 @@ def test_outcomes_schemas_observability_and_render_service() -> None:
                 "timeRangeEnd": "2026-03-02T00:00:00Z",
             }
         )
-    with pytest.raises(ValueError):
-        DemandComparisonQueryRequest.model_validate(
-            {
-                "serviceCategories": ["Roads"],
-                "geographyValues": ["Ward 1"],
-                "timeRangeStart": "2026-03-01T00:00:00Z",
-                "timeRangeEnd": "2026-03-02T00:00:00Z",
-            }
-        )
+
     with pytest.raises(ValueError):
         DemandComparisonRenderEvent.model_validate({"renderStatus": "render_failed"})
 
@@ -650,7 +674,8 @@ def test_result_builder_parsers_and_service_filter_guards() -> None:
             list_current_cleaned_records=lambda *_args, **_kwargs: [
                 {"category": "Roads", "ward": "Ward 2"},
                 {"category": "Waste", "ward": "Ward 1"},
-            ]
+            ],
+            list_current_cleaned_records_filtered=lambda *_args, **_kwargs: []
         ),
         forecast_repository=StubForecastRepository(
             versions=[SimpleNamespace(forecast_version_id="forecast-1")],

@@ -35,16 +35,6 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
-          name: geographyType
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: geographyValue
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: Forecast-accuracy view returned successfully, with or without metrics
@@ -52,6 +42,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ForecastAccuracyResponse'
+              examples:
+                renderedWithMetrics:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-1"
+                    forecastAccuracyResultId: "fa-result-1"
+                    correlationId: "fa-request-1"
+                    timeRangeStart: "2026-03-01T00:00:00Z"
+                    timeRangeEnd: "2026-03-02T00:00:00Z"
+                    serviceCategory: "Roads"
+                    forecastProductName: "daily_1_day"
+                    comparisonGranularity: "hourly"
+                    viewStatus: "rendered_with_metrics"
+                    metricResolutionStatus: "computed_on_demand"
+                    metrics:
+                      mae: 1.0
+                      rmse: 1.0
+                      mape: 33.3333
+                    alignedBuckets:
+                      - bucketStart: "2026-03-01T00:00:00Z"
+                        bucketEnd: "2026-03-01T01:00:00Z"
+                        serviceCategory: "Roads"
+                        forecastValue: 4
+                        actualValue: 3
+                        absoluteErrorValue: 1
+                        percentageErrorValue: 33.3333
+                renderedWithoutMetrics:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-2"
+                    forecastAccuracyResultId: "fa-result-2"
+                    correlationId: "fa-request-2"
+                    timeRangeStart: "2026-03-01T00:00:00Z"
+                    timeRangeEnd: "2026-03-01T01:00:00Z"
+                    serviceCategory: "Roads"
+                    forecastProductName: "daily_1_day"
+                    comparisonGranularity: "hourly"
+                    viewStatus: "rendered_without_metrics"
+                    metricResolutionStatus: "unavailable"
+                    statusMessage: "Metrics are unavailable because at least two aligned buckets are required for on-demand computation"
+                    alignedBuckets:
+                      - bucketStart: "2026-03-01T00:00:00Z"
+                        bucketEnd: "2026-03-01T01:00:00Z"
+                        serviceCategory: "Roads"
+                        forecastValue: 4
+                        actualValue: 1
+                        absoluteErrorValue: 3
+                        percentageErrorValue: 300
+                unavailable:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-3"
+                    forecastAccuracyResultId: "fa-result-3"
+                    correlationId: "fa-request-3"
+                    timeRangeStart: "2026-03-01T00:00:00Z"
+                    timeRangeEnd: "2026-03-02T00:00:00Z"
+                    forecastProductName: "daily_1_day"
+                    comparisonGranularity: "hourly"
+                    viewStatus: "unavailable"
+                    statusMessage: "Historical forecast data is unavailable for the selected scope."
+                    alignedBuckets: []
+                error:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-4"
+                    forecastAccuracyResultId: "fa-result-4"
+                    correlationId: "fa-request-4"
+                    timeRangeStart: "2026-03-01T00:00:00Z"
+                    timeRangeEnd: "2026-03-02T00:00:00Z"
+                    forecastProductName: "daily_1_day"
+                    comparisonGranularity: "hourly"
+                    viewStatus: "error"
+                    statusMessage: "No overlapping forecast and actual buckets are available for safe comparison"
+                    alignedBuckets: []
         '401':
           description: Authentication required
         '403':
@@ -82,6 +142,19 @@ paths:
       responses:
         '202':
           description: Render outcome accepted
+          content:
+            application/json:
+              examples:
+                rendered:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-1"
+                    recordedOutcomeStatus: "rendered"
+                    message: "Render success recorded."
+                renderFailed:
+                  value:
+                    forecastAccuracyRequestId: "fa-request-1"
+                    recordedOutcomeStatus: "render_failed"
+                    message: "Render failure recorded."
         '401':
           description: Authentication required
         '403':
@@ -148,12 +221,6 @@ components:
           type: string
           format: date-time
         serviceCategory:
-          type: string
-          nullable: true
-        geographyType:
-          type: string
-          nullable: true
-        geographyValue:
           type: string
           nullable: true
         forecastProductName:
@@ -241,12 +308,6 @@ components:
           type: string
           format: date-time
         serviceCategory:
-          type: string
-          nullable: true
-        geographyType:
-          type: string
-          nullable: true
-        geographyValue:
           type: string
           nullable: true
         forecastValue:
