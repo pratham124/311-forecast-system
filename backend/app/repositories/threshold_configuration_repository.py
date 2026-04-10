@@ -49,7 +49,58 @@ class ThresholdConfigurationRepository:
         at_time: datetime | None = None,
         create_default_if_missing: bool = False,
     ) -> ThresholdConfiguration | None:
-        return self.get_global_threshold(create_default_if_missing=create_default_if_missing, at_time=at_time)
+        current = at_time or _utc_now()
+        base_filters = [
+            ThresholdConfiguration.status == "active",
+            ThresholdConfiguration.effective_from <= current,
+            or_(ThresholdConfiguration.effective_to.is_(None), ThresholdConfiguration.effective_to > current),
+        ]
+
+        # FR-011a: category-plus-geography takes precedence over category-only
+        if geography_value is not None:
+            geo_match = self.session.scalar(
+                select(ThresholdConfiguration)
+                .where(
+                    ThresholdConfiguration.service_category == service_category,
+                    ThresholdConfiguration.geography_value == geography_value,
+                    ThresholdConfiguration.forecast_window_type == forecast_window_type,
+                    *base_filters,
+                )
+                .order_by(ThresholdConfiguration.effective_from.desc())
+                .limit(1)
+            )
+            if geo_match is not None:
+                return geo_match
+
+        # Category-only match (geography_value IS NULL)
+        cat_match = self.session.scalar(
+            select(ThresholdConfiguration)
+            .where(
+                ThresholdConfiguration.service_category == service_category,
+                ThresholdConfiguration.geography_value.is_(None),
+                ThresholdConfiguration.forecast_window_type == forecast_window_type,
+                *base_filters,
+            )
+            .order_by(ThresholdConfiguration.effective_from.desc())
+            .limit(1)
+        )
+        if cat_match is not None:
+            return cat_match
+
+        if not create_default_if_missing:
+            return None
+
+        # Create a default category-level threshold
+        return self.create_configuration(
+            service_category=service_category,
+            forecast_window_type=forecast_window_type,
+            threshold_value=DEFAULT_THRESHOLD_VALUE,
+            operational_manager_id=DEFAULT_MANAGER_ID,
+            notification_channels=DEFAULT_NOTIFICATION_CHANNELS,
+            geography_type=None,
+            geography_value=None,
+            effective_from=current,
+        )
 
     @staticmethod
     def parse_channels(configuration: ThresholdConfiguration) -> list[str]:
