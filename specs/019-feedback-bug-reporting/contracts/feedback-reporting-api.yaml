@@ -20,14 +20,16 @@ paths:
             schema:
               $ref: '#/components/schemas/FeedbackSubmissionCreateRequest'
       responses:
-        '202':
-          description: Submission accepted
+        '201':
+          description: Submission created and stored locally
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedbackSubmissionCreateResponse'
-        '400':
+        '422':
           description: Invalid input
+        '503':
+          description: Submission could not be fully recorded
     get:
       summary: List submitted reports for authorized reviewers
       operationId: listFeedbackSubmissions
@@ -136,6 +138,7 @@ components:
         - processingStatus
         - acceptedAt
         - userOutcome
+        - statusMessage
       properties:
         feedbackSubmissionId:
           type: string
@@ -149,7 +152,9 @@ components:
           format: date-time
         userOutcome:
           type: string
-          enum: [accepted, accepted_with_delay, failed]
+          enum: [accepted, accepted_with_delay]
+        statusMessage:
+          type: string
 
     SubmissionStatusEvent:
       type: object
@@ -175,6 +180,7 @@ components:
         - submitterKind
         - processingStatus
         - submittedAt
+        - triageStatus
       properties:
         feedbackSubmissionId:
           type: string
@@ -188,6 +194,9 @@ components:
         submittedAt:
           type: string
           format: date-time
+        triageStatus:
+          type: string
+          enum: [new, in_review, resolved, closed]
 
     FeedbackSubmissionListResponse:
       type: object
@@ -210,6 +219,8 @@ components:
         - submitterKind
         - processingStatus
         - submittedAt
+        - triageStatus
+        - visibilityStatus
         - statusEvents
       properties:
         feedbackSubmissionId:
@@ -226,9 +237,17 @@ components:
           $ref: '#/components/schemas/SubmitterKind'
         processingStatus:
           $ref: '#/components/schemas/ProcessingStatus'
+        externalReference:
+          type: string
         submittedAt:
           type: string
           format: date-time
+        triageStatus:
+          type: string
+          enum: [new, in_review, resolved, closed]
+        visibilityStatus:
+          type: string
+          enum: [visible, hidden, archived]
         statusEvents:
           type: array
           items:

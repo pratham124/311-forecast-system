@@ -58,6 +58,17 @@ def get_current_claims(
     return claims
 
 
+def get_optional_claims(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+) -> dict[str, Any] | None:
+    if credentials is None:
+        return None
+    claims = _decode_jwt_payload(credentials.credentials)
+    if claims.get("token_type") != "access":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    return claims
+
+
 def require_roles(*allowed_roles: str):
     def dependency(claims: dict[str, Any] = Depends(get_current_claims)) -> dict[str, Any]:
         roles = claims.get("roles", [])

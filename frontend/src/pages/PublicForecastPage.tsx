@@ -39,6 +39,12 @@ export function PublicForecastPage() {
             >
               Back
             </Link>
+            <Link
+              to="/feedback"
+              className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
+            >
+              Report an issue
+            </Link>
           </nav>
         </header>
         <Card className="rounded-[32px] border-white/70 bg-white/88 shadow-[0_24px_80px_rgba(15,23,42,0.10)] backdrop-blur">

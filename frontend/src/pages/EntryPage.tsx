@@ -6,12 +6,13 @@ type AuthMode = 'login' | 'register';
 type EntryPageProps = {
   onAuthenticate: (mode: AuthMode, email: string, password: string) => Promise<void>;
   onGuestView: () => void;
+  onFeedbackView: () => void;
   onModeChange?: () => void;
   isSubmitting: boolean;
   errorMessage: string | null;
 };
 
-export function EntryPage({ onAuthenticate, onGuestView, onModeChange, isSubmitting, errorMessage }: EntryPageProps) {
+export function EntryPage({ onAuthenticate, onGuestView, onFeedbackView, onModeChange, isSubmitting, errorMessage }: EntryPageProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -107,6 +108,13 @@ export function EntryPage({ onAuthenticate, onGuestView, onModeChange, isSubmitt
               className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
             >
               View public forecast
+            </button>
+            <button
+              type="button"
+              onClick={onFeedbackView}
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
+            >
+              Report an issue
             </button>
           </CardContent>
         </Card>

@@ -58,6 +58,7 @@ from app.models.public_forecast_portal import (
     PublicForecastSanitizationOutcome,
     PublicForecastVisualizationPayload,
 )
+from app.models.feedback_submission import FeedbackSubmission, ReviewQueueRecord, SubmissionStatusEvent
 from app.models.user_guide import GuideAccessEvent, GuideRenderOutcomeRecord
 from app.models.threshold_alert_models import (
     NotificationChannelAttempt,
@@ -96,6 +97,7 @@ __all__ = [
     "EvaluationResult",
     "EvaluationRun",
     "EvaluationSegment",
+    "FeedbackSubmission",
     "FailureNotificationRecord",
     "ForecastBucket",
     "ForecastModelArtifact",
@@ -120,7 +122,9 @@ __all__ = [
     "PublicForecastPortalRequest",
     "PublicForecastSanitizationOutcome",
     "PublicForecastVisualizationPayload",
+    "ReviewQueueRecord",
     "ReviewNeededRecord",
+    "SubmissionStatusEvent",
     "SuccessfulPullCursor",
     "UserAccount",
     "ValidationResultRecord",
