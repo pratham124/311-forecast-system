@@ -263,7 +263,6 @@ class ForecastService:
                 summary="forecast generated and activated",
                 buckets=buckets,
             )
-            self._run_threshold_alert_evaluation(run.forecast_run_id, forecast_version_id)
         except ForecastModelUnavailableError as exc:
             print(
                 "[debug][forecast] forecast fail "
@@ -309,27 +308,29 @@ class ForecastService:
             f"geography_scope={geography_scope}"
         )
         self._log("forecast.generated", run_id=run.forecast_run_id, forecast_version_id=forecast_version_id)
-        return self.forecast_run_repository.finalize_generated(
+        result = self.forecast_run_repository.finalize_generated(
             run.forecast_run_id,
             forecast_version_id=forecast_version_id,
             geography_scope=geography_scope,
             summary="forecast generated and activated",
         )
+        self._run_threshold_alert_evaluation(run.forecast_run_id, forecast_version_id)
+        return result
 
     def _run_threshold_alert_evaluation(self, forecast_run_id: str, forecast_version_id: str) -> None:
-        session = self.forecast_repository.session
-        pipeline = ThresholdAlertEvaluationPipeline(
-            forecast_scope_service=ForecastScopeService(
-                forecast_repository=self.forecast_repository,
-                weekly_forecast_repository=WeeklyForecastRepository(session),
-            ),
-            threshold_configuration_repository=ThresholdConfigurationRepository(session),
-            threshold_evaluation_repository=ThresholdEvaluationRepository(session),
-            threshold_state_repository=ThresholdStateRepository(session),
-            notification_event_repository=NotificationEventRepository(session),
-            logger=logging.getLogger("forecast.alerts"),
-        )
         try:
+            session = self.forecast_repository.session
+            pipeline = ThresholdAlertEvaluationPipeline(
+                forecast_scope_service=ForecastScopeService(
+                    forecast_repository=self.forecast_repository,
+                    weekly_forecast_repository=WeeklyForecastRepository(session),
+                ),
+                threshold_configuration_repository=ThresholdConfigurationRepository(session),
+                threshold_evaluation_repository=ThresholdEvaluationRepository(session),
+                threshold_state_repository=ThresholdStateRepository(session),
+                notification_event_repository=NotificationEventRepository(session),
+                logger=logging.getLogger("forecast.alerts"),
+            )
             pipeline.evaluate(
                 forecast_reference_id=forecast_version_id,
                 forecast_product="daily",
