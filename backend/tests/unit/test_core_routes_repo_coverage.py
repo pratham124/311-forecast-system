@@ -12,10 +12,17 @@ import app.main as main_module
 from app.api.routes.approved_dataset_status import get_approved_dataset_status
 from app.api.routes.review_needed_status import list_review_needed_datasets
 from app.api.routes.validation_run_status import get_validation_run_status
+from app.api.errors import WEATHER_OVERLAY_STATUS_MESSAGES
 from app.core.auth import _decode_jwt_payload, get_current_claims, require_roles
 from app.core.config import _to_bool, get_settings
 from app.core.db import get_db_session, get_engine
-from app.core.logging import configure_logging, redact_value, sanitize_mapping, summarize_status
+from app.core.logging import (
+    configure_logging,
+    redact_value,
+    sanitize_mapping,
+    summarize_status,
+    summarize_threshold_alert_failure,
+)
 from app.models.validation_models import _uuid
 from app.repositories.approval_status_repository import ApprovalStatusRepository
 from app.repositories.cursor_repository import CursorRepository
@@ -196,7 +203,11 @@ def test_logging_helpers_cover_remaining_paths() -> None:
     summary = summarize_status("event", password="abc12345")
     assert summary["message"] == "event"
     assert summary["password"] != "abc12345"
+    alert_failure = summarize_threshold_alert_failure("threshold.failed", run_id="run-1")
+    assert alert_failure["message"] == "threshold.failed"
+    assert alert_failure["outcome"] == "failure"
     assert configure_logging().name == "forecast_system"
+    assert WEATHER_OVERLAY_STATUS_MESSAGES["retrieval-failed"].startswith("Weather data retrieval failed")
 
 
 @pytest.mark.unit

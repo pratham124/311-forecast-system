@@ -19,7 +19,7 @@
 
 - [ ] T001 Create backend and frontend directory skeletons in `backend/src/api/`, `backend/src/pipelines/`, `backend/src/services/`, `backend/src/repositories/`, `backend/src/models/`, `backend/src/clients/`, `backend/src/core/`, `backend/tests/`, `frontend/src/api/`, `frontend/src/features/alerts/`, `frontend/src/types/`, and `frontend/tests/`
 - [ ] T002 Initialize backend application entrypoints and package markers in `backend/src/main.py`, `backend/src/api/__init__.py`, `backend/src/services/__init__.py`, `backend/src/repositories/__init__.py`, `backend/src/models/__init__.py`, `backend/src/clients/__init__.py`, and `backend/src/core/__init__.py`
-- [ ] T003 [P] Initialize frontend alert-review feature entrypoints in `frontend/src/features/alerts/index.ts`, `frontend/src/api/forecast_alerts.ts`, and `frontend/src/types/forecast_alerts.ts`
+- [X] T003 [P] Initialize frontend alert-review feature entrypoints in `frontend/src/features/alerts/index.ts`, `frontend/src/api/forecast_alerts.ts`, and `frontend/src/types/forecast_alerts.ts`
 
 ---
 
@@ -29,12 +29,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create threshold-alert persistence models in `backend/src/models/threshold_configuration.py`, `backend/src/models/threshold_evaluation_run.py`, `backend/src/models/threshold_scope_evaluation.py`, `backend/src/models/threshold_state.py`, `backend/src/models/notification_event.py`, and `backend/src/models/notification_channel_attempt.py`
-- [ ] T005 [P] Create the initial threshold-alert schema migration in `backend/src/models/migrations/010_threshold_alerts.py`
-- [ ] T006 [P] Implement shared repository interfaces in `backend/src/repositories/threshold_configuration_repository.py`, `backend/src/repositories/threshold_evaluation_repository.py`, and `backend/src/repositories/notification_event_repository.py`
-- [ ] T007 [P] Implement shared API schemas for evaluation triggers and alert review in `backend/src/api/schemas/forecast_alerts.py`
-- [ ] T008 [P] Implement authenticated routing and authorization scaffolding for forecast alerts in `backend/src/api/routes/forecast_alerts.py` and `backend/src/core/auth.py`
-- [ ] T009 [P] Implement notification delivery client abstractions in `backend/src/clients/notification_service.py`
+- [X] T004 Create threshold-alert persistence models in `backend/src/models/threshold_configuration.py`, `backend/src/models/threshold_evaluation_run.py`, `backend/src/models/threshold_scope_evaluation.py`, `backend/src/models/threshold_state.py`, `backend/src/models/notification_event.py`, and `backend/src/models/notification_channel_attempt.py`
+- [X] T005 [P] Create the initial threshold-alert schema migration in `backend/src/models/migrations/010_threshold_alerts.py`
+- [X] T006 [P] Implement shared repository interfaces in `backend/src/repositories/threshold_configuration_repository.py`, `backend/src/repositories/threshold_evaluation_repository.py`, and `backend/src/repositories/notification_event_repository.py`
+- [X] T007 [P] Implement shared API schemas for evaluation triggers and alert review in `backend/src/api/schemas/forecast_alerts.py`
+- [X] T008 [P] Implement authenticated routing and authorization scaffolding for forecast alerts in `backend/src/api/routes/forecast_alerts.py` and `backend/src/core/auth.py`
+- [X] T009 [P] Implement notification delivery client abstractions in `backend/src/clients/notification_service.py`
 - [ ] T010 Implement alert-evaluation pipeline orchestration and structured logging scaffolding in `backend/src/pipelines/threshold_alert_evaluation_pipeline.py` and `backend/src/core/logging.py`
 
 **Checkpoint**: Foundation ready. User story implementation can now proceed.
@@ -49,16 +49,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add contract tests for `POST /api/v1/forecast-alerts/evaluations` in `tests/contract/test_threshold_alert_evaluations.py`
-- [ ] T012 [P] [US1] Add integration tests for threshold-crossing alert creation in `tests/integration/test_threshold_crossing_alerts.py`
+- [X] T011 [P] [US1] Add contract tests for `POST /api/v1/forecast-alerts/evaluations` in `tests/contract/test_threshold_alert_evaluations.py`
+- [X] T012 [P] [US1] Add integration tests for threshold-crossing alert creation in `tests/integration/test_threshold_crossing_alerts.py`
 - [ ] T013 [P] [US1] Add integration tests for daily and weekly forecast-window-type evaluation in `tests/integration/test_forecast_window_type_evaluation.py`
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Implement forecast lineage lookup and canonical scope extraction for daily and weekly products in `backend/src/services/forecast_scope_service.py`
-- [ ] T015 [US1] Implement threshold comparison and threshold-crossing detection helpers in `backend/src/services/threshold_alert_service.py`
-- [ ] T016 [US1] Implement notification event creation and persistence for newly crossed scopes in `backend/src/repositories/notification_event_repository.py`
-- [ ] T017 [US1] Connect evaluation-trigger route handling to the alert-evaluation pipeline in `backend/src/api/routes/forecast_alerts.py` and `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
+- [X] T014 [US1] Implement forecast lineage lookup and canonical scope extraction for daily and weekly products in `backend/src/services/forecast_scope_service.py`
+- [X] T015 [US1] Implement threshold comparison and threshold-crossing detection helpers in `backend/src/services/threshold_alert_service.py`
+- [X] T016 [US1] Implement notification event creation and persistence for newly crossed scopes in `backend/src/repositories/notification_event_repository.py`
+- [X] T017 [US1] Connect evaluation-trigger route handling to the alert-evaluation pipeline in `backend/src/api/routes/forecast_alerts.py` and `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -72,15 +72,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T018 [P] [US2] Add integration tests for geography-specific threshold precedence and scoped alerting in `tests/integration/test_geography_threshold_precedence.py`
-- [ ] T019 [P] [US2] Add unit tests for threshold-selection precedence in `tests/unit/test_threshold_selection.py`
+- [X] T018 [P] [US2] Add integration tests for geography-specific threshold precedence and scoped alerting in `tests/integration/test_geography_threshold_precedence.py`
+- [X] T019 [P] [US2] Add unit tests for threshold-selection precedence in `tests/unit/test_threshold_selection.py`
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Implement threshold selection logic for category-only versus category-plus-geography rules in `backend/src/services/threshold_selection_service.py`
-- [ ] T021 [US2] Integrate precedence-aware threshold resolution into the alert-evaluation pipeline in `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
-- [ ] T022 [US2] Persist geography-scoped evaluation outcomes without double evaluation in `backend/src/repositories/threshold_evaluation_repository.py`
-- [ ] T023 [US2] Update frontend alert types to include optional geography and canonical forecast-window fields in `frontend/src/types/forecast_alerts.ts`
+- [X] T020 [US2] Implement threshold selection logic for category-only versus category-plus-geography rules in `backend/src/services/threshold_selection_service.py`
+- [X] T021 [US2] Integrate precedence-aware threshold resolution into the alert-evaluation pipeline in `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
+- [X] T022 [US2] Persist geography-scoped evaluation outcomes without double evaluation in `backend/src/repositories/threshold_evaluation_repository.py`
+- [X] T023 [US2] Update frontend alert types to include optional geography and canonical forecast-window fields in `frontend/src/types/forecast_alerts.ts`
 
 **Checkpoint**: User Stories 1 and 2 are both independently functional and testable.
 
@@ -100,11 +100,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Implement threshold-state persistence and re-arming logic in `backend/src/repositories/threshold_state_repository.py`
+- [X] T027 [US3] Implement threshold-state persistence and re-arming logic in `backend/src/repositories/threshold_state_repository.py`
 - [ ] T028 [US3] Implement multi-channel delivery aggregation with `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required` statuses in `backend/src/services/notification_delivery_service.py`
 - [ ] T029 [US3] Implement threshold-change reconciliation for threshold state and active threshold linkage in `backend/src/repositories/threshold_state_repository.py`
-- [ ] T030 [US3] Persist channel-attempt records and failed follow-up reasons in `backend/src/repositories/notification_event_repository.py`
-- [ ] T031 [US3] Integrate duplicate suppression and delivery-failure follow-up logic into the alert-evaluation pipeline in `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
+- [X] T030 [US3] Persist channel-attempt records and failed follow-up reasons in `backend/src/repositories/notification_event_repository.py`
+- [X] T031 [US3] Integrate duplicate suppression and delivery-failure follow-up logic into the alert-evaluation pipeline in `backend/src/pipelines/threshold_alert_evaluation_pipeline.py`
 
 **Checkpoint**: User Stories 1 through 3 are independently functional and traceable.
 
@@ -118,16 +118,16 @@
 
 ### Tests for User Story 4
 
-- [ ] T032 [P] [US4] Add contract tests for alert-event retrieval endpoints in `tests/contract/test_threshold_alert_events.py`
-- [ ] T033 [P] [US4] Add contract assertions for all `FR-012a` alert review fields in `tests/contract/test_threshold_alert_review_payload.py`
-- [ ] T034 [P] [US4] Add frontend interaction tests for alert review and channel-failure visibility in `frontend/tests/test_alert_review.tsx`
+- [X] T032 [P] [US4] Add contract tests for alert-event retrieval endpoints in `tests/contract/test_threshold_alert_events.py`
+- [X] T033 [P] [US4] Add contract assertions for all `FR-012a` alert review fields in `tests/contract/test_threshold_alert_review_payload.py`
+- [X] T034 [P] [US4] Add frontend interaction tests for alert review and channel-failure visibility in `frontend/tests/test_alert_review.tsx`
 
 ### Implementation for User Story 4
 
-- [ ] T035 [US4] Implement alert-event list and detail query services in `backend/src/services/alert_review_service.py`
-- [ ] T036 [US4] Implement alert-event retrieval endpoints in `backend/src/api/routes/forecast_alerts.py`
-- [ ] T037 [US4] Implement frontend alert-review API list/detail retrieval methods in `frontend/src/api/forecast_alerts.ts`
-- [ ] T038 [US4] Build typed alert-review UI state and rendering for overall outcomes and failed channels in `frontend/src/features/alerts/alert_review.tsx`
+- [X] T035 [US4] Implement alert-event list and detail query services in `backend/src/services/alert_review_service.py`
+- [X] T036 [US4] Implement alert-event retrieval endpoints in `backend/src/api/routes/forecast_alerts.py`
+- [X] T037 [US4] Implement frontend alert-review API list/detail retrieval methods in `frontend/src/api/forecast_alerts.ts`
+- [X] T038 [US4] Build typed alert-review UI state and rendering for overall outcomes and failed channels in `frontend/src/features/alerts/alert_review.tsx`
 
 **Checkpoint**: All user stories are independently functional and reviewable.
 

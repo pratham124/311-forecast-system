@@ -14,6 +14,10 @@ const EvaluationPage = lazy(async () => {
   const module = await import('./pages/EvaluationPage');
   return { default: module.EvaluationPage };
 });
+const AlertReviewPage = lazy(async () => {
+  const module = await import('./pages/AlertReviewPage');
+  return { default: module.AlertReviewPage };
+});
 const ForecastVisualizationPage = lazy(async () => {
   const module = await import('./pages/ForecastVisualizationPage');
   return { default: module.ForecastVisualizationPage };
@@ -79,6 +83,14 @@ function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout:
               >
                 Historical
               </NavLink>
+              {showEvaluationPage ? (
+                <NavLink
+                  to="/app/alerts"
+                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
+                >
+                  Alerts
+                </NavLink>
+              ) : null}
               {showEvaluationPage ? (
                 <NavLink
                   to="/app/evaluations"
@@ -217,6 +229,10 @@ function AppShell() {
           <Route path="forecasts" element={<ForecastVisualizationPage />} />
           <Route path="demand-comparisons" element={<DemandComparisonPage />} />
           <Route path="historical-demand" element={<HistoricalDemandPage />} />
+          <Route
+            path="alerts"
+            element={showEvaluationPage ? <AlertReviewPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}
+          />
           <Route
             path="evaluations"
             element={showEvaluationPage ? <EvaluationPage roles={session!.user.roles} /> : <Navigate to="/app/forecasts" replace />}

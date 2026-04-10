@@ -59,6 +59,14 @@ from app.models.public_forecast_portal import (
     PublicForecastVisualizationPayload,
 )
 from app.models.user_guide import GuideAccessEvent, GuideRenderOutcomeRecord
+from app.models.threshold_alert_models import (
+    NotificationChannelAttempt,
+    NotificationEvent,
+    ThresholdConfiguration,
+    ThresholdEvaluationRun,
+    ThresholdScopeEvaluation,
+    ThresholdState,
+)
 
 __all__ = [
     "CandidateDataset",
@@ -107,6 +115,12 @@ __all__ = [
     "ValidationRun",
     "VisualizationLoadRecord",
     "VisualizationSnapshot",
+    "NotificationChannelAttempt",
+    "NotificationEvent",
+    "ThresholdConfiguration",
+    "ThresholdEvaluationRun",
+    "ThresholdScopeEvaluation",
+    "ThresholdState",
     "WeeklyForecastBucket",
     "WeeklyForecastRun",
     "WeeklyForecastVersion",

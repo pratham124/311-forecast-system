@@ -212,3 +212,9 @@
 | AT-07 | Extension 3a |
 | AT-08 | Extension 5a; Failed End Condition |
 | AT-09 | “Configurable threshold” behavior across updates |
+
+## Current Automated Coverage Mapping
+
+- Contract coverage: trigger, list, detail, auth rejection
+- Integration coverage: daily/hourly and weekly/daily window handling, geography precedence, duplicate suppression, configuration-missing outcomes, manual-review delivery failure, and latency bound assertions
+- Unit coverage: threshold-selection precedence and threshold-state reconciliation after threshold changes
