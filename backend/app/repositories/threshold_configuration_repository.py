@@ -52,8 +52,11 @@ class ThresholdConfigurationRepository:
         self.session.flush()
         return configuration
 
-    def list_configurations(self) -> list[ThresholdRule]:
-        statement = select(ThresholdConfiguration).order_by(
+    def list_configurations(self, *, include_inactive: bool = False) -> list[ThresholdRule]:
+        statement = select(ThresholdConfiguration)
+        if not include_inactive:
+            statement = statement.where(ThresholdConfiguration.status == "active")
+        statement = statement.order_by(
             ThresholdConfiguration.service_category.asc(),
             ThresholdConfiguration.forecast_window_type.asc(),
             ThresholdConfiguration.effective_from.desc(),
@@ -62,6 +65,10 @@ class ThresholdConfigurationRepository:
             ThresholdRule(configuration=row, notification_channels=json.loads(row.notification_channels_json))
             for row in self.session.scalars(statement)
         ]
+
+    def list_active_configurations(self) -> list[ThresholdRule]:
+        """Return all active configurations for bulk pre-loading."""
+        return self.list_configurations(include_inactive=False)
 
     def get_configuration(self, threshold_configuration_id: str) -> ThresholdRule | None:
         configuration = self.session.get(ThresholdConfiguration, threshold_configuration_id)

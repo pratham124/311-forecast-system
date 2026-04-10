@@ -99,46 +99,7 @@ describe('AlertReviewPage', () => {
           { status: 200 },
         ),
       )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            items: [
-              {
-                thresholdConfigurationId: 'threshold-1',
-                serviceCategory: 'Waste',
-                forecastWindowType: 'daily',
-                thresholdValue: 11,
-                notificationChannels: ['dashboard'],
-                operationalManagerId: 'manager-1',
-                status: 'active',
-                effectiveFrom: '2026-03-19T00:00:00Z',
-              },
-            ],
-          }),
-          { status: 200 },
-        ),
-      )
       .mockResolvedValueOnce(new Response(null, { status: 204 }))
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            items: [
-              {
-                thresholdConfigurationId: 'threshold-1',
-                serviceCategory: 'Waste',
-                forecastWindowType: 'daily',
-                thresholdValue: 11,
-                notificationChannels: ['dashboard'],
-                operationalManagerId: 'manager-1',
-                status: 'inactive',
-                effectiveFrom: '2026-03-19T00:00:00Z',
-                effectiveTo: '2026-03-20T00:10:00Z',
-              },
-            ],
-          }),
-          { status: 200 },
-        ),
-      )
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
@@ -169,9 +130,8 @@ describe('AlertReviewPage', () => {
     expect(await screen.findByText(/gateway timeout/i)).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: /service category/i })).toHaveTextContent('Select a category');
-    expect(screen.getByRole('button', { name: /notification channels/i })).toHaveTextContent('Email + dashboard');
 
-    await user.click(screen.getByRole('button', { name: /^edit$/i }));
+    await user.click(screen.getByRole('button', { name: /edit/i }));
     expect(screen.getByRole('button', { name: /service category/i })).toHaveTextContent('Roads');
     expect(screen.getByRole('button', { name: /forecast window/i })).toHaveTextContent('Hourly');
 
@@ -184,19 +144,18 @@ describe('AlertReviewPage', () => {
     await user.clear(screen.getByLabelText(/threshold value/i));
     await user.type(screen.getByLabelText(/threshold value/i), '11');
 
-    await user.click(screen.getByRole('button', { name: /notification channels/i }));
-    await user.click(screen.getByRole('button', { name: /clear all/i }));
-    await user.click(screen.getByRole('button', { name: /^Dashboard$/i }));
-
     await user.click(screen.getByRole('button', { name: /update threshold/i }));
 
     expect(await screen.findByText(/^11$/)).toBeInTheDocument();
+    expect(screen.getByText(/^Waste$/)).toBeInTheDocument();
+    expect(screen.getByText(/◷ daily/i)).toBeInTheDocument();
     expect(screen.queryByText(/inactive/i)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /^delete$/i }));
-    expect(await screen.findByText(/^inactive$/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /delete/i }));
+    expect(await screen.findByText(/no thresholds configured yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^Waste$/)).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /roads partial delivery/i }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(9));
+    await user.click(screen.getByRole('button', { name: /roads partial/i }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(7));
   });
 });

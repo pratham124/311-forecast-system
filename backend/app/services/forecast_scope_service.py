@@ -28,9 +28,17 @@ class ForecastScopeService:
         self.forecast_repository = forecast_repository
         self.weekly_forecast_repository = weekly_forecast_repository
 
-    def list_scopes(self, *, forecast_reference_id: str, forecast_product: str) -> list[ForecastScope]:
+    def list_scopes(
+        self,
+        *,
+        forecast_reference_id: str,
+        forecast_product: str,
+        service_category: str | None = None,
+    ) -> list[ForecastScope]:
         if forecast_product == "daily":
             buckets = self.forecast_repository.list_buckets(forecast_reference_id)
+            if service_category:
+                buckets = [b for b in buckets if b.service_category == service_category]
             return [
                 ForecastScope(
                     service_category=bucket.service_category,
@@ -44,6 +52,8 @@ class ForecastScopeService:
                 for bucket in buckets
             ]
         buckets = self.weekly_forecast_repository.list_buckets(forecast_reference_id)
+        if service_category:
+            buckets = [b for b in buckets if b.service_category == service_category]
         scopes: list[ForecastScope] = []
         for bucket in buckets:
             start = datetime.combine(bucket.forecast_date_local, datetime.min.time(), tzinfo=timezone.utc)

@@ -6,6 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, R
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import require_forecast_alert_reader, require_forecast_alert_trigger
+from app.clients.notification_service import NotificationDeliveryClient as _NotificationDeliveryClient
 from app.core.config import get_settings
 from app.core.db import get_db_session, get_session_factory
 from app.models import ThresholdConfiguration
@@ -30,6 +31,7 @@ from app.services.threshold_alert_trigger_service import run_threshold_alert_eva
 router = APIRouter(prefix="/api/v1/forecast-alerts", tags=["forecast-alerts"])
 
 logger = logging.getLogger("forecast_alerts.api")
+NotificationDeliveryClient = _NotificationDeliveryClient
 
 
 def build_alert_review_service(session: Session) -> AlertReviewService:
@@ -76,7 +78,10 @@ def list_threshold_configurations(
 ) -> ThresholdConfigurationListResponse:
     repository = ThresholdConfigurationRepository(session)
     return ThresholdConfigurationListResponse(
-        items=[serialize_threshold_configuration(item.configuration, item.notification_channels) for item in repository.list_configurations()]
+        items=[
+            serialize_threshold_configuration(item.configuration, item.notification_channels)
+            for item in repository.list_configurations(include_inactive=True)
+        ]
     )
 
 
@@ -95,7 +100,7 @@ def create_threshold_configuration(
         notification_channels=payload.notification_channels,
         operational_manager_id=operational_manager_id,
     )
-    _schedule_recheck(background_tasks, payload.forecast_window_type, trigger_source="manual_replay")
+    _schedule_recheck(background_tasks, payload.forecast_window_type, trigger_source="manual_replay", service_category=payload.service_category)
     return serialize_threshold_configuration(
         configuration,
         payload.notification_channels,
@@ -120,7 +125,7 @@ def update_threshold_configuration(
     )
     if configuration is None:
         raise HTTPException(status_code=404, detail="Threshold configuration not found")
-    _schedule_recheck(background_tasks, payload.forecast_window_type, trigger_source="manual_replay")
+    _schedule_recheck(background_tasks, payload.forecast_window_type, trigger_source="manual_replay", service_category=payload.service_category)
     return serialize_threshold_configuration(configuration, payload.notification_channels)
 
 
@@ -136,7 +141,13 @@ def delete_threshold_configuration(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def _schedule_recheck(background_tasks: BackgroundTasks, forecast_window_type: str, *, trigger_source: str) -> None:
+def _schedule_recheck(
+    background_tasks: BackgroundTasks,
+    forecast_window_type: str,
+    *,
+    trigger_source: str,
+    service_category: str | None = None,
+) -> None:
     settings = get_settings()
 
     def execute() -> None:
@@ -151,6 +162,7 @@ def _schedule_recheck(background_tasks: BackgroundTasks, forecast_window_type: s
                     forecast_reference_id=marker.forecast_version_id,
                     forecast_product="daily",
                     trigger_source=trigger_source,
+                    service_category=service_category,
                 )
             else:
                 marker = WeeklyForecastRepository(background_session).get_current_marker(settings.weekly_forecast_product_name)
@@ -161,6 +173,7 @@ def _schedule_recheck(background_tasks: BackgroundTasks, forecast_window_type: s
                     forecast_reference_id=marker.weekly_forecast_version_id,
                     forecast_product="weekly",
                     trigger_source=trigger_source,
+                    service_category=service_category,
                 )
             background_session.commit()
         except Exception as exc:  # noqa: BLE001

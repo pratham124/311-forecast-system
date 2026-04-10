@@ -388,21 +388,35 @@ export function EvaluationPage({ roles }: EvaluationPageProps) {
               <CardTitle>Segment summaries</CardTitle>
               <CardDescription>Review category and time-period slices, especially where exclusions reduced the metric set.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {evaluation.segments.map((segment) => (
-                <div key={`${segment.segmentType}-${segment.segmentKey}`} className="rounded-[22px] border border-slate-200 bg-white/80 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="m-0 text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">{segment.segmentType.replace('_', ' ')} · {formatSegmentKey(segment.segmentType, segment.segmentKey)}</h3>
-                      <p className="mt-1 text-sm text-muted">{segment.comparisonRowCount} rows · {segment.excludedMetricCount} excluded metrics</p>
+            <CardContent>
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-3 pb-2 custom-scrollbar">
+                {evaluation.segments.map((segment) => (
+                  <div key={`${segment.segmentType}-${segment.segmentKey}`} className="group rounded-[22px] border border-slate-200 bg-white/80 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md hover:border-accent/40">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h3 className="m-0 text-[13px] font-bold uppercase tracking-[0.16em] text-slate-800 transition-colors group-hover:text-accent">
+                          {segment.segmentType.replace('_', ' ')} <span className="mx-1 text-slate-300">·</span> {formatSegmentKey(segment.segmentType, segment.segmentKey)}
+                        </h3>
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-sm font-medium text-muted">{segment.comparisonRowCount} rows</span>
+                          <span className="h-1 w-1 rounded-full bg-slate-300" />
+                          <span className={`text-sm font-bold ${segment.excludedMetricCount > 0 ? 'text-amber-600' : 'text-muted'}`}>
+                            {segment.excludedMetricCount} excluded metrics
+                          </span>
+                        </div>
+                      </div>
+                      <span className="rounded-full bg-slate-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600 ring-1 ring-slate-200/50">
+                        {segment.segmentStatus}
+                      </span>
                     </div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      {segment.segmentStatus}
-                    </span>
+                    {segment.notes ? (
+                      <div className="mt-4 rounded-xl bg-slate-50/80 border border-slate-100 p-3">
+                        <p className="text-sm text-slate-600 font-medium">{segment.notes}</p>
+                      </div>
+                    ) : null}
                   </div>
-                  {segment.notes ? <p className="mt-3 text-sm text-muted">{segment.notes}</p> : null}
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </>

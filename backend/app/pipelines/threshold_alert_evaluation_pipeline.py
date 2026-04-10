@@ -28,7 +28,7 @@ class ThresholdAlertEvaluationPipeline:
     def __post_init__(self) -> None:
         self.logger = self.logger or logging.getLogger("forecast_alerts.pipeline")
 
-    def run(self, *, forecast_reference_id: str, forecast_product: str, trigger_source: str):
+    def run(self, *, forecast_reference_id: str, forecast_product: str, trigger_source: str, service_category: str | None = None):
         run = self.evaluation_repository.create_run(
             forecast_version_reference=forecast_reference_id,
             forecast_product=forecast_product,
@@ -43,12 +43,14 @@ class ThresholdAlertEvaluationPipeline:
                 trigger_source=trigger_source,
             ),
         )
-        evaluated_scope_count = 0
-        alert_created_count = 0
-        for scope in self.scope_service.list_scopes(
+        scopes = self.scope_service.list_scopes(
             forecast_reference_id=forecast_reference_id,
             forecast_product=forecast_product,
-        ):
+            service_category=service_category,
+        )
+        evaluated_scope_count = 0
+        alert_created_count = 0
+        for scope in scopes:
             evaluated_scope_count += 1
             rule = self.configuration_repository.find_active_threshold(
                 service_category=scope.service_category,
@@ -90,8 +92,13 @@ class ThresholdAlertEvaluationPipeline:
                 forecast_window_start=scope.forecast_window_start,
                 forecast_window_end=scope.forecast_window_end,
             )
+            current_state = state.current_state if state else None
             should_alert = self.alert_service.should_alert(
-                current_state=state.current_state if state else None,
+                current_state=current_state,
+                forecast_value=scope.forecast_bucket_value,
+                threshold_value=threshold_value,
+            )
+            is_exceeded = self.alert_service.is_exceeded(
                 forecast_value=scope.forecast_bucket_value,
                 threshold_value=threshold_value,
             )
@@ -102,10 +109,7 @@ class ThresholdAlertEvaluationPipeline:
             notification_event_id = None
             outcome = "below_or_equal"
             last_notification_event_id = None
-            if self.alert_service.is_exceeded(
-                forecast_value=scope.forecast_bucket_value,
-                threshold_value=threshold_value,
-            ):
+            if is_exceeded:
                 outcome = "exceeded_suppressed"
             if should_alert:
                 delivery = self.notification_delivery_service.deliver(

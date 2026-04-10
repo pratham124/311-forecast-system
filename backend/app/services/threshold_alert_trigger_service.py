@@ -21,6 +21,7 @@ def run_threshold_alert_evaluation(
     forecast_reference_id: str,
     forecast_product: str,
     trigger_source: str,
+    service_category: str | None = None,
 ) -> object:
     pipeline = ThresholdAlertEvaluationPipeline(
         scope_service=ForecastScopeService(
@@ -38,5 +39,6 @@ def run_threshold_alert_evaluation(
         forecast_reference_id=forecast_reference_id,
         forecast_product=forecast_product,
         trigger_source=trigger_source,
+        service_category=service_category,
     )
 

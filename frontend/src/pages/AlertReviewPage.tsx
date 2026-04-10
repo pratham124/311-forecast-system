@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -17,6 +17,7 @@ import type {
   ThresholdAlertEventSummary,
   ThresholdConfiguration,
   ThresholdConfigurationWrite,
+  OverallDeliveryStatus,
 } from '../types/forecastAlerts';
 
 const READER_ROLES = new Set(['CityPlanner', 'OperationalManager']);
@@ -25,17 +26,24 @@ const FORECAST_WINDOW_OPTIONS: Array<{ value: ForecastWindowType; label: string 
   { value: 'hourly', label: 'Hourly' },
   { value: 'daily', label: 'Daily' },
 ];
-const CHANNEL_PRESET_OPTIONS = [
-  { value: 'email', label: 'Email', channels: ['email'] },
-  { value: 'dashboard', label: 'Dashboard', channels: ['dashboard'] },
-  { value: 'sms', label: 'SMS', channels: ['sms'] },
-  { value: 'dashboard,email', label: 'Email + dashboard', channels: ['email', 'dashboard'] },
-  { value: 'email,sms', label: 'Email + SMS', channels: ['email', 'sms'] },
-  { value: 'dashboard,sms', label: 'Dashboard + SMS', channels: ['dashboard', 'sms'] },
-  { value: 'dashboard,email,sms', label: 'Email + dashboard + SMS', channels: ['email', 'dashboard', 'sms'] },
-] as const;
 
-const DEFAULT_CHANNEL_PRESET = 'dashboard,email';
+
+/* ── Status styling helpers ────────────────────────────────────────── */
+
+const STATUS_STYLES: Record<OverallDeliveryStatus, { bg: string; text: string; icon: string; label: string }> = {
+  delivered: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: '✓', label: 'Delivered' },
+  partial_delivery: { bg: 'bg-amber-50', text: 'text-amber-700', icon: '◐', label: 'Partial' },
+  retry_pending: { bg: 'bg-sky-50', text: 'text-sky-700', icon: '↻', label: 'Retry Pending' },
+  manual_review_required: { bg: 'bg-red-50', text: 'text-red-700', icon: '!', label: 'Review Required' },
+};
+
+function deliveryStatusStyle(status: OverallDeliveryStatus) {
+  return STATUS_STYLES[status] ?? STATUS_STYLES.delivered;
+}
+
+
+
+/* ── Shared utility functions ──────────────────────────────────────── */
 
 function canReadAlerts(roles: string[]): boolean {
   return roles.some((role) => READER_ROLES.has(role));
@@ -55,20 +63,87 @@ function formatDateTime(value: string): string {
   });
 }
 
-function normalizeChannelPreset(channels: string[]): string {
-  const value = [...channels].sort().join(',');
-  const match = CHANNEL_PRESET_OPTIONS.find((option) => option.value === value);
-  return match?.value ?? DEFAULT_CHANNEL_PRESET;
-}
 
-function formatChannelSelection(channels: string[]): string {
-  const value = normalizeChannelPreset(channels);
-  return CHANNEL_PRESET_OPTIONS.find((option) => option.value === value)?.label ?? 'Choose channels';
-}
 
 function mergeServiceCategories(serviceCategories: string[], thresholds: ThresholdConfiguration[], selectedCategory: string): string[] {
   return [...new Set([...serviceCategories, ...thresholds.map((item) => item.serviceCategory), selectedCategory].filter(Boolean))].sort();
 }
+
+/* ── Small shared components ───────────────────────────────────────── */
+
+function StatusBadge({ status }: { status: OverallDeliveryStatus }) {
+  const s = deliveryStatusStyle(status);
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${s.bg} ${s.text}`}>
+      <span aria-hidden="true">{s.icon}</span>
+      {s.label}
+    </span>
+  );
+}
+
+function SectionDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-3">
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(25,58,90,0.12)] to-transparent" />
+      <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted/60">{label}</span>
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(25,58,90,0.12)] to-transparent" />
+    </div>
+  );
+}
+
+function ForecastGauge({ forecast, threshold }: { forecast: number; threshold: number }) {
+  const max = Math.max(forecast, threshold) * 1.3;
+  const forecastPct = Math.min((forecast / max) * 100, 100);
+  const thresholdPct = Math.min((threshold / max) * 100, 100);
+  const exceeded = forecast >= threshold;
+
+  return (
+    <div className="grid gap-2">
+      <div className="flex items-baseline justify-between text-xs font-semibold">
+        <span className="text-muted">Forecast vs Threshold</span>
+        <span className={exceeded ? 'text-red-600' : 'text-emerald-600'}>
+          {exceeded ? 'Exceeded' : 'Within limit'}
+        </span>
+      </div>
+      <div className="relative h-5 w-full overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
+          style={{
+            width: `${forecastPct}%`,
+            background: exceeded
+              ? 'linear-gradient(90deg, #f87171, #dc2626)'
+              : 'linear-gradient(90deg, #34d399, #059669)',
+          }}
+        />
+        <div
+          className="absolute inset-y-0 w-0.5 bg-ink/40"
+          style={{ left: `${thresholdPct}%` }}
+          title={`Threshold: ${threshold}`}
+        />
+      </div>
+      <div className="flex justify-between text-xs text-muted">
+        <span>Forecast: <span className="font-semibold text-ink">{forecast}</span></span>
+        <span>Threshold: <span className="font-semibold text-ink">{threshold}</span></span>
+      </div>
+    </div>
+  );
+}
+
+function formatChannelType(value: string): string {
+  return value
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function attemptStatusClasses(status: 'succeeded' | 'failed'): string {
+  return status === 'succeeded'
+    ? 'border-emerald-200 bg-emerald-50/80 text-emerald-800'
+    : 'border-red-200 bg-red-50/80 text-red-800';
+}
+
+/* ── Dropdown sub-component ────────────────────────────────────────── */
 
 function ForecastStyleSingleSelect<T extends string>({
   buttonId,
@@ -93,7 +168,7 @@ function ForecastStyleSingleSelect<T extends string>({
   ariaLabel: string;
   scrollable?: boolean;
 }) {
-  const selectedLabel = useMemo(() => options.find((option) => option.value === value)?.label ?? placeholder, [options, placeholder, value]);
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? placeholder;
 
   return (
     <div ref={containerRef} className={isOpen ? 'relative z-[120]' : 'relative z-10'}>
@@ -134,106 +209,38 @@ function ForecastStyleSingleSelect<T extends string>({
   );
 }
 
-function NotificationChannelMultiSelect({
-  selectedValues,
-  onChange,
-  isOpen,
-  onOpenChange,
-  containerRef,
-}: {
-  selectedValues: string[];
-  onChange: (values: string[]) => void;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  containerRef: RefObject<HTMLDivElement>;
-}) {
-  const buttonLabel = useMemo(() => {
-    if (selectedValues.length === 0) return 'Choose channels';
-    return formatChannelSelection(selectedValues);
-  }, [selectedValues]);
 
-  const toggleValue = (value: string) => {
-    if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter((item) => item !== value));
-      return;
-    }
-    onChange([...selectedValues, value].sort());
-  };
 
-  return (
-    <div ref={containerRef} className={isOpen ? 'relative z-[120]' : 'relative z-10'}>
-      <button
-        id="notification-channels"
-        type="button"
-        onClick={() => onOpenChange(!isOpen)}
-        className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-[rgba(25,58,90,0.14)] bg-white px-4 py-3 text-left text-sm text-ink shadow-sm transition hover:border-accent focus:border-accent focus:outline-none"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-label="Notification channels"
-      >
-        <span>{buttonLabel}</span>
-        <span className="ml-4 text-muted">{isOpen ? 'Hide' : 'Choose'}</span>
-      </button>
-      {isOpen ? (
-        <div className="absolute z-[130] mt-2 w-full rounded-2xl border border-[rgba(25,58,90,0.14)] bg-white p-3 shadow-panel backdrop-blur-xl">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="m-0 text-sm font-semibold text-ink">Notification channels</p>
-            <button
-              type="button"
-              onClick={() => onChange([])}
-              className="text-sm font-medium text-forecast hover:underline"
-            >
-              Clear all
-            </button>
-          </div>
-          <div role="listbox" aria-label="Notification channels" className="space-y-2">
-            {CHANNEL_PRESET_OPTIONS.slice(0, 3).map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => toggleValue(option.value)}
-                className="flex w-full items-center justify-between rounded-xl px-2 py-2 text-left text-sm text-ink transition hover:bg-[#eef5fa]"
-                aria-pressed={selectedValues.includes(option.value)}
-              >
-                <span>{option.label}</span>
-                {selectedValues.includes(option.value) ? <span className="text-forecast">Selected</span> : null}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
+/* ── Form state ────────────────────────────────────────────────────── */
 
 type ThresholdFormState = {
   serviceCategory: string;
   forecastWindowType: ForecastWindowType;
   thresholdValue: string;
-  notificationChannels: string[];
 };
 
 const EMPTY_FORM: ThresholdFormState = {
   serviceCategory: '',
   forecastWindowType: 'hourly',
   thresholdValue: '10',
-  notificationChannels: ['dashboard', 'email'],
 };
+
+/* ── Main page component ───────────────────────────────────────────── */
 
 export function AlertReviewPage({ roles }: { roles: string[] }) {
   const [events, setEvents] = useState<ThresholdAlertEventSummary[]>([]);
   const [thresholds, setThresholds] = useState<ThresholdConfiguration[]>([]);
   const [serviceCategories, setServiceCategories] = useState<string[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<ThresholdAlertEvent | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [editingThresholdId, setEditingThresholdId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [formState, setFormState] = useState(EMPTY_FORM);
-  const [openDropdown, setOpenDropdown] = useState<'serviceCategory' | 'forecastWindow' | 'notificationChannels' | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<'serviceCategory' | 'forecastWindow' | null>(null);
   const serviceCategoryRef = useRef<HTMLDivElement>(null);
   const forecastWindowRef = useRef<HTMLDivElement>(null);
-  const notificationChannelsRef = useRef<HTMLDivElement>(null);
   const readable = canReadAlerts(roles);
   const writable = canWriteThresholds(roles);
 
@@ -245,6 +252,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
         setThresholds(thresholdItems);
         setEvents(eventItems);
         if (eventItems[0]) {
+          setSelectedEventId(eventItems[0].notificationEventId);
           setSelectedEvent(await fetchThresholdAlertEvent(eventItems[0].notificationEventId));
         }
       })
@@ -262,7 +270,6 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
       if (
         serviceCategoryRef.current?.contains(target)
         || forecastWindowRef.current?.contains(target)
-        || notificationChannelsRef.current?.contains(target)
       ) {
         return;
       }
@@ -289,7 +296,6 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
       serviceCategory: configuration.serviceCategory,
       forecastWindowType: configuration.forecastWindowType,
       thresholdValue: String(configuration.thresholdValue),
-      notificationChannels: [...configuration.notificationChannels].sort(),
     });
     setSaveError(null);
   }
@@ -310,10 +316,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
       setSaveError('Enter a whole-number threshold value of at least 1.');
       return;
     }
-    if (formState.notificationChannels.length === 0) {
-      setSaveError('Select at least one notification channel.');
-      return;
-    }
+
 
     setIsSaving(true);
     setSaveError(null);
@@ -321,16 +324,33 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
       serviceCategory: formState.serviceCategory,
       forecastWindowType: formState.forecastWindowType,
       thresholdValue: parsedThresholdValue,
-      notificationChannels: [...formState.notificationChannels].sort(),
+      notificationChannels: ['dashboard'],
     };
 
     try {
+      let saved: ThresholdConfiguration;
       if (editingThresholdId) {
-        await updateThresholdConfiguration(editingThresholdId, payload);
+        saved = await updateThresholdConfiguration(editingThresholdId, payload);
       } else {
-        await createThresholdConfiguration(payload);
+        saved = await createThresholdConfiguration(payload);
       }
-      await refreshThresholds();
+
+      // Immediately update local state so the UI reflects the change
+      setThresholds((current) => {
+        const exists = current.some((t) => t.thresholdConfigurationId === saved.thresholdConfigurationId);
+        if (exists) {
+          return current.map((t) => (t.thresholdConfigurationId === saved.thresholdConfigurationId ? saved : t));
+        }
+        return [...current, saved];
+      });
+      setServiceCategories((current) => mergeServiceCategories(current, thresholds, saved.serviceCategory));
+      
+      // The background task evaluates alerts immediately after saving. 
+      // Give it a brief delay to finish, then fetch the latest events so new ones appear!
+      setTimeout(() => {
+        void fetchThresholdAlertEvents().then(setEvents);
+      }, 1000);
+
       resetForm();
     } catch (requestError) {
       setSaveError(requestError instanceof Error ? requestError.message : 'Unable to save threshold.');
@@ -343,13 +363,23 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
     setSaveError(null);
     try {
       await deleteThresholdConfiguration(thresholdConfigurationId);
-      await refreshThresholds();
+      // Immediately remove from local state
+      setThresholds((current) =>
+        current.map((t) =>
+          t.thresholdConfigurationId === thresholdConfigurationId ? { ...t, status: 'inactive' } : t,
+        ),
+      );
       if (editingThresholdId === thresholdConfigurationId) {
         resetForm();
       }
     } catch (requestError) {
       setSaveError(requestError instanceof Error ? requestError.message : 'Unable to delete threshold.');
     }
+  }
+
+  function handleSelectEvent(eventId: string): void {
+    setSelectedEventId(eventId);
+    void fetchThresholdAlertEvent(eventId).then(setSelectedEvent);
   }
 
   if (!readable) {
@@ -364,31 +394,44 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
   }
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl gap-5 px-4 pb-14 pt-7 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+    <main className="mx-auto grid w-full max-w-6xl gap-6 px-4 pb-14 pt-7 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+      {/* ─── Left column: Thresholds & event list ──────────────── */}
       <Card className="rounded-[28px] border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
         <CardHeader>
           <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">Threshold Alerts</p>
           <CardTitle className="text-3xl text-ink">Set thresholds and review alert outcomes</CardTitle>
           <CardDescription>Create category thresholds and inspect delivered, partial-delivery, and failed alerts.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3">
+        <CardContent className="grid gap-4">
           {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
+
+          {/* ── Threshold form ─────────────────────────────────── */}
           {writable ? (
-            <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div
+              className="grid gap-3 rounded-2xl border border-[rgba(25,58,90,0.10)] p-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(241,247,252,0.9) 0%, rgba(255,255,255,0.95) 100%)',
+              }}
+            >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-ink">{editingThresholdId ? 'Edit threshold' : 'Add threshold'}</p>
+                <p className="m-0 flex items-center gap-2 text-sm font-bold text-ink">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-accent/10 text-xs text-accent">
+                    {editingThresholdId ? '✎' : '+'}
+                  </span>
+                  {editingThresholdId ? 'Edit threshold' : 'Add threshold'}
+                </p>
                 {editingThresholdId ? (
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="text-sm font-semibold text-accent transition hover:text-accent-strong"
+                    className="text-xs font-bold uppercase tracking-wider text-accent transition hover:text-accent-strong"
                   >
                     Cancel
                   </button>
                 ) : null}
               </div>
 
-              <label className="grid gap-1 text-sm font-medium text-ink">
+              <label className="grid gap-1.5 text-sm font-medium text-ink">
                 <span>Service category</span>
                 <ForecastStyleSingleSelect
                   buttonId="service-category"
@@ -407,7 +450,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
                 />
               </label>
 
-              <label className="grid gap-1 text-sm font-medium text-ink">
+              <label className="grid gap-1.5 text-sm font-medium text-ink">
                 <span>Forecast window</span>
                 <ForecastStyleSingleSelect
                   buttonId="forecast-window"
@@ -422,7 +465,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
                 />
               </label>
 
-              <label className="grid gap-1 text-sm font-medium text-ink">
+              <label className="grid gap-1.5 text-sm font-medium text-ink">
                 <span>Threshold value</span>
                 <Input
                   type="number"
@@ -435,16 +478,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
                 />
               </label>
 
-              <label className="grid gap-1 text-sm font-medium text-ink">
-                <span>Notification channels</span>
-                <NotificationChannelMultiSelect
-                  selectedValues={formState.notificationChannels}
-                  onChange={(values) => updateForm({ notificationChannels: values })}
-                  isOpen={openDropdown === 'notificationChannels'}
-                  onOpenChange={(isOpen) => setOpenDropdown(isOpen ? 'notificationChannels' : null)}
-                  containerRef={notificationChannelsRef}
-                />
-              </label>
+
 
               {saveError ? <p className="text-sm font-medium text-red-700">{saveError}</p> : null}
 
@@ -454,70 +488,71 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
                   void handleSaveThreshold();
                 }}
                 disabled={isSaving}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-strong hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
               >
+                {isSaving ? (
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : null}
                 {editingThresholdId ? 'Update threshold' : 'Save threshold'}
               </button>
             </div>
           ) : null}
 
-          <div className="grid gap-2">
-            <p className="text-sm font-semibold text-ink">Current thresholds</p>
-            {thresholds.map((item) => (
+          {/* ── Current thresholds ─────────────────────────────── */}
+          <SectionDivider label="Active thresholds" />
+
+          <div className="grid max-h-96 gap-3 overflow-auto">
+            {thresholds.filter((t) => t.status === 'active').length === 0 ? (
+              <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 py-8 text-center">
+                <span className="text-3xl opacity-30">⊘</span>
+                <p className="text-sm text-muted">No thresholds configured yet.</p>
+              </div>
+            ) : null}
+            {thresholds.filter((item) => item.status === 'active').map((item) => (
               <div
                 key={item.thresholdConfigurationId}
-                className="grid gap-4 rounded-[24px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(241,247,252,0.95))] px-4 py-4 text-sm text-ink shadow-[0_14px_34px_rgba(15,23,42,0.06)]"
+                className="group grid gap-3 rounded-[22px] border border-white/80 px-5 py-4 text-sm text-ink shadow-[0_8px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_14px_38px_rgba(15,23,42,0.10)]"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(241,247,252,0.95) 100%)',
+                }}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-base font-semibold leading-tight text-ink">{item.serviceCategory}</p>
+                  <div className="space-y-0.5">
+                    <p className="text-base font-bold leading-tight text-ink">{item.serviceCategory}</p>
                     <p className="text-sm text-muted">
-                      Alert when forecasted demand reaches at least <span className="font-semibold text-ink">{item.thresholdValue}</span>
+                      Alert at ≥ <span className="font-bold text-ink">{item.thresholdValue}</span> forecasted requests
                     </p>
                   </div>
-                  <span
-                    className={`inline-flex min-h-9 items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
-                      item.status === 'active'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-200 text-slate-600'
-                    }`}
-                  >
-                    {item.status}
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-800">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    active
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex min-h-9 items-center rounded-full border border-[rgba(25,58,90,0.12)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-                    {item.forecastWindowType}
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/15 bg-accent/5 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-accent">
+                    ◷ {item.forecastWindowType}
                   </span>
-                  {item.notificationChannels.map((channel) => (
-                    <span
-                      key={`${item.thresholdConfigurationId}-${channel}`}
-                      className="inline-flex min-h-9 items-center rounded-full border border-[rgba(25,58,90,0.12)] bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink"
-                    >
-                      {channel}
-                    </span>
-                  ))}
                 </div>
 
                 {writable ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => populateForm(item)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent"
+                      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-ink shadow-sm transition hover:border-accent hover:shadow-md"
                     >
-                      Edit
+                      ✎ Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         void handleDeleteThreshold(item.thresholdConfigurationId);
                       }}
-                      disabled={item.status !== 'active'}
-                      className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:border-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={false}
+                      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 text-xs font-bold text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      Delete
+                      ✕ Delete
                     </button>
                   </div>
                 ) : null}
@@ -525,54 +560,152 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
             ))}
           </div>
 
-          <p className="pt-2 text-sm font-semibold text-ink">Recorded alerts</p>
-          {events.map((item) => (
-            <button
-              key={item.notificationEventId}
-              type="button"
-              onClick={() => {
-                void fetchThresholdAlertEvent(item.notificationEventId).then(setSelectedEvent);
-              }}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-accent"
-            >
-              <p className="text-sm font-semibold text-ink">{item.serviceCategory}</p>
-              <p className="text-sm text-muted">{item.overallDeliveryStatus.replace(/_/g, ' ')} · {formatDateTime(item.createdAt)}</p>
-            </button>
-          ))}
+          {/* ── Recorded alerts list ──────────────────────────── */}
+          <SectionDivider label="Recorded alerts" />
+
+          <div className="grid max-h-96 gap-2 overflow-auto">
+            {events.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 py-8 text-center">
+                <span className="text-3xl opacity-30">🔔</span>
+                <p className="text-sm text-muted">No alert events recorded yet.</p>
+              </div>
+            ) : null}
+            {events.map((item) => {
+              const active = selectedEventId === item.notificationEventId;
+              const s = deliveryStatusStyle(item.overallDeliveryStatus);
+              return (
+                <button
+                  key={item.notificationEventId}
+                  type="button"
+                  onClick={() => handleSelectEvent(item.notificationEventId)}
+                  className={`group grid gap-1.5 rounded-2xl border px-4 py-3 text-left transition-all ${
+                    active
+                      ? 'border-accent/30 bg-accent/[0.04] shadow-[0_4px_16px_rgba(0,80,135,0.10)]'
+                      : 'border-slate-200 bg-slate-50/70 hover:border-accent/20 hover:bg-white hover:shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`text-sm font-bold ${active ? 'text-accent' : 'text-ink'}`}>{item.serviceCategory}</p>
+                    <StatusBadge status={item.overallDeliveryStatus} />
+                  </div>
+                  <p className="text-xs text-muted">
+                    <span className="capitalize">{item.forecastWindowType}</span> · {formatDateTime(item.createdAt)}
+                  </p>
+                  <div className="mt-1 flex items-center gap-3 text-xs text-muted">
+                    <span>Forecast <span className="font-semibold text-ink">{item.forecastValue}</span></span>
+                    <span className="text-slate-300">|</span>
+                    <span>Threshold <span className="font-semibold text-ink">{item.thresholdValue}</span></span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="rounded-[28px] border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-        <CardHeader>
-          <CardTitle className="text-2xl text-ink">Alert Detail</CardTitle>
-          <CardDescription>Open an alert to inspect scope, values, and per-channel delivery details.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          {selectedEvent ? (
-            <>
-              <div className="grid gap-1 text-sm text-ink">
-                <p><strong>Category:</strong> {selectedEvent.serviceCategory}</p>
-                <p><strong>Window:</strong> {selectedEvent.forecastWindowType} from {formatDateTime(selectedEvent.forecastWindowStart)}</p>
-                <p><strong>Forecast:</strong> {selectedEvent.forecastValue}</p>
-                <p><strong>Threshold:</strong> {selectedEvent.thresholdValue}</p>
-                <p><strong>Status:</strong> {selectedEvent.overallDeliveryStatus.replace(/_/g, ' ')}</p>
-                {selectedEvent.followUpReason ? <p><strong>Follow-up:</strong> {selectedEvent.followUpReason}</p> : null}
-              </div>
-              <div className="grid gap-2">
-                <p className="text-sm font-semibold text-ink">Channel Attempts</p>
-                {selectedEvent.channelAttempts.map((attempt) => (
-                  <div key={`${attempt.channelType}-${attempt.attemptNumber}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink">
-                    {attempt.channelType} · {attempt.status}
-                    {attempt.failureReason ? ` · ${attempt.failureReason}` : ''}
+      {/* ─── Right column: Alert detail ────────────────────────── */}
+      <div className="lg:sticky lg:top-7 lg:self-start">
+        <Card className="overflow-hidden rounded-[28px] border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+          {/* Decorative gradient bar */}
+          <div
+            className="h-1.5"
+            style={{
+              background: selectedEvent
+                ? selectedEvent.forecastValue >= selectedEvent.thresholdValue
+                  ? 'linear-gradient(90deg, #f87171, #dc2626, #b91c1c)'
+                  : 'linear-gradient(90deg, #34d399, #059669, #047857)'
+                : 'linear-gradient(90deg, #005087, #0081BC, #38bdf8)',
+            }}
+          />
+          <CardHeader>
+            <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">Alert Inspector</p>
+            <CardTitle className="text-2xl text-ink">Alert Detail</CardTitle>
+            <CardDescription>Inspect scope, forecast values, and threshold outcomes.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-5">
+            {selectedEvent ? (
+              <>
+                {/* Category & status header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-lg font-bold text-ink">{selectedEvent.serviceCategory}</p>
+                    <p className="text-xs text-muted">
+                      <span className="capitalize">{selectedEvent.forecastWindowType}</span> window from{' '}
+                      {formatDateTime(selectedEvent.forecastWindowStart)}
+                    </p>
                   </div>
-                ))}
+                  <StatusBadge status={selectedEvent.overallDeliveryStatus} />
+                </div>
+
+                {/* Forecast gauge */}
+                <ForecastGauge forecast={selectedEvent.forecastValue} threshold={selectedEvent.thresholdValue} />
+
+                {/* Key-value grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted/70">Forecast</p>
+                    <p className="mt-1 text-xl font-bold text-ink">{selectedEvent.forecastValue}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted/70">Threshold</p>
+                    <p className="mt-1 text-xl font-bold text-ink">{selectedEvent.thresholdValue}</p>
+                  </div>
+                </div>
+
+                {selectedEvent.followUpReason ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700/70">Follow-up Reason</p>
+                    <p className="mt-1 text-sm font-medium text-amber-900">{selectedEvent.followUpReason}</p>
+                  </div>
+                ) : null}
+
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted/70">Delivery trace</p>
+                    <p className="text-xs text-muted">{selectedEvent.channelAttempts.length} channel attempts</p>
+                  </div>
+                  {selectedEvent.channelAttempts.length > 0 ? (
+                    <div className="grid gap-3">
+                      {selectedEvent.channelAttempts.map((attempt) => (
+                        <div
+                          key={`${attempt.channelType}-${attempt.attemptNumber}-${attempt.attemptedAt}`}
+                          className={`rounded-xl border px-4 py-3 ${attemptStatusClasses(attempt.status)}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-bold text-ink">
+                                {formatChannelType(attempt.channelType)} attempt {attempt.attemptNumber}
+                              </p>
+                              <p className="text-xs text-muted">{formatDateTime(attempt.attemptedAt)}</p>
+                            </div>
+                            <span className="text-[11px] font-bold uppercase tracking-[0.14em]">
+                              {attempt.status === 'succeeded' ? 'Succeeded' : 'Failed'}
+                            </span>
+                          </div>
+                          {attempt.failureReason ? (
+                            <p className="mt-2 text-sm font-medium text-ink">{attempt.failureReason}</p>
+                          ) : null}
+                          {attempt.providerReference ? (
+                            <p className="mt-1 text-xs text-muted">Reference: {attempt.providerReference}</p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted">No channel attempts were recorded for this alert.</p>
+                  )}
+                </div>
+
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-10 text-center">
+                <span className="text-5xl opacity-20">📋</span>
+                <p className="text-sm font-medium text-muted">Select an alert from the list to inspect its details.</p>
               </div>
-            </>
-          ) : (
-            <p className="text-sm text-muted">Select an alert from the list to inspect its delivery trace.</p>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }

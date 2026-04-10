@@ -37,6 +37,13 @@ class ThresholdEvaluationRepository:
         self.session.flush()
         return evaluation
 
+    def record_scope_evaluations_batch(self, evaluations: list[dict]) -> None:
+        """Batch-insert all scope evaluations in a single flush."""
+        if not evaluations:
+            return
+        self.session.add_all([ThresholdScopeEvaluation(**e) for e in evaluations])
+        self.session.flush()
+
     def get_state(
         self,
         *,

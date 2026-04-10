@@ -12,6 +12,10 @@ class ThresholdStateRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def list_all_states(self) -> list[ThresholdState]:
+        """Bulk-load all threshold states for in-memory lookup."""
+        return list(self.session.scalars(select(ThresholdState)))
+
     def get_state(
         self,
         *,

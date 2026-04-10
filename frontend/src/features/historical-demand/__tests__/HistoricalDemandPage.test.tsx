@@ -89,7 +89,10 @@ describe('HistoricalDemandPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /proceed/i }));
 
-    expect(await screen.findByText(/summary table/i)).toBeInTheDocument();
+    expect(await screen.findByText(/historical demand pattern/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    });
   });
 
   it('shows no-data messaging without partial results', async () => {

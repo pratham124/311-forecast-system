@@ -3,7 +3,7 @@ from __future__ import annotations
 
 class ThresholdAlertService:
     def is_exceeded(self, *, forecast_value: float, threshold_value: float) -> bool:
-        return forecast_value > threshold_value
+        return forecast_value >= threshold_value
 
     def should_alert(self, *, current_state: str | None, forecast_value: float, threshold_value: float) -> bool:
         return self.is_exceeded(forecast_value=forecast_value, threshold_value=threshold_value) and current_state != "above_threshold_alerted"
