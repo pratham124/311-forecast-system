@@ -30,9 +30,9 @@ def seed_approved_dataset(session):
         candidate_id=None,
         record_count=3,
         records=[
-            {"service_request_id": "hist-1", "requested_at": "2026-03-01T00:15:00Z", "category": "Roads", "ward": "Ward 1"},
-            {"service_request_id": "hist-2", "requested_at": "2026-03-01T01:15:00Z", "category": "Roads", "ward": "Ward 1"},
-            {"service_request_id": "hist-3", "requested_at": "2026-03-01T02:15:00Z", "category": "Waste", "ward": "Ward 1"},
+            {"service_request_id": "hist-1", "requested_at": "2026-03-01T00:15:00Z", "category": "Roads", "geography_key": "Ward 1"},
+            {"service_request_id": "hist-2", "requested_at": "2026-03-01T01:15:00Z", "category": "Roads", "geography_key": "Ward 1"},
+            {"service_request_id": "hist-3", "requested_at": "2026-03-01T02:15:00Z", "category": "Waste", "geography_key": "Ward 1"},
         ],
         validation_status="approved",
         dataset_kind="cleaned",
@@ -267,7 +267,7 @@ def test_demand_comparison_service_success_and_render_flow(session) -> None:
         DemandComparisonQueryRequest.model_validate(
             {
                 "serviceCategories": ["Roads", "Waste"],
-                "geographyLevel": "ward",
+                "geographyLevel": "geography_key",
                 "geographyValues": ["Ward 1"],
                 "timeRangeStart": "2026-03-01T00:00:00Z",
                 "timeRangeEnd": "2026-03-02T00:00:00Z",
@@ -309,7 +309,7 @@ def test_demand_comparison_service_warning_partial_forecast_and_alignment_failur
         DemandComparisonQueryRequest.model_validate(
             {
                 "serviceCategories": ["Roads", "Waste"],
-                "geographyLevel": "ward",
+                "geographyLevel": "geography_key",
                 "geographyValues": ["Ward 1"],
                 "timeRangeStart": "2026-03-01T00:00:00Z",
                 "timeRangeEnd": "2026-03-02T00:00:00Z",
@@ -327,7 +327,7 @@ def test_demand_comparison_service_warning_partial_forecast_and_alignment_failur
         DemandComparisonQueryRequest.model_validate(
             {
                 "serviceCategories": ["Roads"],
-                "geographyLevel": "ward",
+                "geographyLevel": "geography_key",
                 "geographyValues": ["Ward 1"],
                 "timeRangeStart": "2026-03-01T00:00:00Z",
                 "timeRangeEnd": "2026-03-02T00:00:00Z",
@@ -348,7 +348,7 @@ def test_demand_comparison_service_forecast_only_historical_only_weekly_and_fail
         DemandComparisonQueryRequest.model_validate(
                 {
                     "serviceCategories": ["Roads"],
-                    "geographyLevel": "ward",
+                    "geographyLevel": "geography_key",
                     "geographyValues": ["Ward 1"],
                     "timeRangeStart": "2026-03-02T00:00:00Z",
                     "timeRangeEnd": "2026-03-05T00:00:00Z",
@@ -365,7 +365,7 @@ def test_demand_comparison_service_forecast_only_historical_only_weekly_and_fail
         DemandComparisonQueryRequest.model_validate(
             {
                 "serviceCategories": ["Roads"],
-                "geographyLevel": "ward",
+                "geographyLevel": "geography_key",
                 "geographyValues": ["Ward 1"],
                 "timeRangeStart": "2026-03-01T00:00:00Z",
                 "timeRangeEnd": "2026-03-02T00:00:00Z",

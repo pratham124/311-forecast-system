@@ -127,7 +127,7 @@ describe('AlertReviewPage', () => {
     render(<AlertReviewPage roles={['OperationalManager']} />);
 
     expect(await screen.findByText(/set thresholds and review alert outcomes/i)).toBeInTheDocument();
-    expect(await screen.findByText(/gateway timeout/i)).toBeInTheDocument();
+    expect(await screen.findByText(/one or more channels failed/i)).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: /service category/i })).toHaveTextContent('Select a category');
 

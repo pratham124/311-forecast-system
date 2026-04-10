@@ -7,6 +7,17 @@
 
 **Organization**: Tasks are grouped by user story so each story can be implemented and verified independently while preserving the shared forecast-accuracy retrieval, metric-resolution, alignment, and observability architecture.
 
+## Implementation Audit
+
+Status as of 2026-04-10 after implementation and verification against the live codebase under `backend/app`, `backend/tests`, and `frontend/src`:
+
+- `Complete`: `T001` through `T044`
+
+Notes:
+
+- The original task list referenced `backend/src/...` and top-level `tests/...`, but this repository uses `backend/app/...` and `backend/tests/...`.
+- Existing UC-06 evaluation code supplied useful alignment and metric-computation patterns, but UC-14 is now implemented as its own API, persistence model, UI, and render-event workflow.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel when the task touches different files and does not depend on incomplete work
@@ -17,9 +28,9 @@
 
 **Purpose**: Create the planned backend, frontend, and test scaffolding for the shared forecast-accuracy workflow.
 
-- [ ] T001 Create the planned backend, frontend, and test directories in `backend/src/api/routes/`, `backend/src/api/schemas/`, `backend/src/services/`, `backend/src/repositories/`, `backend/src/models/`, `backend/src/clients/`, `backend/src/core/`, `frontend/src/api/`, `frontend/src/features/forecast-accuracy/components/`, `frontend/src/features/forecast-accuracy/hooks/`, `frontend/src/features/forecast-accuracy/state/`, `frontend/src/pages/`, `frontend/src/types/`, `frontend/tests/`, `tests/contract/`, `tests/integration/`, and `tests/unit/`
-- [ ] T002 Create backend Python module scaffolding for forecast-accuracy retrieval and render-event reporting in `backend/src/api/routes/forecast_accuracy.py`, `backend/src/api/schemas/forecast_accuracy.py`, `backend/src/services/forecast_accuracy_query_service.py`, `backend/src/services/forecast_accuracy_metric_service.py`, `backend/src/services/forecast_accuracy_alignment_service.py`, `backend/src/services/forecast_accuracy_observability_service.py`, `backend/src/repositories/forecast_accuracy_repository.py`, and `backend/src/models/forecast_accuracy.py`
-- [ ] T003 [P] Create frontend TypeScript scaffolding for the forecast-performance page, API access, and typed state in `frontend/src/api/forecastAccuracyApi.ts`, `frontend/src/types/forecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/state/forecastAccuracyState.ts`, and `frontend/src/pages/ForecastAccuracyPage.tsx`
+- [X] T001 Create the planned backend, frontend, and test directories in `backend/app/api/routes/`, `backend/app/schemas/`, `backend/app/services/`, `backend/app/repositories/`, `backend/app/models/`, `backend/app/clients/`, `backend/app/core/`, `frontend/src/api/`, `frontend/src/features/forecast-accuracy/components/`, `frontend/src/features/forecast-accuracy/hooks/`, `frontend/src/features/forecast-accuracy/state/`, `frontend/src/pages/`, `frontend/src/types/`, `frontend/tests/`, `backend/tests/contract/`, `backend/tests/integration/`, and `backend/tests/unit/`
+- [X] T002 Create backend Python module scaffolding for forecast-accuracy retrieval and render-event reporting in `backend/app/api/routes/forecast_accuracy.py`, `backend/app/schemas/forecast_accuracy.py`, `backend/app/services/forecast_accuracy_query_service.py`, `backend/app/services/forecast_accuracy_metric_service.py`, `backend/app/services/forecast_accuracy_alignment_service.py`, `backend/app/services/forecast_accuracy_observability_service.py`, `backend/app/repositories/forecast_accuracy_repository.py`, and `backend/app/models/forecast_accuracy.py`
+- [X] T003 [P] Create frontend TypeScript scaffolding for the forecast-performance page, API access, and typed state in `frontend/src/api/forecastAccuracyApi.ts`, `frontend/src/types/forecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/state/forecastAccuracyState.ts`, and `frontend/src/pages/ForecastAccuracyPage.tsx`
 
 ---
 
@@ -29,17 +40,17 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create the UC-14 persistence models and canonical vocabularies for `ForecastAccuracyRequest`, `ForecastAccuracyMetricResolution`, `ForecastAccuracyComparisonResult`, `ForecastAccuracyAlignedBucket`, and `ForecastAccuracyRenderEvent` in `backend/src/models/forecast_accuracy.py`
-- [ ] T005 [P] Create the initial forecast-accuracy schema migration in `backend/src/models/migrations/014_forecast_accuracy.py`
-- [ ] T006 [P] Implement repository methods for request creation, terminal request updates, metric-resolution persistence, prepared-result persistence, aligned-bucket persistence, render-event persistence, and prepared-result lookup in `backend/src/repositories/forecast_accuracy_repository.py`
-- [ ] T007 [P] Define typed request and response schemas for forecast-accuracy view retrieval, unavailable and error states, and render-event submission in `backend/src/api/schemas/forecast_accuracy.py`
-- [ ] T008 [P] Implement authenticated and role-aware route dependencies for forecast-accuracy endpoints in `backend/src/core/auth.py` and `backend/src/api/routes/forecast_accuracy.py`
-- [ ] T009 [P] Implement retained historical-source lookup helpers for daily forecast lineage plus approved actual-demand lineage in `backend/src/clients/forecast_history_client.py` and `backend/src/clients/actual_demand_client.py`
-- [ ] T010 [P] Implement structured logging helpers for request start, forecast retrieval, actual retrieval, metric fallback, alignment refusal, prepared-result storage, and render outcomes in `backend/src/core/logging.py`
-- [ ] T011 [P] Create frontend typed contracts and API client support for authenticated `GET /api/v1/forecast-accuracy` and `POST /api/v1/forecast-accuracy/{forecastAccuracyRequestId}/render-events` in `frontend/src/types/forecastAccuracy.ts` and `frontend/src/api/forecastAccuracyApi.ts`
-- [ ] T012 Implement default-scope resolution, exact-window metric-match rules, and shared view-status derivation helpers in `backend/src/services/forecast_accuracy_query_service.py` and `backend/src/services/forecast_accuracy_metric_service.py`
-- [ ] T013 Implement the shared alignment service for matching-bucket selection, excluded-bucket counting, and unsafe-overlap rejection in `backend/src/services/forecast_accuracy_alignment_service.py`
-- [ ] T014 Implement the shared observability service for correlation-id propagation, request lifecycle updates, and render-failure status transitions in `backend/src/services/forecast_accuracy_observability_service.py`
+- [X] T004 Create the UC-14 persistence models and canonical vocabularies for `ForecastAccuracyRequest`, `ForecastAccuracyMetricResolution`, `ForecastAccuracyComparisonResult`, `ForecastAccuracyAlignedBucket`, and `ForecastAccuracyRenderEvent` in `backend/app/models/forecast_accuracy.py`
+- [X] T005 [P] Create the initial forecast-accuracy schema migration in `backend/migrations/versions/018_uc14_forecast_accuracy.py`
+- [X] T006 [P] Implement repository methods for request creation, terminal request updates, metric-resolution persistence, prepared-result persistence, aligned-bucket persistence, render-event persistence, and prepared-result lookup in `backend/app/repositories/forecast_accuracy_repository.py`
+- [X] T007 [P] Define typed request and response schemas for forecast-accuracy view retrieval, unavailable and error states, and render-event submission in `backend/app/schemas/forecast_accuracy.py`
+- [X] T008 [P] Implement authenticated and role-aware route dependencies for forecast-accuracy endpoints in `backend/app/core/auth.py` and `backend/app/api/routes/forecast_accuracy.py`
+- [X] T009 [P] Implement retained historical-source lookup helpers for daily forecast lineage plus approved actual-demand lineage in `backend/app/clients/forecast_history_client.py` and `backend/app/clients/actual_demand_client.py`
+- [X] T010 [P] Implement structured logging helpers for request start, forecast retrieval, actual retrieval, metric fallback, alignment refusal, prepared-result storage, and render outcomes in `backend/app/core/logging.py`
+- [X] T011 [P] Create frontend typed contracts and API client support for authenticated `GET /api/v1/forecast-accuracy` and `POST /api/v1/forecast-accuracy/{forecastAccuracyRequestId}/render-events` in `frontend/src/types/forecastAccuracy.ts` and `frontend/src/api/forecastAccuracyApi.ts`
+- [X] T012 Implement default-scope resolution, exact-window metric-match rules, and shared view-status derivation helpers in `backend/app/services/forecast_accuracy_query_service.py` and `backend/app/services/forecast_accuracy_metric_service.py`
+- [X] T013 Implement the shared alignment service for matching-bucket selection, excluded-bucket counting, and unsafe-overlap rejection in `backend/app/services/forecast_accuracy_alignment_service.py`
+- [X] T014 Implement the shared observability service for correlation-id propagation, request lifecycle updates, and render-failure status transitions in `backend/app/services/forecast_accuracy_observability_service.py`
 
 **Checkpoint**: Shared persistence, authorization, retained-source access, metric fallback rules, alignment behavior, logging, and typed contracts are ready. User story implementation can begin.
 
@@ -53,19 +64,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Add contract tests for authenticated `GET /api/v1/forecast-accuracy` `200`, `401`, `403`, and `422` responses plus authenticated `POST /render-events` `202` success in `tests/contract/test_forecast_accuracy_api.py`
-- [ ] T016 [P] [US1] Add backend unit tests for default last-30-completed-days scope resolution, exact retained-metric matching, daily forecast selection, and view-status derivation in `tests/unit/test_forecast_accuracy_services.py`
-- [ ] T017 [P] [US1] Add integration tests for successful request persistence, retained forecast retrieval, approved actual retrieval, aligned-bucket persistence, prepared-result storage, and success logging in `tests/integration/test_forecast_accuracy_success.py`
-- [ ] T018 [P] [US1] Add frontend interaction tests for authenticated default load, scope changes, aligned comparison rendering, and metrics display in `frontend/tests/test_forecast_accuracy_success.tsx`
+- [X] T015 [P] [US1] Add contract tests for authenticated `GET /api/v1/forecast-accuracy` `200`, `401`, `403`, and `422` responses plus authenticated `POST /render-events` `202` success in `backend/tests/contract/test_forecast_accuracy_api.py`
+- [X] T016 [P] [US1] Add backend unit tests for default last-30-completed-days scope resolution, exact retained-metric matching, daily forecast selection, and view-status derivation in `backend/tests/unit/test_forecast_accuracy_services.py`
+- [X] T017 [P] [US1] Add integration tests for successful request persistence, retained forecast retrieval, approved actual retrieval, aligned-bucket persistence, prepared-result storage, and success logging in `backend/tests/integration/test_forecast_accuracy_success.py`
+- [X] T018 [P] [US1] Add frontend interaction tests for authenticated default load, scope changes, aligned comparison rendering, and metrics display in `frontend/tests/forecast_accuracy_success.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T019 [P] [US1] Implement retained forecast and actual-demand retrieval plus exact-scope request assembly in `backend/src/services/forecast_accuracy_query_service.py`
-- [ ] T020 [P] [US1] Implement precomputed metric reuse and on-demand MAE, RMSE, and MAPE computation for exact matching windows in `backend/src/services/forecast_accuracy_metric_service.py`
-- [ ] T021 [P] [US1] Implement aligned comparison-result assembly, bucket-level error calculation, and prepared-view persistence in `backend/src/services/forecast_accuracy_alignment_service.py` and `backend/src/repositories/forecast_accuracy_repository.py`
-- [ ] T022 [US1] Implement the authenticated forecast-accuracy retrieval endpoint with thin request handling in `backend/src/api/routes/forecast_accuracy.py`
-- [ ] T023 [P] [US1] Build the forecast-performance UI for scope filters, metrics summary, and prediction-versus-actual comparison output in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyFilters.tsx`, `frontend/src/features/forecast-accuracy/components/ForecastAccuracyMetrics.tsx`, and `frontend/src/features/forecast-accuracy/components/ForecastAccuracyComparison.tsx`
-- [ ] T024 [US1] Implement the forecast-accuracy hook, state transitions, and page composition for default load, scope updates, and successful render reporting in `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/state/forecastAccuracyState.ts`, and `frontend/src/pages/ForecastAccuracyPage.tsx`
+- [X] T019 [P] [US1] Implement retained forecast and actual-demand retrieval plus exact-scope request assembly in `backend/app/services/forecast_accuracy_query_service.py`
+- [X] T020 [P] [US1] Implement precomputed metric reuse and on-demand MAE, RMSE, and MAPE computation for exact matching windows in `backend/app/services/forecast_accuracy_metric_service.py`
+- [X] T021 [P] [US1] Implement aligned comparison-result assembly, bucket-level error calculation, and prepared-view persistence in `backend/app/services/forecast_accuracy_alignment_service.py` and `backend/app/repositories/forecast_accuracy_repository.py`
+- [X] T022 [US1] Implement the authenticated forecast-accuracy retrieval endpoint with thin request handling in `backend/app/api/routes/forecast_accuracy.py`
+- [X] T023 [P] [US1] Build the forecast-performance UI for scope filters, metrics summary, and prediction-versus-actual comparison output in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyFilters.tsx`, `frontend/src/features/forecast-accuracy/components/ForecastAccuracyMetrics.tsx`, and `frontend/src/features/forecast-accuracy/components/ForecastAccuracyComparison.tsx`
+- [X] T024 [US1] Implement the forecast-accuracy hook, state transitions, and page composition for default load, scope updates, and successful render reporting in `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts`, `frontend/src/features/forecast-accuracy/state/forecastAccuracyState.ts`, and `frontend/src/pages/ForecastAccuracyPage.tsx`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -79,17 +90,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Add contract tests for `GET /api/v1/forecast-accuracy` responses with `rendered_without_metrics` status and explicit `metricResolutionStatus` or `statusMessage` fields in `tests/contract/test_forecast_accuracy_metrics_fallback.py`
-- [ ] T026 [P] [US2] Add backend unit tests for missing-precomputed-metrics logging, on-demand metric fallback, and metrics-unavailable view shaping in `tests/unit/test_forecast_accuracy_metric_fallback.py`
-- [ ] T027 [P] [US2] Add integration tests for retained-metrics miss, on-demand metric-computation attempt, unavailable-metrics persistence, and correlation-aware logging in `tests/integration/test_forecast_accuracy_metrics_fallback.py`
-- [ ] T028 [P] [US2] Add frontend interaction tests for metrics-unavailable messaging while comparison buckets remain visible in `frontend/tests/test_forecast_accuracy_metrics_fallback.tsx`
+- [X] T025 [P] [US2] Add contract tests for `GET /api/v1/forecast-accuracy` responses with `rendered_without_metrics` status and explicit `metricResolutionStatus` or `statusMessage` fields in `backend/tests/contract/test_forecast_accuracy_metrics_fallback.py`
+- [X] T026 [P] [US2] Add backend unit tests for missing-precomputed-metrics logging, on-demand metric fallback, and metrics-unavailable view shaping in `backend/tests/unit/test_forecast_accuracy_metric_fallback.py`
+- [X] T027 [P] [US2] Add integration tests for retained-metrics miss, on-demand metric-computation attempt, unavailable-metrics persistence, and correlation-aware logging in `backend/tests/integration/test_forecast_accuracy_metrics_fallback.py`
+- [X] T028 [P] [US2] Add frontend interaction tests for metrics-unavailable messaging while comparison buckets remain visible in `frontend/tests/forecast_accuracy_metrics_fallback.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Implement missing-precomputed-metrics logging, on-demand metric fallback, and `rendered_without_metrics` result creation in `backend/src/services/forecast_accuracy_metric_service.py` and `backend/src/services/forecast_accuracy_observability_service.py`
-- [ ] T030 [P] [US2] Persist metric-resolution outcomes and comparison results for fallback requests in `backend/src/repositories/forecast_accuracy_repository.py`
-- [ ] T031 [P] [US2] Build frontend metrics-unavailable messaging and degraded-summary presentation in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyMetricsUnavailable.tsx`
-- [ ] T032 [US2] Integrate fallback response handling into `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts` and `frontend/src/pages/ForecastAccuracyPage.tsx`
+- [X] T029 [US2] Implement missing-precomputed-metrics logging, on-demand metric fallback, and `rendered_without_metrics` result creation in `backend/app/services/forecast_accuracy_metric_service.py` and `backend/app/services/forecast_accuracy_observability_service.py`
+- [X] T030 [P] [US2] Persist metric-resolution outcomes and comparison results for fallback requests in `backend/app/repositories/forecast_accuracy_repository.py`
+- [X] T031 [P] [US2] Build frontend metrics-unavailable messaging and degraded-summary presentation in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyMetricsUnavailable.tsx`
+- [X] T032 [US2] Integrate fallback response handling into `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts` and `frontend/src/pages/ForecastAccuracyPage.tsx`
 
 **Checkpoint**: User Stories 1 and 2 are independently functional and testable.
 
@@ -103,17 +114,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Add contract tests for `GET /api/v1/forecast-accuracy` unavailable or error responses and `POST /render-events` `401`, `403`, `404`, and `422` responses in `tests/contract/test_forecast_accuracy_failure_states.py`
-- [ ] T034 [P] [US3] Add backend unit tests for forecast-missing, actual-missing, alignment-unavailable, and render-failed status transitions in `tests/unit/test_forecast_accuracy_failure_states.py`
-- [ ] T035 [P] [US3] Add integration tests for missing-forecast, missing-actual, empty-overlap, and render-failure observability flows in `tests/integration/test_forecast_accuracy_failure_states.py`
-- [ ] T036 [P] [US3] Add frontend interaction tests for unavailable-state messaging, error-state rendering, and failed-render reporting in `frontend/tests/test_forecast_accuracy_failure_states.tsx`
+- [X] T033 [P] [US3] Add contract tests for `GET /api/v1/forecast-accuracy` unavailable or error responses and `POST /render-events` `401`, `403`, `404`, and `422` responses in `backend/tests/contract/test_forecast_accuracy_failure_states.py`
+- [X] T034 [P] [US3] Add backend unit tests for forecast-missing, actual-missing, alignment-unavailable, and render-failed status transitions in `backend/tests/unit/test_forecast_accuracy_failure_states.py`
+- [X] T035 [P] [US3] Add integration tests for missing-forecast, missing-actual, empty-overlap, and render-failure observability flows in `backend/tests/integration/test_forecast_accuracy_failure_states.py`
+- [X] T036 [P] [US3] Add frontend interaction tests for unavailable-state messaging, error-state rendering, and failed-render reporting in `frontend/tests/forecast_accuracy_failure_states.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Implement missing-forecast, missing-actual, and unsafe-alignment outcome handling with terminal request updates and zero-bucket prepared results in `backend/src/services/forecast_accuracy_query_service.py`, `backend/src/services/forecast_accuracy_alignment_service.py`, and `backend/src/repositories/forecast_accuracy_repository.py`
-- [ ] T038 [P] [US3] Implement the authenticated render-event endpoint, render-failure acceptance, and request-status update logic in `backend/src/api/routes/forecast_accuracy.py` and `backend/src/services/forecast_accuracy_observability_service.py`
-- [ ] T039 [P] [US3] Build frontend unavailable and error-state components plus render-failure reporting helpers in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyUnavailable.tsx`, `frontend/src/features/forecast-accuracy/components/ForecastAccuracyError.tsx`, and `frontend/src/api/forecastAccuracyApi.ts`
-- [ ] T040 [US3] Integrate unavailable-state rendering, error-state rendering, and render-event reporting into `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts` and `frontend/src/pages/ForecastAccuracyPage.tsx`
+- [X] T037 [US3] Implement missing-forecast, missing-actual, and unsafe-alignment outcome handling with terminal request updates and zero-bucket prepared results in `backend/app/services/forecast_accuracy_query_service.py`, `backend/app/services/forecast_accuracy_alignment_service.py`, and `backend/app/repositories/forecast_accuracy_repository.py`
+- [X] T038 [P] [US3] Implement the authenticated render-event endpoint, render-failure acceptance, and request-status update logic in `backend/app/api/routes/forecast_accuracy.py` and `backend/app/services/forecast_accuracy_observability_service.py`
+- [X] T039 [P] [US3] Build frontend unavailable and error-state components plus render-failure reporting helpers in `frontend/src/features/forecast-accuracy/components/ForecastAccuracyUnavailable.tsx`, `frontend/src/features/forecast-accuracy/components/ForecastAccuracyError.tsx`, and `frontend/src/api/forecastAccuracyApi.ts`
+- [X] T040 [US3] Integrate unavailable-state rendering, error-state rendering, and render-event reporting into `frontend/src/features/forecast-accuracy/hooks/useForecastAccuracy.ts` and `frontend/src/pages/ForecastAccuracyPage.tsx`
 
 **Checkpoint**: All user stories are independently functional and reviewable.
 
@@ -123,10 +134,10 @@
 
 **Purpose**: Finish acceptance traceability, contract alignment, observability assertions, and end-to-end verification for the shared forecast-accuracy workflow.
 
-- [ ] T041 [P] Map implementation and verification steps for AT-01 through AT-12 in `specs/014-uc-14-forecast-accuracy/quickstart.md`
-- [ ] T042 [P] Align request and response examples for rendered-with-metrics, rendered-without-metrics, unavailable, error, and render-event outcomes in `specs/014-uc-14-forecast-accuracy/contracts/forecast-accuracy-api.yaml`
-- [ ] T043 [P] Add observability and correlation-id assertions for success, metrics fallback, unavailable, and render-failure flows in `tests/integration/test_forecast_accuracy_success.py`, `tests/integration/test_forecast_accuracy_metrics_fallback.py`, and `tests/integration/test_forecast_accuracy_failure_states.py`
-- [ ] T044 Run end-to-end verification for contract, unit, integration, and frontend interaction suites covering forecast-accuracy retrieval and render-event outcomes in `tests/contract/`, `tests/unit/`, `tests/integration/`, and `frontend/tests/`
+- [X] T041 [P] Map implementation and verification steps for AT-01 through AT-12 in `specs/014-uc-14-forecast-accuracy/quickstart.md`
+- [X] T042 [P] Align request and response examples for rendered-with-metrics, rendered-without-metrics, unavailable, error, and render-event outcomes in `specs/014-uc-14-forecast-accuracy/contracts/forecast-accuracy-api.yaml`
+- [X] T043 [P] Add observability and correlation-id assertions for success, metrics fallback, unavailable, and render-failure flows in `backend/tests/integration/test_forecast_accuracy_success.py`, `backend/tests/integration/test_forecast_accuracy_metrics_fallback.py`, and `backend/tests/integration/test_forecast_accuracy_failure_states.py`
+- [X] T044 Run end-to-end verification for contract, unit, integration, and frontend interaction suites covering forecast-accuracy retrieval and render-event outcomes in `backend/tests/contract/`, `backend/tests/unit/`, `backend/tests/integration/`, and `frontend/tests/`
 
 ---
 
@@ -193,7 +204,7 @@
 Task: "Add contract tests for GET /api/v1/forecast-accuracy and successful POST render-event handling in tests/contract/test_forecast_accuracy_api.py"
 Task: "Add backend unit tests for default scope resolution, product selection, and view-status derivation in tests/unit/test_forecast_accuracy_services.py"
 Task: "Add integration tests for successful request persistence and aligned-bucket storage in tests/integration/test_forecast_accuracy_success.py"
-Task: "Add frontend interaction tests for default load, scope changes, and metrics rendering in frontend/tests/test_forecast_accuracy_success.tsx"
+Task: "Add frontend interaction tests for default load, scope changes, and metrics rendering in frontend/tests/forecast_accuracy_success.test.tsx"
 ```
 
 ```bash
@@ -207,7 +218,7 @@ Task: "Build the forecast-performance UI in frontend/src/features/forecast-accur
 ```bash
 Task: "Add contract tests for rendered_without_metrics responses in tests/contract/test_forecast_accuracy_metrics_fallback.py"
 Task: "Add integration tests for retained-metrics miss and on-demand fallback outcomes in tests/integration/test_forecast_accuracy_metrics_fallback.py"
-Task: "Add frontend interaction tests for metrics-unavailable messaging in frontend/tests/test_forecast_accuracy_metrics_fallback.tsx"
+Task: "Add frontend interaction tests for metrics-unavailable messaging in frontend/tests/forecast_accuracy_metrics_fallback.test.tsx"
 ```
 
 ## Parallel Example: User Story 3
@@ -215,7 +226,7 @@ Task: "Add frontend interaction tests for metrics-unavailable messaging in front
 ```bash
 Task: "Add contract tests for unavailable or error retrieval responses and POST render-event failure responses in tests/contract/test_forecast_accuracy_failure_states.py"
 Task: "Add integration tests for missing-forecast, missing-actual, empty-overlap, and render-failure observability in tests/integration/test_forecast_accuracy_failure_states.py"
-Task: "Add frontend interaction tests for unavailable and error states plus failed-render reporting in frontend/tests/test_forecast_accuracy_failure_states.tsx"
+Task: "Add frontend interaction tests for unavailable and error states plus failed-render reporting in frontend/tests/forecast_accuracy_failure_states.test.tsx"
 ```
 
 ---

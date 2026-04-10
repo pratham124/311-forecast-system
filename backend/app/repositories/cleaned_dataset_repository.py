@@ -265,3 +265,62 @@ class CleanedDatasetRepository:
             if (start_requested_at is None or str(record.get("requested_at", "")) >= start_requested_at)
             and (end_requested_at is None or str(record.get("requested_at", "")) < end_requested_at)
         ]
+
+    def list_current_cleaned_records_filtered(
+        self,
+        source_name: str,
+        *,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        categories: list[str] | None = None,
+        geography_keys: list[str] | None = None,
+    ) -> list[dict[str, object]]:
+        """Like list_current_cleaned_records but with category and geography pushed into SQL."""
+        statement = select(CleanedCurrentRecord).where(CleanedCurrentRecord.source_name == source_name)
+        if start_time is not None:
+            statement = statement.where(CleanedCurrentRecord.requested_at >= _to_requested_at_string(start_time))
+        if end_time is not None:
+            statement = statement.where(CleanedCurrentRecord.requested_at < _to_requested_at_string(end_time))
+        if categories:
+            statement = statement.where(CleanedCurrentRecord.category.in_(categories))
+        if geography_keys is not None:
+            statement = statement.where(CleanedCurrentRecord.geography_key.in_(geography_keys))
+        rows = list(
+            self.session.scalars(
+                statement.order_by(CleanedCurrentRecord.requested_at.asc(), CleanedCurrentRecord.service_request_id.asc())
+            )
+        )
+        if rows:
+            normalized: list[dict[str, object]] = []
+            for row in rows:
+                try:
+                    payload = json.loads(row.record_payload)
+                except json.JSONDecodeError:
+                    payload = {
+                        "service_request_id": row.service_request_id,
+                        "requested_at": row.requested_at,
+                        "category": row.category,
+                    }
+                    if row.geography_key is not None:
+                        payload["geography_key"] = row.geography_key
+                normalized.append(payload)
+            return normalized
+
+        # Fallback to dataset_records table (same as list_current_cleaned_records)
+        current_dataset = self.get_current_approved_dataset(source_name)
+        if current_dataset is None:
+            return []
+
+        start_requested_at = _to_requested_at_string(start_time) if start_time is not None else None
+        end_requested_at = _to_requested_at_string(end_time) if end_time is not None else None
+        category_set = set(categories) if categories else None
+        geography_set = set(geography_keys) if geography_keys is not None else None
+        return [
+            record
+            for record in self.list_dataset_records(current_dataset.dataset_version_id)
+            if (start_requested_at is None or str(record.get("requested_at", "")) >= start_requested_at)
+            and (end_requested_at is None or str(record.get("requested_at", "")) < end_requested_at)
+            and (category_set is None or str(record.get("category", "")).strip() in category_set)
+            and (geography_set is None or str(record.get("geography_key", "") or "").strip() in geography_set)
+        ]
+
