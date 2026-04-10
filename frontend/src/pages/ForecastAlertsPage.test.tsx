@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ForecastAlertsPage } from './ForecastAlertsPage';
@@ -136,7 +136,7 @@ describe('ForecastAlertsPage', () => {
     render(<ForecastAlertsPage roles={['OperationalManager']} />);
 
     const input = await screen.findByLabelText(/threshold value/i);
-    expect(input).toHaveValue(20);
+    await waitFor(() => expect(input).toHaveValue(20));
     await user.clear(input);
     await user.type(input, '35');
     await user.click(screen.getByRole('button', { name: /update threshold/i }));
