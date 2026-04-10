@@ -20,6 +20,7 @@ from app.api.routes.user_guide import router as user_guide_router
 from app.api.routes.validation_run_status import router as validation_run_router
 from app.api.routes.weather_overlay import router as weather_overlay_router
 from app.api.routes.weekly_forecasts import router as weekly_forecast_router
+from app.api.routes.forecast_accuracy import router as forecast_accuracy_router
 from app.core.config import get_settings
 from app.core.db import get_session_factory, run_migrations
 from app.core.logging import configure_logging
@@ -168,6 +169,7 @@ def create_app() -> FastAPI:
     app.include_router(forecast_alerts_router)
     app.include_router(historical_demand_router)
     app.include_router(demand_comparison_router)
+    app.include_router(forecast_accuracy_router)
     app.include_router(public_forecast_router)
     app.include_router(user_guide_router)
     app.include_router(weather_overlay_router)

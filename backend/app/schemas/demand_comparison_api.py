@@ -91,8 +91,6 @@ class DemandComparisonQueryRequest(BaseModel):
             raise ValueError("timeRangeStart and timeRangeEnd must be timezone-aware")
         if self.time_range_end < self.time_range_start:
             raise ValueError("timeRangeEnd must not be earlier than timeRangeStart")
-        if self.geography_values and not self.geography_level:
-            raise ValueError("geographyLevel is required when geographyValues are provided")
         return self
 
 

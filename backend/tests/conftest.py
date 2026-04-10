@@ -70,14 +70,35 @@ def build_token(
     return jwt.encode(payload, secret or settings.jwt_secret, algorithm="HS256")
 
 
-@pytest.fixture(autouse=True)
-def isolated_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[None]:
-    monkeypatch.setenv("DATABASE_URL", f"sqlite+pysqlite:///{tmp_path / 'test.db'}")
-    monkeypatch.setenv("EDMONTON_311_SOURCE_NAME", "edmonton_311")
+import shutil
+
+_template_db_path: Path | None = None
+
+@pytest.fixture(scope="session", autouse=True)
+def _prepare_template_db(tmp_path_factory: pytest.TempPathFactory) -> None:
+    global _template_db_path
+    template_dir = tmp_path_factory.mktemp("db_template")
+    _template_db_path = template_dir / "template.db"
+    
+    # Run migrations once on the template db
+    os.environ["DATABASE_URL"] = f"sqlite+pysqlite:///{_template_db_path}"
     config_module.get_settings.cache_clear()
     db_module._engine = None
     db_module._session_factory = None
     run_migrations()
+
+
+@pytest.fixture(autouse=True)
+def isolated_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[None]:
+    test_db = tmp_path / 'test.db'
+    if _template_db_path and _template_db_path.exists():
+        shutil.copy(_template_db_path, test_db)
+    
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+pysqlite:///{test_db}")
+    monkeypatch.setenv("EDMONTON_311_SOURCE_NAME", "edmonton_311")
+    config_module.get_settings.cache_clear()
+    db_module._engine = None
+    db_module._session_factory = None
     yield
     config_module.get_settings.cache_clear()
     db_module._engine = None

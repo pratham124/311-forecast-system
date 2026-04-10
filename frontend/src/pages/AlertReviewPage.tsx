@@ -659,42 +659,8 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
                   </div>
                 ) : null}
 
-                <div className="grid gap-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted/70">Delivery trace</p>
-                    <p className="text-xs text-muted">{selectedEvent.channelAttempts.length} channel attempts</p>
-                  </div>
-                  {selectedEvent.channelAttempts.length > 0 ? (
-                    <div className="grid gap-3">
-                      {selectedEvent.channelAttempts.map((attempt) => (
-                        <div
-                          key={`${attempt.channelType}-${attempt.attemptNumber}-${attempt.attemptedAt}`}
-                          className={`rounded-xl border px-4 py-3 ${attemptStatusClasses(attempt.status)}`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-bold text-ink">
-                                {formatChannelType(attempt.channelType)} attempt {attempt.attemptNumber}
-                              </p>
-                              <p className="text-xs text-muted">{formatDateTime(attempt.attemptedAt)}</p>
-                            </div>
-                            <span className="text-[11px] font-bold uppercase tracking-[0.14em]">
-                              {attempt.status === 'succeeded' ? 'Succeeded' : 'Failed'}
-                            </span>
-                          </div>
-                          {attempt.failureReason ? (
-                            <p className="mt-2 text-sm font-medium text-ink">{attempt.failureReason}</p>
-                          ) : null}
-                          {attempt.providerReference ? (
-                            <p className="mt-1 text-xs text-muted">Reference: {attempt.providerReference}</p>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted">No channel attempts were recorded for this alert.</p>
-                  )}
-                </div>
+
+
 
               </>
             ) : (

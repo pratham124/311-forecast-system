@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -123,6 +123,38 @@ class WeeklyForecastRepository:
             )
         )
         return list(self.session.scalars(statement))
+
+    def list_buckets_filtered(
+        self,
+        version_ids: list[str],
+        *,
+        service_categories: list[str] | None = None,
+        date_start: date | None = None,
+        date_end: date | None = None,
+        geography_keys: list[str] | None = None,
+    ) -> list[WeeklyForecastBucket]:
+        """Fetch buckets for multiple weekly versions in one query, with all filters in SQL."""
+        if not version_ids:
+            return []
+        statement = (
+            select(WeeklyForecastBucket)
+            .where(WeeklyForecastBucket.weekly_forecast_version_id.in_(version_ids))
+        )
+        if service_categories:
+            statement = statement.where(WeeklyForecastBucket.service_category.in_(service_categories))
+        if date_start is not None:
+            statement = statement.where(WeeklyForecastBucket.forecast_date_local >= date_start)
+        if date_end is not None:
+            statement = statement.where(WeeklyForecastBucket.forecast_date_local < date_end)
+        if geography_keys is not None:
+            statement = statement.where(WeeklyForecastBucket.geography_key.in_(geography_keys))
+        statement = statement.order_by(
+            WeeklyForecastBucket.forecast_date_local.asc(),
+            WeeklyForecastBucket.service_category.asc(),
+            WeeklyForecastBucket.geography_key.asc(),
+        )
+        return list(self.session.scalars(statement))
+
 
     def list_service_categories(self, weekly_forecast_version_id: str) -> list[str]:
         return sorted({bucket.service_category for bucket in self.list_buckets(weekly_forecast_version_id) if bucket.service_category})

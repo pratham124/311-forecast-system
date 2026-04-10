@@ -30,6 +30,10 @@ const HistoricalDemandPage = lazy(async () => {
   const module = await import('./pages/HistoricalDemandPage');
   return { default: module.HistoricalDemandPage };
 });
+const ForecastAccuracyPage = lazy(async () => {
+  const module = await import('./pages/ForecastAccuracyPage');
+  return { default: module.ForecastAccuracyPage };
+});
 const IngestionPage = lazy(async () => {
   const module = await import('./pages/IngestionPage');
   return { default: module.IngestionPage };
@@ -51,79 +55,86 @@ function canReadInternalOperations(roles: string[]): boolean {
   return roles.some((role) => role === 'CityPlanner' || role === 'OperationalManager');
 }
 
+function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `relative inline-flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-[13px] font-semibold outline-none transition-colors duration-200 ${
+          isActive
+            ? 'text-accent after:absolute after:bottom-0 after:left-1 after:right-1 after:h-[2.5px] after:rounded-full after:bg-accent'
+            : 'text-slate-500 hover:text-ink'
+        }`
+      }
+    >
+      {children}
+    </NavLink>
+  );
+}
+
 function InternalLayout({ session, onLogout }: { session: AuthSession; onLogout: () => Promise<void> }) {
   const showEvaluationPage = canReadInternalOperations(session.user.roles);
   const showIngestionPage = canReadInternalOperations(session.user.roles);
+  const userInitial = (session.user.email[0] ?? '?').toUpperCase();
+  const displayRole = session.user.roles[0]
+    ?.replace(/([a-z])([A-Z])/g, '$1 $2') ?? 'User';
 
   return (
     <div className="min-h-screen bg-[#f3f4f5]">
-      <header className="border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-accent">Signed in</p>
-              <p className="text-sm text-ink">{session.user.email} · {session.user.roles.join(', ')}</p>
+      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur-lg">
+        {/* Top bar — brand + user */}
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-xs font-black tracking-tight text-white shadow-sm">
+              311
             </div>
-            <nav className="flex items-center gap-2 pl-2" aria-label="internal navigation">
-              <NavLink
-                to="/app/forecasts"
-                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-              >
-                Forecasts
-              </NavLink>
-              <NavLink
-                to="/app/demand-comparisons"
-                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-              >
-                Comparisons
-              </NavLink>
-              <NavLink
-                to="/app/historical-demand"
-                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-              >
-                Historical
-              </NavLink>
-              {showEvaluationPage ? (
-                <NavLink
-                  to="/app/alerts"
-                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-                >
-                  Alerts
-                </NavLink>
-              ) : null}
-              {showEvaluationPage ? (
-                <NavLink
-                  to="/app/evaluations"
-                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-                >
-                  Evaluations
-                </NavLink>
-              ) : null}
-              {showIngestionPage ? (
-                <NavLink
-                  to="/app/ingestion"
-                  className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-                >
-                  Ingestion
-                </NavLink>
-              ) : null}
-              <NavLink
-                to="/app/user-guide"
-                className={({ isActive }) => `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${isActive ? 'bg-accent text-white' : 'border border-slate-300 bg-white text-ink hover:border-accent hover:text-accent'}`}
-              >
-                Help
-              </NavLink>
-            </nav>
+            <span className="text-[15px] font-bold tracking-tight text-ink">
+              Forecast<span className="font-normal text-slate-400">&nbsp;System</span>
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              void onLogout();
-            }}
-            className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent"
-          >
-            Log out
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2.5 sm:flex">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
+                {userInitial}
+              </div>
+              <div className="text-right">
+                <p className="m-0 text-[13px] font-medium leading-tight text-ink">{session.user.email}</p>
+                <p className="m-0 text-[11px] leading-tight text-slate-400">{displayRole}</p>
+              </div>
+            </div>
+            <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+            <button
+              type="button"
+              onClick={() => {
+                void onLogout();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[13px] font-medium text-slate-500 outline-none transition-colors duration-200 hover:bg-slate-100 hover:text-ink"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              Log out
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation bar */}
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+          <nav className="-mb-px flex items-center gap-0.5 overflow-x-auto" aria-label="internal navigation">
+            <NavItem to="/app/forecasts">Forecasts</NavItem>
+            <NavItem to="/app/demand-comparisons">Comparisons</NavItem>
+            <NavItem to="/app/forecast-accuracy">Accuracy</NavItem>
+            <NavItem to="/app/historical-demand">Historical</NavItem>
+            {showEvaluationPage ? <NavItem to="/app/alerts">Alerts</NavItem> : null}
+            {showEvaluationPage ? <NavItem to="/app/evaluations">Evaluations</NavItem> : null}
+            {showIngestionPage ? <NavItem to="/app/ingestion">Ingestion</NavItem> : null}
+            <NavItem to="/app/user-guide">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
+              Help
+            </NavItem>
+          </nav>
         </div>
       </header>
       <Outlet />
@@ -228,6 +239,7 @@ function AppShell() {
           <Route index element={<Navigate to="forecasts" replace />} />
           <Route path="forecasts" element={<ForecastVisualizationPage />} />
           <Route path="demand-comparisons" element={<DemandComparisonPage />} />
+          <Route path="forecast-accuracy" element={<ForecastAccuracyPage />} />
           <Route path="historical-demand" element={<HistoricalDemandPage />} />
           <Route
             path="alerts"

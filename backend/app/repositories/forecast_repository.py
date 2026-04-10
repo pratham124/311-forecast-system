@@ -136,6 +136,38 @@ class ForecastRepository:
         )
         return list(self.session.scalars(statement))
 
+    def list_buckets_filtered(
+        self,
+        version_ids: list[str],
+        *,
+        service_categories: list[str] | None = None,
+        time_start: datetime | None = None,
+        time_end: datetime | None = None,
+        geography_keys: list[str] | None = None,
+    ) -> list[ForecastBucket]:
+        """Fetch buckets for multiple versions in one query, with all filters in SQL."""
+        if not version_ids:
+            return []
+        statement = (
+            select(ForecastBucket)
+            .where(ForecastBucket.forecast_version_id.in_(version_ids))
+        )
+        if service_categories:
+            statement = statement.where(ForecastBucket.service_category.in_(service_categories))
+        if time_start is not None:
+            statement = statement.where(ForecastBucket.bucket_start >= time_start)
+        if time_end is not None:
+            statement = statement.where(ForecastBucket.bucket_start < time_end)
+        if geography_keys is not None:
+            statement = statement.where(ForecastBucket.geography_key.in_(geography_keys))
+        statement = statement.order_by(
+            ForecastBucket.bucket_start.asc(),
+            ForecastBucket.service_category.asc(),
+            ForecastBucket.geography_key.asc(),
+        )
+        return list(self.session.scalars(statement))
+
+
     def list_service_categories(self, forecast_version_id: str) -> list[str]:
         return sorted({bucket.service_category for bucket in self.list_buckets(forecast_version_id) if bucket.service_category})
 
