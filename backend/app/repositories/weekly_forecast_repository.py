@@ -124,6 +124,18 @@ class WeeklyForecastRepository:
         )
         return list(self.session.scalars(statement))
 
+    def list_service_categories(self, weekly_forecast_version_id: str) -> list[str]:
+        return sorted({bucket.service_category for bucket in self.list_buckets(weekly_forecast_version_id) if bucket.service_category})
+
+    def list_current_service_categories(self, forecast_product_name: str) -> list[str]:
+        marker = self.get_current_marker(forecast_product_name)
+        if marker is None:
+            return []
+        version = self.get_forecast_version(marker.weekly_forecast_version_id)
+        if version is None or version.storage_status != "stored":
+            return []
+        return self.list_service_categories(version.weekly_forecast_version_id)
+
     def find_latest_stored_version(self) -> WeeklyForecastVersion | None:
         statement = (
             select(WeeklyForecastVersion)

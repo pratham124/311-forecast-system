@@ -22,6 +22,7 @@ from app.schemas.forecast import CurrentForecastRead, ForecastBucketRead, Foreca
 from app.services.forecast_activation_service import ForecastActivationService, ForecastStorageError
 from app.services.forecast_bucket_service import ForecastBucketService
 from app.services.forecast_training_service import ForecastModelStorageError, ForecastTrainingService
+from app.services.threshold_alert_trigger_service import run_threshold_alert_evaluation
 
 
 class ForecastModelUnavailableError(RuntimeError):
@@ -82,6 +83,12 @@ def compute_forecast_horizon(now: datetime | None = None) -> tuple[datetime, dat
     horizon_start = current.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
     horizon_end = horizon_start + timedelta(hours=24)
     return horizon_start, horizon_end
+
+
+def _map_alert_trigger_source(trigger_type: str) -> str:
+    if trigger_type == "scheduled":
+        return "forecast_refresh"
+    return "forecast_publish"
 
 
 @dataclass
@@ -256,6 +263,19 @@ class ForecastService:
                 summary="forecast generated and activated",
                 buckets=buckets,
             )
+            try:
+                run_threshold_alert_evaluation(
+                    self.forecast_repository.session,
+                    forecast_reference_id=forecast_version_id,
+                    forecast_product="daily",
+                    trigger_source=_map_alert_trigger_source(run.trigger_type),
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning(
+                    "threshold alert evaluation failed for forecast_version_id=%s: %s",
+                    forecast_version_id,
+                    exc,
+                )
         except ForecastModelUnavailableError as exc:
             print(
                 "[debug][forecast] forecast fail "
