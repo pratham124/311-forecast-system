@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { SurgeAlertReview } from '../features/surge_alerts';
 import {
   createThresholdConfiguration,
   deleteThresholdConfiguration,
@@ -228,6 +229,7 @@ const EMPTY_FORM: ThresholdFormState = {
 /* ── Main page component ───────────────────────────────────────────── */
 
 export function AlertReviewPage({ roles }: { roles: string[] }) {
+  const [activePanel, setActivePanel] = useState<'thresholds' | 'surges'>('thresholds');
   const [events, setEvents] = useState<ThresholdAlertEventSummary[]>([]);
   const [thresholds, setThresholds] = useState<ThresholdConfiguration[]>([]);
   const [serviceCategories, setServiceCategories] = useState<string[]>([]);
@@ -394,7 +396,31 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
   }
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl gap-6 px-4 pb-14 pt-7 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
+    <main className="mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setActivePanel('thresholds')}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            activePanel === 'thresholds' ? 'bg-accent text-white' : 'bg-white text-ink'
+          }`}
+        >
+          Threshold Alerts
+        </button>
+        <button
+          type="button"
+          onClick={() => setActivePanel('surges')}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            activePanel === 'surges' ? 'bg-accent text-white' : 'bg-white text-ink'
+          }`}
+        >
+          Surge Alerts
+        </button>
+      </div>
+
+      {activePanel === 'surges' ? <SurgeAlertReview roles={roles} /> : null}
+      {activePanel === 'thresholds' ? (
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
       {/* ─── Left column: Thresholds & event list ──────────────── */}
       <Card className="rounded-[28px] border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
         <CardHeader>
@@ -672,6 +698,8 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
           </CardContent>
         </Card>
       </div>
+        </div>
+      ) : null}
     </main>
   );
 }

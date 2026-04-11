@@ -68,6 +68,15 @@ from app.models.threshold_alert_models import (
     ThresholdScopeEvaluation,
     ThresholdState,
 )
+from app.models.surge_alert_models import (
+    SurgeCandidate,
+    SurgeConfirmationOutcome,
+    SurgeDetectionConfiguration,
+    SurgeEvaluationRun,
+    SurgeNotificationChannelAttempt,
+    SurgeNotificationEvent,
+    SurgeState,
+)
 from app.models.forecast_accuracy import (
     ForecastAccuracyAlignedBucket,
     ForecastAccuracyComparisonResult,
@@ -133,6 +142,13 @@ __all__ = [
     "VisualizationSnapshot",
     "NotificationChannelAttempt",
     "NotificationEvent",
+    "SurgeCandidate",
+    "SurgeConfirmationOutcome",
+    "SurgeDetectionConfiguration",
+    "SurgeEvaluationRun",
+    "SurgeNotificationChannelAttempt",
+    "SurgeNotificationEvent",
+    "SurgeState",
     "ThresholdConfiguration",
     "ThresholdEvaluationRun",
     "ThresholdScopeEvaluation",
