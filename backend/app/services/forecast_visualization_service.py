@@ -5,11 +5,16 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.config import Settings
 from app.models import VisualizationLoadRecord
+from app.schemas.forecast_visualization import CategoryFilter, ForecastConfidenceRead, ForecastVisualizationRead, ServiceCategoryOptionsRead, StatusMessage, VisualizationRenderEvent
+from app.services.forecast_confidence_service import (
+    ForecastConfidenceService,
+    build_unavailable_confidence_read,
+    confidence_signal_resolution_status,
+)
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_repository import ForecastRepository
 from app.repositories.visualization_repository import VisualizationRepository
 from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
-from app.schemas.forecast_visualization import CategoryFilter, ForecastVisualizationRead, ServiceCategoryOptionsRead, StatusMessage, VisualizationRenderEvent
 from app.services.forecast_visualization_sources import ForecastVisualizationSourceService, NormalizedForecastSource
 from app.services.historical_demand_service import HistoricalDemandService
 from app.services.visualization_snapshot_service import VisualizationSnapshotService
@@ -49,6 +54,7 @@ class ForecastVisualizationService:
         snapshot_service: VisualizationSnapshotService,
         settings: Settings,
         logger: logging.Logger,
+        confidence_service: ForecastConfidenceService | None = None,
     ) -> None:
         self.cleaned_dataset_repository = cleaned_dataset_repository
         self.forecast_repository = forecast_repository
@@ -59,6 +65,12 @@ class ForecastVisualizationService:
         self.snapshot_service = snapshot_service
         self.settings = settings
         self.logger = logger
+        self.confidence_service = confidence_service or ForecastConfidenceService(
+            surge_state_repository=None,
+            surge_evaluation_repository=None,
+            settings=settings,
+            logger=logger,
+        )
 
     def get_current_visualization(
         self,
@@ -115,6 +127,7 @@ class ForecastVisualizationService:
                     source_cleaned_dataset_version_id=response.source_cleaned_dataset_version_id,
                     source_forecast_version_id=response.source_forecast_version_id,
                     source_weekly_forecast_version_id=response.source_weekly_forecast_version_id,
+                    **self._confidence_kwargs(response.forecast_confidence),
                 )
                 return response
             response = self._build_unavailable_response(
@@ -130,6 +143,7 @@ class ForecastVisualizationService:
                 load_record.visualization_load_id,
                 status="unavailable",
                 failure_reason=response.summary,
+                **self._confidence_kwargs(response.forecast_confidence),
             )
             return response
 
@@ -145,6 +159,13 @@ class ForecastVisualizationService:
         elif source.uncertainty_bands is None:
             degradation_type = "uncertainty_missing"
         selected_categories = getattr(source, 'selected_categories', None) or normalized_categories
+        confidence = self.confidence_service.assess_confidence(
+            visualization_load_id=load_record.visualization_load_id,
+            forecast_product=forecast_product,
+            service_categories=selected_categories,
+            degradation_type=degradation_type,
+            now=now,
+        )
         response = ForecastVisualizationRead(
             visualizationLoadId=load_record.visualization_load_id,
             forecastProduct=forecast_product,
@@ -164,6 +185,7 @@ class ForecastVisualizationService:
             uncertaintyBands=source.uncertainty_bands,
             alerts=self._build_alerts(degradation_type),
             pipelineStatus=self._build_pipeline_status(source, degradation_type),
+            forecastConfidence=confidence.to_schema(),
             viewStatus="degraded" if degradation_type else "success",
             degradationType=degradation_type,
             summary=self._build_summary(degradation_type),
@@ -175,6 +197,7 @@ class ForecastVisualizationService:
             history_window_start=history_start,
             history_window_end=history_end,
             source_cleaned_dataset_version_id=dataset_version_id or source.source_cleaned_dataset_version_id,
+            **self._confidence_kwargs(response.forecast_confidence),
         )
         if degradation_type is None:
             self.snapshot_service.store_snapshot(load_record=load_record, source=source, response=response)
@@ -200,6 +223,13 @@ class ForecastVisualizationService:
 
     def record_render_event(self, visualization_load_id: str, payload: VisualizationRenderEvent) -> None:
         self.visualization_repository.report_render_event(
+            visualization_load_id,
+            render_status=payload.render_status,
+            failure_reason=payload.failure_reason,
+        )
+
+    def record_confidence_render_event(self, visualization_load_id: str, payload: VisualizationRenderEvent) -> None:
+        self.visualization_repository.report_confidence_render_event(
             visualization_load_id,
             render_status=payload.render_status,
             failure_reason=payload.failure_reason,
@@ -291,6 +321,20 @@ class ForecastVisualizationService:
             historyWindowEnd=history_window_end,
             alerts=[StatusMessage(code="visualization_unavailable", level="error", message=failure_reason)],
             pipelineStatus=[StatusMessage(code="forecast_missing", level="error", message="Current forecast data could not be resolved.")],
+            forecastConfidence=build_unavailable_confidence_read(),
             viewStatus="unavailable",
             summary=failure_reason,
         )
+
+    @staticmethod
+    def _confidence_kwargs(confidence: ForecastConfidenceRead | None) -> dict[str, object]:
+        if confidence is None:
+            return {}
+        return {
+            "confidence_assessment_status": confidence.assessment_status,
+            "confidence_indicator_state": confidence.indicator_state,
+            "confidence_reason_categories": confidence.reason_categories,
+            "confidence_supporting_signals": confidence.supporting_signals,
+            "confidence_message": confidence.message,
+            "confidence_signal_resolution_status": confidence_signal_resolution_status(confidence.assessment_status),
+        }

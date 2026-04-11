@@ -57,6 +57,13 @@ class Settings:
     weekly_forecast_timezone: str
     weekly_forecast_history_days: int
     visualization_fallback_age_hours: int
+    forecast_confidence_signal_lookback_hours: int
+    forecast_confidence_normal_message: str
+    forecast_confidence_signals_missing_message: str
+    forecast_confidence_dismissed_message: str
+    forecast_confidence_missing_inputs_message: str
+    forecast_confidence_anomaly_message: str
+    forecast_confidence_combined_message: str
     evaluation_forecast_products: str
     evaluation_baseline_methods: str
     evaluation_scheduler_enabled: bool
@@ -128,6 +135,31 @@ def get_settings() -> Settings:
         weekly_forecast_timezone=os.getenv("WEEKLY_FORECAST_TIMEZONE", "America/Edmonton"),
         weekly_forecast_history_days=int(os.getenv("WEEKLY_FORECAST_HISTORY_DAYS", "112")),
         visualization_fallback_age_hours=int(os.getenv("VISUALIZATION_FALLBACK_AGE_HOURS", "24")),
+        forecast_confidence_signal_lookback_hours=int(os.getenv("FORECAST_CONFIDENCE_SIGNAL_LOOKBACK_HOURS", "48")),
+        forecast_confidence_normal_message=os.getenv(
+            "FORECAST_CONFIDENCE_NORMAL_MESSAGE",
+            "Forecast confidence is normal for the current selection.",
+        ),
+        forecast_confidence_signals_missing_message=os.getenv(
+            "FORECAST_CONFIDENCE_SIGNALS_MISSING_MESSAGE",
+            "Forecast confidence could not be fully assessed with the currently available signals.",
+        ),
+        forecast_confidence_dismissed_message=os.getenv(
+            "FORECAST_CONFIDENCE_DISMISSED_MESSAGE",
+            "Recent confidence warnings were reviewed and dismissed for the current selection.",
+        ),
+        forecast_confidence_missing_inputs_message=os.getenv(
+            "FORECAST_CONFIDENCE_MISSING_INPUTS_MESSAGE",
+            "Forecast confidence is reduced because some visualization inputs are missing.",
+        ),
+        forecast_confidence_anomaly_message=os.getenv(
+            "FORECAST_CONFIDENCE_ANOMALY_MESSAGE",
+            "Forecast confidence is reduced because recent surge conditions were confirmed for the selected service areas.",
+        ),
+        forecast_confidence_combined_message=os.getenv(
+            "FORECAST_CONFIDENCE_COMBINED_MESSAGE",
+            "Forecast confidence is reduced because some visualization inputs are missing and recent surge conditions were confirmed for the selected service areas.",
+        ),
         evaluation_forecast_products=os.getenv("EVALUATION_FORECAST_PRODUCTS", "daily_1_day,weekly_7_day"),
         evaluation_baseline_methods=os.getenv("EVALUATION_BASELINE_METHODS", "seasonal_naive,moving_average"),
         evaluation_scheduler_enabled=_to_bool(os.getenv("EVALUATION_SCHEDULER_ENABLED"), False),

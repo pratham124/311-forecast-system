@@ -102,6 +102,36 @@ describe('useForecastVisualization – error paths', () => {
     expect(result.current.serviceCategories).toBe(previousCategories);
   });
 
+  it('resets service categories to all-selected when every option remains selected after a product change', async () => {
+    vi.mocked(api.fetchServiceCategoryOptions)
+      .mockResolvedValueOnce({
+        forecastProduct: 'daily_1_day',
+        categories: ['Roads', 'Waste'],
+      })
+      .mockResolvedValueOnce({
+        forecastProduct: 'weekly_7_day',
+        categories: ['Roads', 'Waste'],
+      });
+    vi.mocked(api.fetchCurrentForecastVisualization).mockResolvedValue({
+      visualizationLoadId: 'load-all-selected',
+    } as any);
+
+    const { result } = renderHook(() => useForecastVisualization());
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    act(() => {
+      result.current.setServiceCategories(['Roads', 'Waste']);
+    });
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    act(() => {
+      result.current.setForecastProduct('weekly_7_day');
+    });
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    expect(result.current.serviceCategories).toEqual([]);
+  });
+
   it('returns early from reportRenderEvent when visualization is not loaded', async () => {
     vi.mocked(api.fetchServiceCategoryOptions).mockImplementation(
       () => new Promise(() => {}),
@@ -114,5 +144,58 @@ describe('useForecastVisualization – error paths', () => {
     });
 
     expect(api.submitVisualizationRenderEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns early from reportConfidenceRenderEvent when visualization is not loaded', async () => {
+    vi.mocked(api.fetchServiceCategoryOptions).mockImplementation(
+      () => new Promise(() => {}),
+    );
+
+    const { result } = renderHook(() => useForecastVisualization());
+
+    await act(async () => {
+      await result.current.reportConfidenceRenderEvent({ renderStatus: 'rendered' });
+    });
+
+    expect(api.submitConfidenceRenderEvent).not.toHaveBeenCalled();
+  });
+
+  it('deduplicates confidence render events per load and status', async () => {
+    vi.mocked(api.fetchServiceCategoryOptions).mockResolvedValue({ forecastProduct: 'daily_1_day', categories: ['Roads'] });
+    vi.mocked(api.fetchCurrentForecastVisualization).mockResolvedValue({ visualizationLoadId: 'load-1' } as any);
+    vi.mocked(api.submitConfidenceRenderEvent).mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useForecastVisualization());
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    await act(async () => {
+      await result.current.reportConfidenceRenderEvent({ renderStatus: 'rendered' });
+      await result.current.reportConfidenceRenderEvent({ renderStatus: 'rendered' });
+    });
+
+    expect(api.submitConfidenceRenderEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses excluded categories when most service areas are selected', async () => {
+    vi.mocked(api.fetchServiceCategoryOptions).mockResolvedValue({
+      forecastProduct: 'daily_1_day',
+      categories: ['Roads', 'Waste', 'Transit', 'Parks'],
+    });
+    vi.mocked(api.fetchCurrentForecastVisualization).mockResolvedValue({ visualizationLoadId: 'load-2' } as any);
+
+    const { result } = renderHook(() => useForecastVisualization());
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    act(() => {
+      result.current.setServiceCategories(['Roads', 'Waste', 'Transit']);
+    });
+    await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+
+    expect(api.fetchCurrentForecastVisualization).toHaveBeenLastCalledWith(
+      'daily_1_day',
+      [],
+      ['Parks'],
+      expect.any(AbortSignal),
+    );
   });
 });

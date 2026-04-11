@@ -2,6 +2,9 @@ export type ForecastProduct = 'daily_1_day' | 'weekly_7_day';
 export type ViewStatus = 'success' | 'degraded' | 'fallback_shown' | 'unavailable' | 'render_failed';
 export type DegradationType = 'history_missing' | 'uncertainty_missing';
 export type RenderStatus = 'rendered' | 'render_failed';
+export type ForecastConfidenceAssessmentStatus = 'degraded_confirmed' | 'normal' | 'signals_missing' | 'dismissed';
+export type ForecastConfidenceIndicatorState = 'display_required' | 'not_required' | 'render_failed';
+export type ForecastConfidenceReasonCategory = 'missing_inputs' | 'anomaly' | 'shock';
 
 export interface CategoryFilter {
   selectedCategory: string | null;
@@ -47,6 +50,14 @@ export interface FallbackMetadata {
   expiresAt: string;
 }
 
+export interface ForecastConfidence {
+  assessmentStatus: ForecastConfidenceAssessmentStatus;
+  indicatorState: ForecastConfidenceIndicatorState;
+  reasonCategories: ForecastConfidenceReasonCategory[];
+  supportingSignals: string[];
+  message: string;
+}
+
 export interface ForecastVisualization {
   visualizationLoadId: string;
   forecastProduct: ForecastProduct;
@@ -67,6 +78,7 @@ export interface ForecastVisualization {
   alerts: StatusMessage[];
   pipelineStatus: StatusMessage[];
   fallback?: FallbackMetadata;
+  forecastConfidence?: ForecastConfidence;
   viewStatus: ViewStatus;
   degradationType?: DegradationType;
   summary?: string;

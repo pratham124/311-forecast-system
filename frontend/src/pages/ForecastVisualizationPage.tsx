@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Label } from '../components/ui/label';
+import { ForecastConfidenceBanner } from '../features/forecast-confidence/components/ForecastConfidenceBanner';
 import { ChartErrorBoundary } from '../features/forecast-visualization/components/ChartErrorBoundary';
 import { ForecastVisualizationChart } from '../features/forecast-visualization/components/ForecastVisualizationChart';
 import { ServiceAreaMultiSelect } from '../features/forecast-visualization/components/ServiceAreaMultiSelect';
@@ -41,6 +42,7 @@ export function ForecastVisualizationPage() {
     isLoading,
     error,
     reportRenderEvent,
+    reportConfidenceRenderEvent,
   } = useForecastVisualization();
   const overlayWindowStart = visualization?.historyWindowStart ?? visualization?.forecastWindowStart ?? new Date().toISOString();
   const overlayWindowEnd = visualization?.forecastWindowEnd ?? visualization?.historyWindowEnd ?? new Date().toISOString();
@@ -83,6 +85,10 @@ export function ForecastVisualizationPage() {
   const handleRenderFailure = (chartError: Error) => {
     void reportRenderEvent({ renderStatus: 'render_failed', failureReason: chartError.message });
     void reportRenderFailure(chartError.message);
+  };
+
+  const handleConfidenceRenderFailure = (bannerError: Error) => {
+    void reportConfidenceRenderEvent({ renderStatus: 'render_failed', failureReason: bannerError.message });
   };
 
   useEffect(() => {
@@ -156,6 +162,19 @@ export function ForecastVisualizationPage() {
       {visualization ? (
         <>
           {visualization.fallback ? <VisualizationFallbackBanner fallback={visualization.fallback} /> : null}
+          {visualization.forecastConfidence?.assessmentStatus === 'degraded_confirmed' ? (
+            <ChartErrorBoundary
+              onError={handleConfidenceRenderFailure}
+              fallback={null}
+            >
+              <ForecastConfidenceBanner
+                confidence={visualization.forecastConfidence}
+                onRendered={() => {
+                  void reportConfidenceRenderEvent({ renderStatus: 'rendered' });
+                }}
+              />
+            </ChartErrorBoundary>
+          ) : null}
           <section className="mt-5 grid gap-4 md:grid-cols-3">
             <Card className="rounded-[22px]">
               <CardContent className="p-5">

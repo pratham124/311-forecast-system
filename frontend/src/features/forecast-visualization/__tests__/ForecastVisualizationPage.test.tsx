@@ -18,6 +18,13 @@ const successPayload = {
   uncertaintyBands: { labels: ['P10', 'P50', 'P90'], points: [{ timestamp: '2026-03-20T00:00:00Z', p10: 8, p50: 10, p90: 12 }] },
   alerts: [],
   pipelineStatus: [{ code: 'forecast_loaded', level: 'info', message: 'Loaded daily forecast data.' }],
+  forecastConfidence: {
+    assessmentStatus: 'normal',
+    indicatorState: 'not_required',
+    reasonCategories: [],
+    supportingSignals: [],
+    message: 'Forecast confidence is normal for the current selection.',
+  },
   viewStatus: 'success',
 };
 
@@ -101,6 +108,99 @@ describe('ForecastVisualizationPage', () => {
     render(<ForecastVisualizationPage />);
 
     expect(await screen.findByText(/forecast view unavailable/i)).toBeInTheDocument();
+  });
+
+  it('shows a degraded confidence banner and submits a dedicated render event when confidence is reduced', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify(categoriesPayload), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            ...successPayload,
+            forecastConfidence: {
+              assessmentStatus: 'degraded_confirmed',
+              indicatorState: 'display_required',
+              reasonCategories: ['anomaly'],
+              supportingSignals: ['recent_confirmed_surge'],
+              message: 'Forecast confidence is reduced because recent surge conditions were confirmed for the selected service areas.',
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValue(new Response(null, { status: 202 }));
+
+    render(<ForecastVisualizationPage />);
+
+    expect(await screen.findByLabelText(/forecast confidence banner/i)).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: /demand forecast chart/i })).toBeInTheDocument();
+
+    await waitFor(() => {
+      const requestedUrls = fetchMock.mock.calls.map((call) => String(call[0]));
+      expect(requestedUrls.some((url) => url.includes('/confidence-render-events'))).toBe(true);
+      expect(
+        requestedUrls.some((url) => url.includes('/render-events') && !url.includes('/confidence-render-events')),
+      ).toBe(true);
+    });
+  });
+
+  it('keeps signals-missing confidence messaging neutral and skips the warning banner', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify(categoriesPayload), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            ...successPayload,
+            forecastConfidence: {
+              assessmentStatus: 'signals_missing',
+              indicatorState: 'not_required',
+              reasonCategories: [],
+              supportingSignals: ['fallback_confidence_unresolved'],
+              message: 'Forecast confidence could not be fully assessed with the currently available signals.',
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValue(new Response(null, { status: 202 }));
+
+    render(<ForecastVisualizationPage />);
+
+    expect(await screen.findByRole('img', { name: /demand forecast chart/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/forecast confidence banner/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/could not be fully assessed/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      const requestedUrls = fetchMock.mock.calls.map((call) => String(call[0]));
+      expect(requestedUrls.some((url) => url.includes('/confidence-render-events'))).toBe(false);
+    });
+  });
+
+  it('shows dismissed confidence copy without a warning banner', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(JSON.stringify(categoriesPayload), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            ...successPayload,
+            forecastConfidence: {
+              assessmentStatus: 'dismissed',
+              indicatorState: 'not_required',
+              reasonCategories: ['anomaly'],
+              supportingSignals: ['filtered_surge_candidate'],
+              message: 'Recent confidence warnings were reviewed and dismissed for the current selection.',
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValue(new Response(null, { status: 202 }));
+
+    render(<ForecastVisualizationPage />);
+
+    expect(await screen.findByRole('img', { name: /demand forecast chart/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/forecast confidence banner/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/reviewed and dismissed/i)).toBeInTheDocument();
   });
 
   it('starts with all service areas selected and updates the request when one is chosen', async () => {

@@ -32,6 +32,9 @@ class StubVisualizationRepository:
             setattr(record, key, value)
         return record
 
+    def report_confidence_render_event(self, visualization_load_id, **kwargs):
+        return self.report_render_event(visualization_load_id, **kwargs)
+
 
 class StubHistoricalDemandService:
     def __init__(self, history):
@@ -103,6 +106,13 @@ class StubSettings:
     weekly_forecast_product_name = 'weekly_7_day_demand'
     source_name = 'edmonton_311'
     visualization_fallback_age_hours = 24
+    forecast_confidence_signal_lookback_hours = 48
+    forecast_confidence_normal_message = 'Forecast confidence is normal for the current selection.'
+    forecast_confidence_signals_missing_message = 'Forecast confidence could not be fully assessed with the currently available signals.'
+    forecast_confidence_dismissed_message = 'Recent confidence warnings were reviewed and dismissed for the current selection.'
+    forecast_confidence_missing_inputs_message = 'Forecast confidence is reduced because some visualization inputs are missing.'
+    forecast_confidence_anomaly_message = 'Forecast confidence is reduced because recent surge conditions were confirmed for the selected service areas.'
+    forecast_confidence_combined_message = 'Forecast confidence is reduced because some visualization inputs are missing and recent surge conditions were confirmed for the selected service areas.'
 
 
 def _build_service(source, history, fallback=None):
@@ -139,6 +149,8 @@ def test_success_response_uses_history_and_uncertainty():
     service = _build_service(source, history)
     response = service.get_current_visualization(forecast_product='daily_1_day', service_categories=['Roads', 'Waste'])
     assert response.view_status == 'success'
+    assert response.forecast_confidence is not None
+    assert response.forecast_confidence.assessment_status == 'normal'
     assert len(response.historical_series) == 1
     assert response.uncertainty_bands is not None
     assert response.category_filter.selected_categories == ['Roads', 'Waste']
@@ -164,12 +176,16 @@ def test_degraded_response_when_history_missing():
     response = service.get_current_visualization(forecast_product='daily_1_day', service_categories=['Roads'])
     assert response.view_status == 'degraded'
     assert response.degradation_type == 'history_missing'
+    assert response.forecast_confidence is not None
+    assert response.forecast_confidence.assessment_status == 'degraded_confirmed'
 
 
 def test_unavailable_without_source_or_fallback():
     service = _build_service(None, [])
     response = service.get_current_visualization(forecast_product='daily_1_day', service_categories=['Roads'])
     assert response.view_status == 'unavailable'
+    assert response.forecast_confidence is not None
+    assert response.forecast_confidence.assessment_status == 'signals_missing'
 
 
 def test_list_service_categories_returns_available_values():
