@@ -97,6 +97,51 @@ function buildVisualizationResponse(confidence: ConfidenceOverride, loadId = 'lo
 }
 
 /* ------------------------------------------------------------------ */
+/*  AT-01 / AT-02 — Forecast loads and confidence is retrieved         */
+/* ------------------------------------------------------------------ */
+
+test.describe('UC-16 scenario: forecast load and signal retrieval (AT-01/AT-02)', () => {
+  test('loads forecast visualization and returns confidence payload', async ({ page }) => {
+    let capturedConfidence: Record<string, unknown> | null = null;
+
+    await injectAuth(page);
+    await mockAuthMe(page);
+    await mockServiceCategories(page);
+    await mockRenderEvents(page);
+    await page.route('**/api/v1/forecast-visualizations/*/confidence-render-events', (route) =>
+      route.fulfill({ status: 202, body: '' }),
+    );
+    await page.route('**/api/v1/forecast-visualizations/current?*', async (route) => {
+      const payload = buildVisualizationResponse(
+        {
+          assessmentStatus: 'normal',
+          indicatorState: 'not_required',
+          reasonCategories: [],
+          supportingSignals: [],
+          message: 'Forecast confidence is normal for the current selection.',
+        },
+        'load-at01-at02',
+      );
+      capturedConfidence = payload.forecastConfidence as Record<string, unknown>;
+      await route.fulfill({ json: payload });
+    });
+
+    await page.goto('/app/forecasts');
+
+    // AT-01: forecast visualization loads with visible data
+    await expect(page.getByText('311 Forecast Overview')).toBeVisible();
+    await expect(page.getByRole('img', { name: /demand forecast chart/i })).toBeVisible();
+    await expect(page.getByText('Forecast view unavailable')).toHaveCount(0);
+
+    // AT-02: confidence payload is retrieved for the same view request
+    await expect.poll(() => capturedConfidence !== null).toBe(true);
+    expect(capturedConfidence?.assessmentStatus).toBe('normal');
+    expect(capturedConfidence?.indicatorState).toBe('not_required');
+    expect(capturedConfidence?.message).toBeTruthy();
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /*  AT-03 / AT-04 / AT-05 — Degraded confidence banner displayed      */
 /* ------------------------------------------------------------------ */
 
@@ -281,18 +326,12 @@ test.describe('UC-16 scenario: dismissed signal (AT-08)', () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  AT-09 — Render failure baseline (FR-013/014)                       */
-/*  Note: React error boundary crashes cannot be reliably triggered    */
-/*  from Playwright. Full AT-09 coverage comes from:                  */
-/*    - ForecastVisualizationPageConfidenceCrash.test.tsx (frontend)   */
-/*    - test_confidence_render_events_persist_without_changing_chart_  */
-/*      status (integration)                                           */
-/*  This test validates the success-path render event as a baseline.  */
+/*  AT-09 — Render failure: indicator hidden and failure logged         */
 /* ------------------------------------------------------------------ */
 
-test.describe('UC-16 scenario: render failure baseline (AT-09)', () => {
-  test('rendered event is sent on success — failure path covered by unit/integration tests', async ({ page }) => {
-    const renderEvents: Array<{ renderStatus: string; failureReason?: string }> = [];
+test.describe('UC-16 scenario: confidence render failure (AT-09)', () => {
+  test('logs render_failed and keeps forecast visible when banner render crashes', async ({ page }) => {
+    const renderEvents: Array<{ url: string; body: { renderStatus: string; failureReason?: string } }> = [];
 
     await injectAuth(page);
     await mockAuthMe(page);
@@ -300,29 +339,40 @@ test.describe('UC-16 scenario: render failure baseline (AT-09)', () => {
     await mockRenderEvents(page);
 
     await page.route('**/api/v1/forecast-visualizations/*/confidence-render-events', async (route) => {
-      renderEvents.push(route.request().postDataJSON() as { renderStatus: string; failureReason?: string });
+      renderEvents.push({
+        url: route.request().url(),
+        body: route.request().postDataJSON() as { renderStatus: string; failureReason?: string },
+      });
       await route.fulfill({ status: 202, body: '' });
     });
 
-    await page.route('**/api/v1/forecast-visualizations/current?*', (route) =>
-      route.fulfill({
-        json: buildVisualizationResponse({
+    await page.route('**/api/v1/forecast-visualizations/current?*', (route) => {
+      const payload = buildVisualizationResponse(
+        {
           assessmentStatus: 'degraded_confirmed',
           indicatorState: 'display_required',
           reasonCategories: ['anomaly'],
           supportingSignals: ['recent_confirmed_surge'],
-          message: 'Forecast confidence is reduced because recent surge conditions were confirmed for the selected service areas.',
-        }),
-      }),
-    );
+          message: ({ invalid: 'react-node' } as unknown as string),
+        },
+        'load-at09-render-failed',
+      );
+      return route.fulfill({ json: payload });
+    });
 
     await page.goto('/app/forecasts');
-    await expect(page.getByLabel('forecast confidence banner')).toBeVisible();
 
-    // Success path: rendered event sent
+    // AT-09: indicator crashes and is not displayed
+    await expect(page.getByLabel('forecast confidence banner')).toHaveCount(0);
+
+    // Forecast remains visible even when the confidence indicator fails
+    await expect(page.getByRole('img', { name: /demand forecast chart/i })).toBeVisible();
+
+    // Rendering failure is logged through confidence render event
     await expect.poll(() => renderEvents.length).toBe(1);
-    expect(renderEvents[0].renderStatus).toBe('rendered');
-    expect(renderEvents[0].failureReason).toBeUndefined();
+    expect(renderEvents[0].body.renderStatus).toBe('render_failed');
+    expect(renderEvents[0].body.failureReason).toBeTruthy();
+    expect(renderEvents[0].url).toContain('load-at09-render-failed');
   });
 });
 
