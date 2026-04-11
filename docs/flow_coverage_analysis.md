@@ -85,6 +85,37 @@ Overall, the implementation covers all flows from the use case.
 9. Acceptance Scenario 9 (Baseline method failure does not publish new official evaluation) -> backend/tests/integration/test_evaluation_failures.py
 10. Acceptance Scenario 10 (Storage failure preserves previous official evaluation) -> backend/tests/integration/test_evaluation_failures.py
 
+## Use Case 7
+
+Overall, the implementation covers most flows from the use case, with no clear direct test for a distinct historical-data
+retrieval failure path.
+
+1. Acceptance Scenario 1 (Historical analysis interface shows available filters) -> backend/tests/contract/test_historical_demand_api.py
+2. Acceptance Scenario 2 (Valid filters retrieve matching historical data and show patterns) -> backend/tests/integration/test_historical_demand_success.py, backend/tests/contract/test_historical_demand_api.py
+3. Acceptance Scenario 3 (Displayed historical demand results are clear for analysis) -> backend/tests/integration/test_historical_demand_success.py
+4. Acceptance Scenario 4 (Valid historical period is aggregated into a planning-friendly summary) -> backend/tests/integration/test_historical_demand_success.py
+5. Acceptance Scenario 5 (Different valid filter combinations update displayed patterns correctly) -> backend/tests/integration/test_historical_demand_success.py, backend/tests/contract/test_historical_demand_api.py
+6. Acceptance Scenario 6 (High-volume request warns before retrieval) -> backend/tests/integration/test_historical_demand_warning.py, backend/tests/contract/test_historical_demand_api.py
+7. Acceptance Scenario 7 (Declining after warning avoids retrieval and keeps filters revisable) -> backend/tests/integration/test_historical_demand_warning.py
+8. Acceptance Scenario 8 (No matching records shows clear no-data state and records it) -> backend/tests/integration/test_historical_demand_failures.py, backend/tests/contract/test_historical_demand_api.py
+9. Acceptance Scenario 9 (Visualization/rendering failure shows error state and records it) -> backend/tests/integration/test_historical_demand_failures.py, backend/tests/contract/test_historical_demand_api.py
+
+## Use Case 8
+
+Overall, the implementation covers most flows from the use case.
+
+1. Acceptance Scenario 1 (Comparison request shows historical and forecast demand for selected scope) -> backend/tests/integration/test_demand_comparison_service.py, backend/tests/contract/test_demand_comparison_api.py
+2. Acceptance Scenario 2 (Multiple categories/geographies are distinguishable in comparison results) -> backend/tests/integration/test_demand_comparison_service.py
+3. Acceptance Scenario 3 (Large request warns before comparison starts) -> backend/tests/integration/test_demand_comparison_service.py, backend/tests/contract/test_demand_comparison_api.py
+4. Acceptance Scenario 4 (Proceeding after warning continues processing) -> backend/tests/integration/test_demand_comparison_service.py
+5. Acceptance Scenario 5 (Forecast-only result when historical data is unavailable) -> backend/tests/integration/test_demand_comparison_service.py
+6. Acceptance Scenario 6 (Historical-only result when forecast data is unavailable) -> backend/tests/integration/test_demand_comparison_service.py
+7. Acceptance Scenario 7 (Historical retrieval failure logs failure and shows error) -> backend/tests/integration/test_demand_comparison_service.py
+8. Acceptance Scenario 8 (Forecast retrieval failure logs failure and shows error) -> backend/tests/integration/test_demand_comparison_service.py
+9. Acceptance Scenario 9 (Alignment failure shows error state and no comparison) -> backend/tests/integration/test_demand_comparison_service.py
+10. Acceptance Scenario 10 (Partial comparison identifies combinations missing forecast data) -> backend/tests/integration/test_demand_comparison_service.py
+11. Acceptance Scenario 11 (API/query/render contract surfaces) -> backend/tests/contract/test_demand_comparison_api.py
+
 ## Use Case 9
 
 Overall, the implementation covers most flows from the use case, with one remaining frontend polish coverage gap.
@@ -101,6 +132,103 @@ Overall, the implementation covers most flows from the use case, with one remain
 10. Acceptance Scenario 10 (Disable and supersede behavior prevents stale overlays and blocks invalid render-event submissions) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx, frontend/src/api/__tests__/weatherOverlayApi.test.ts
 11. Supported-selection latency target validation (5-second path for supported selections) -> backend/tests/integration/test_weather_overlay_latency.py
 12. Remaining gap (weather-layer readability and explicit frontend render-failure fallback component behavior) -> No clear dedicated frontend component test found; tracked by `T043` in `specs/009-add-weather-overlay/tasks.md`
+
+## Use Case 10
+
+Overall, the implementation covers the core flows, though geography-specific threshold behavior is not fully covered end-to-end.
+
+1. Acceptance Scenario 1 (Threshold exceedance creates and sends notification with required details) -> backend/tests/integration/test_threshold_alert_flows.py, backend/tests/contract/test_threshold_alert_api.py
+2. Acceptance Scenario 2 (Category-only threshold notification does not require geography) -> backend/tests/integration/test_threshold_alert_flows.py
+3. Acceptance Scenario 3 (No duplicate alert while same scope remains above threshold) -> backend/tests/integration/test_threshold_alert_flows.py, backend/tests/integration/test_threshold_alert_failures.py
+4. Acceptance Scenario 4 (No configured threshold records configuration issue and sends no alert) -> backend/tests/integration/test_threshold_alert_failures.py
+5. Acceptance Scenario 5 (Delivery failure records failure and follow-up status) -> backend/tests/integration/test_threshold_alert_failures.py
+6. Acceptance Scenario 6 (Alert history shows category/threshold/window/outcome details) -> backend/tests/contract/test_threshold_alert_api.py
+7. Acceptance Scenario 7 (Delivered alert appears as delivered in review history) -> backend/tests/contract/test_threshold_alert_api.py
+8. Acceptance Scenario 8 (Partial or failed channel outcomes are visible in review history) -> backend/tests/contract/test_threshold_alert_api.py, backend/tests/unit/test_notification_delivery_service.py
+9. Acceptance Scenario 9 (Geography-specific threshold is preferred over category-only threshold) -> backend/tests/unit/test_threshold_selection.py
+
+## Use Case 11
+
+Overall, the implementation covers most flows from the use case, with the main gap around a direct delivery-failure integration
+path for confirmed surges.
+
+1. Acceptance Scenario 1 (Confirmed surge creates notification event with category/geography/magnitude/time) -> backend/tests/integration/test_surge_alert_flows.py, backend/tests/contract/test_surge_alert_api.py
+2. Acceptance Scenario 2 (Confirmed surge is delivered successfully and recorded) -> backend/tests/contract/test_surge_alert_api.py
+3. Acceptance Scenario 3 (Operational logs/review records show detector, confirmation, event creation, and delivery) -> backend/tests/contract/test_surge_alert_api.py
+4. Acceptance Scenario 4 (Repeated confirmed surge while active is suppressed) -> backend/tests/integration/test_surge_alert_flows.py
+5. Acceptance Scenario 5 (Flagged candidate failing confirmation is filtered and does not notify) -> backend/tests/integration/test_surge_alert_flows.py, backend/tests/unit/test_surge_confirmation.py
+6. Acceptance Scenario 6 (Initial detector flag alone does not notify before confirmation) -> backend/tests/integration/test_surge_alert_flows.py, backend/tests/unit/test_surge_confirmation.py
+7. Acceptance Scenario 7 (Detector processing failure logs failure and does not notify) -> backend/tests/integration/test_surge_alert_flows.py
+8. Acceptance Scenario 8 (Evaluation listing/detail and event review surfaces are available) -> backend/tests/contract/test_surge_alert_api.py
+
+## Use Case 12
+
+Overall, the implementation covers partial-detail and failure flows well, but the all-components-available happy path is not
+clearly covered end-to-end.
+
+1. Acceptance Scenario 1 (Selecting an alert opens alert-detail context and identifies the selected alert) -> backend/tests/
+integration/test_alert_detail_flows.py
+2. Acceptance Scenario 2 (Threshold alert detail loads available context and persists load state) -> backend/tests/integration/
+test_alert_detail_flows.py
+3. Acceptance Scenario 3 (Surge alert detail loads available context and persists load state) -> backend/tests/integration/
+test_alert_detail_flows.py
+4. Acceptance Scenario 4 (Successful prepared detail view can be recorded/rendered) -> backend/tests/unit/
+test_alert_detail_service.py
+5. Acceptance Scenario 5 (Operational logs/load records correlate to selected alert) -> backend/tests/integration/
+test_alert_detail_flows.py
+6. Acceptance Scenario 6 (Missing distribution still shows remaining context) -> backend/tests/contract/test_alert_detail_api.py,
+backend/tests/unit/test_alert_detail_service.py
+7. Acceptance Scenario 7 (Missing drivers still shows remaining context) -> backend/tests/integration/test_alert_detail_flows.py,
+backend/tests/contract/test_alert_detail_api.py
+8. Acceptance Scenario 8 (Missing anomalies still shows remaining context) -> backend/tests/integration/
+test_alert_detail_flows.py, backend/tests/unit/test_alert_detail_service.py
+9. Acceptance Scenario 9 (Unavailable component is clearly marked and not shown misleadingly) -> backend/tests/integration/
+test_alert_detail_flows.py, backend/tests/contract/test_alert_detail_api.py
+10. Acceptance Scenario 10 (Retrieval failure for required detail component shows error state) -> backend/tests/contract/
+test_alert_detail_api.py, backend/tests/unit/test_alert_detail_service.py
+11. Acceptance Scenario 11 (Render failure shows error state instead of corrupted partial view) -> backend/tests/integration/
+test_alert_detail_flows.py, backend/tests/contract/test_alert_detail_api.py
+
+## Use Case 13
+
+Overall, the implementation covers CRUD management of thresholds, but I do not see a direct test for automatic immediate re-
+evaluation on threshold change.
+
+1. Acceptance Scenario 1 (Configuration section lists active thresholds by service category) -> backend/tests/contract/
+test_threshold_alert_api.py
+2. Acceptance Scenario 2 (Adding a new threshold saves the configuration) -> backend/tests/contract/test_threshold_alert_api.py
+3. Acceptance Scenario 3 (Editing a threshold updates the active set) -> backend/tests/contract/test_threshold_alert_api.py
+4. Acceptance Scenario 4 (Deleting a threshold inactivates it for future cycles) -> backend/tests/contract/
+test_threshold_alert_api.py
+5. Acceptance Scenario 5 (Threshold state reflects later threshold changes) -> backend/tests/unit/
+test_threshold_state_transitions.py
+
+## Use Case 14
+
+Overall, the implementation covers most flows from the use case.
+
+1. Acceptance Scenario 1 (Authorized planner opens forecast performance view with supported controls) -> backend/tests/contract/
+test_forecast_accuracy_api.py, backend/tests/unit/test_forecast_accuracy_branch_coverage.py
+2. Acceptance Scenario 2 (Historical forecasts and actual demand are retrieved for selected scope) -> backend/tests/integration/
+test_forecast_accuracy_success.py
+3. Acceptance Scenario 3 (MAE/RMSE/MAPE are retrieved or computed for the same scope/time window) -> backend/tests/integration/
+test_forecast_accuracy_success.py
+4. Acceptance Scenario 4 (Forecasts and actuals align to the same time buckets) -> backend/tests/integration/
+test_forecast_accuracy_success.py, backend/tests/contract/test_forecast_accuracy_api.py
+5. Acceptance Scenario 5 (Rendered view shows prediction-vs-actual and interpretable metrics) -> backend/tests/integration/
+test_forecast_accuracy_success.py, backend/tests/contract/test_forecast_accuracy_api.py
+6. Acceptance Scenario 6 (Successful request leaves correlated operational/request records) -> backend/tests/integration/
+test_forecast_accuracy_success.py
+7. Acceptance Scenario 7 (Missing precomputed metrics triggers fallback and logs unavailable metrics state) -> backend/tests/
+integration/test_forecast_accuracy_metrics_fallback.py, backend/tests/contract/test_forecast_accuracy_metrics_fallback.py
+8. Acceptance Scenario 8 (If metrics still cannot be resolved, comparisons render without metrics) -> backend/tests/integration/
+test_forecast_accuracy_metrics_fallback.py, backend/tests/contract/test_forecast_accuracy_metrics_fallback.py
+9. Acceptance Scenario 9 (Missing forecast data shows unavailable/error state) -> backend/tests/integration/
+test_forecast_accuracy_failure_states.py, backend/tests/contract/test_forecast_accuracy_failure_states.py
+10. Acceptance Scenario 10 (Render failure shows error state and is recorded) -> backend/tests/integration/
+test_forecast_accuracy_failure_states.py, backend/tests/contract/test_forecast_accuracy_failure_states.py
+11. Acceptance Scenario 11 (Auth and request validation are enforced) -> backend/tests/contract/test_forecast_accuracy_api.py,
+backend/tests/contract/test_forecast_accuracy_failure_states.py
 
 ## Use Case 15
 
@@ -127,3 +255,42 @@ Overall, the implementation covers all flows from the use case.
 6. Acceptance Scenario 6 (Forecast data unavailable logs missing data and displays error message) -> backend/tests/integration/test_public_forecast_failures.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-error-states.test.tsx
 7. Acceptance Scenario 7 (Public-safety filtering fails, system sanitizes data and displays safe summary) -> backend/tests/integration/test_public_forecast_sanitized.py, backend/tests/unit/test_public_forecast_sanitization.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-sanitized.test.tsx
 8. Acceptance Scenario 8 (Visualization rendering error logs failure and displays error state) -> backend/tests/integration/test_public_forecast_failures.py, backend/tests/contract/test_public_forecast_api.py, frontend/tests/public-forecast-error-states.test.tsx
+
+## Use Case 18
+
+Overall, the implementation covers most flows from the use case.
+
+1. Acceptance Scenario 1 (Selecting the user guide shows loading then guide content in readable format) -> backend/tests/
+integration/test_user_guide_open.py, backend/tests/contract/test_user_guide_api.py
+2. Acceptance Scenario 2 (Opened guide is readable without error state) -> backend/tests/integration/test_user_guide_open.py,
+backend/tests/contract/test_user_guide_api.py
+3. Acceptance Scenario 3 (Guide sections can be navigated while remaining readable) -> backend/tests/integration/
+test_user_guide_navigation.py
+4. Acceptance Scenario 4 (Moving between sections updates displayed content without reopening guide) -> backend/tests/integration/
+test_user_guide_navigation.py
+5. Acceptance Scenario 5 (Retrieval failure shows a clear error/unavailable state) -> backend/tests/integration/
+test_user_guide_failures.py, backend/tests/contract/test_user_guide_api.py
+6. Acceptance Scenario 6 (Display/render failure shows error state and withholds corrupted content) -> backend/tests/integration/
+test_user_guide_failures.py, backend/tests/contract/test_user_guide_api.py
+7. Acceptance Scenario 7 (Successful guide access is recorded) -> backend/tests/integration/test_user_guide_open.py
+8. Acceptance Scenario 8 (Render outcome transitions are recorded) -> backend/tests/integration/test_user_guide_open.py, backend/
+tests/contract/test_user_guide_api.py
+
+## Use Case 19
+
+Overall, the implementation covers all major flows from the use case.
+
+1. Acceptance Scenario 1 (Valid feedback/bug report is accepted and success is confirmed) -> backend/tests/integration/
+test_feedback_submission_flow.py, backend/tests/contract/test_feedback_submission_api.py
+2. Acceptance Scenario 2 (Submission without valid required type/input is blocked with validation feedback) -> backend/tests/
+contract/test_feedback_submission_api.py
+3. Acceptance Scenario 3 (Valid submitted report is available for team review with details, type, and timestamp) -> backend/tests/
+integration/test_feedback_submission_flow.py, backend/tests/contract/test_feedback_submission_api.py
+4. Acceptance Scenario 4 (Missing required field prevents submission and highlights validation failure) -> backend/tests/contract/
+test_feedback_submission_api.py
+5. Acceptance Scenario 5 (Invalid field content explains what must be corrected) -> backend/tests/contract/
+test_feedback_submission_api.py
+6. Acceptance Scenario 6 (External tracking destination unavailable retains report for retry and informs user of delay) ->
+backend/tests/integration/test_feedback_submission_flow.py, backend/tests/contract/test_feedback_submission_api.py
+7. Acceptance Scenario 7 (Persistence failure after submission informs user that recording was incomplete) -> backend/tests/
+integration/test_feedback_submission_flow.py
