@@ -1,255 +1,176 @@
-# UC-15 Acceptance Test Suite: Weather and Event Awareness
+# UC-15 Acceptance Test Suite: Weather-Aware Forecasting and Storm-Mode Alerting
 
-**Use Case**: UC-15 Incorporate Weather and Major Events into Forecast Uncertainty and Alerts  
+**Use Case**: UC-15 Weather-Aware Forecasting and Storm-Mode Alerting  
 **Scope**: Operations Analytics System  
-**Goal**: Verify the system monitors weather/event feeds, validates major event detection, activates “storm mode,” adjusts forecast uncertainty and alert sensitivity appropriately, sends alerts based on adjusted logic, and logs storm mode operations; and that failures degrade safely to standard logic with clear logging and retry behavior.
+**Goal**: Verify forecast behavior remains weather-aware where supported, verify storm mode is consistently treated as the same surge/anomaly state used in UC-11, verify alert and notification behavior under that shared state, and verify degraded paths remain safe and traceable.
+
+---
+
+## Clarification
+
+For this acceptance suite, **storm mode is equivalent to the confirmed surge/anomaly state from UC-11**.
 
 ---
 
 ## Assumptions / Test Harness Requirements
+
 - A test environment with controllable components:
-  - **Weather/Event Data Service** (success, no data, outage/timeout/5xx)
-  - **Storm/Event Detector** with defined criteria and a way to inject “true storm” and “false trigger” inputs
-  - **Forecasting Engine** that can apply storm-mode uncertainty adjustments (and be forced to fail adjustment)
-  - **Alerting Logic** that can adjust sensitivity under storm mode (e.g., lower trigger threshold / earlier alerts) and expose effective parameters
-  - **Notification Service** (success and delivery failure; records attempts; supports retry marking)
-- Seeded demand/forecast scenarios to validate behavior:
-  - a baseline “non-storm” scenario
-  - a “storm mode” scenario where uncertainty should widen and alerts should be more sensitive
+  - **Weather Context Provider** (available, unavailable, unusable payloads)
+  - **Forecasting Engine** (weather-aware and baseline-compatible behavior)
+  - **Surge/Anomaly Confirmation Logic** (active/inactive outcomes)
+  - **Alert Evaluation Logic** (storm-mode-aware path and baseline path)
+  - **Notification Service** (success and delivery failure with follow-up status)
+- Seeded scenarios:
+  - baseline scenario (storm mode inactive)
+  - storm-mode scenario (surge/anomaly confirmed)
+  - degraded weather-context scenario
 - Observability:
-  - logs accessible for assertions (storm mode activation, validation outcomes, adjustment application, alert evaluation, notifications) with correlation id where available
-  - UI or API surfaces where an Operational Manager can view storm mode state, forecast uncertainty bands, and alerts (if applicable)
-  - ability to inspect “effective” uncertainty and alert sensitivity parameters used for a run
+  - access to operational records sufficient to correlate forecast behavior context, storm-mode state, alert outcome, and notification outcome
 
 ---
 
-## AT-01 — System monitors weather and event data feeds
-**Covers**: Main Success Scenario Step 1  
+## AT-01 — Forecast behavior is weather-aware for supported scenarios
+**Covers**: UC-15 Main Scenario Step 1
+
 **Preconditions**
-- Weather/Event Data Service is reachable.
+- Weather context is available for the scenario.
 
 **Steps**
-1. Start the system (or the monitoring job) with Weather/Event Data Service available.
-2. Observe monitoring activity (via logs/health endpoints).
+1. Run a supported forecast scenario with weather context enabled.
+2. Review output and operational records.
 
 **Expected Results**
-- System continuously (or on schedule) queries/receives weather and event feed updates.
-- Logs show monitoring is active and ingesting/processing feed updates.
+- Forecast behavior is recorded as weather-aware.
+- Scenario completes without requiring storm mode.
 
 ---
 
-## AT-02 — Storm/event detection triggers validation and activates storm mode when criteria are met
-**Covers**: Main Success Scenario Steps 2–3  
+## AT-02 — Storm mode in UC-15 maps to the UC-11 surge/anomaly state
+**Covers**: Clarification + Main Scenario Step 2
+
 **Preconditions**
-- Storm/event detection criteria are defined.
-- Injected feed data represents a true storm/major event meeting criteria.
+- Surge/anomaly confirmation logic is enabled.
 
 **Steps**
-1. Inject weather/event conditions that meet storm mode criteria.
-2. Observe detection and validation behavior.
-3. Confirm storm mode activation state (UI/state flag/logs).
+1. Trigger a confirmed surge/anomaly scenario.
+2. Review storm-mode state representation for UC-15.
 
 **Expected Results**
-- System detects storm/event conditions and validates the trigger.
-- System activates “storm mode” adjustments.
-- Logs record storm mode activation and the triggering evidence/summary (implementation-dependent).
+- UC-15 storm mode is active when and only when the UC-11-equivalent surge/anomaly state is active.
+- No second independent storm-mode state is observed.
 
 ---
 
-## AT-03 — Forecasting engine incorporates weather/event factors into uncertainty calculations
-**Covers**: Main Success Scenario Step 4  
+## AT-03 — Storm-mode-aware alert behavior applies when shared storm mode is active
+**Covers**: Main Scenario Step 3
+
 **Preconditions**
-- Storm mode is active (AT-02).
-- Forecast generation can be triggered for the affected scope.
+- Shared storm mode is active for the evaluated scope.
 
 **Steps**
-1. Trigger forecast generation/update while storm mode is active.
-2. Inspect uncertainty-related outputs (bands/intervals) and logs.
+1. Run alert evaluation for a scope where storm-mode-aware behavior is expected.
+2. Compare against baseline alert behavior for the same scope.
 
 **Expected Results**
-- Forecasting Engine applies weather/event factors to uncertainty calculations.
-- Uncertainty bands are widened/expanded relative to baseline (spot-check known scenario).
-- Logs indicate storm-mode uncertainty adjustment was applied.
+- Alert evaluation follows storm-mode-aware behavior while shared storm mode is active.
+- Behavior differs from baseline where scope rules require a difference.
 
 ---
 
-## AT-04 — Alert logic increases sensitivity where appropriate during storm mode
-**Covers**: Main Success Scenario Step 5  
+## AT-04 — Demand-risk evaluation and notification follow shared storm-mode context
+**Covers**: Main Scenario Steps 4-5
+
 **Preconditions**
-- Storm mode is active (AT-02).
-- Alerting logic supports adaptive sensitivity parameters.
+- Shared storm mode is active.
+- Notification pathway is operational.
 
 **Steps**
-1. Trigger alert evaluation during storm mode for a category/geography where sensitivity should increase.
-2. Inspect the effective sensitivity parameters (logs/debug output).
-3. Compare to baseline parameters (same scope when storm mode is inactive).
+1. Execute demand-risk evaluation for an alertable scenario.
+2. Observe notification behavior.
 
 **Expected Results**
-- Alert logic uses increased sensitivity under storm mode (e.g., lower trigger threshold / earlier trigger) for relevant scopes.
-- Effective parameters differ from baseline in the expected direction.
-- Logs record that storm mode sensitivity was applied.
+- Alert outcomes are evaluated under the active storm-mode context.
+- Notification is sent when alert conditions are met.
 
 ---
 
-## AT-05 — System generates forecasts with expanded uncertainty bands
-**Covers**: Main Success Scenario Step 6  
+## AT-05 — Operational records preserve one coherent trail
+**Covers**: Main Scenario Step 6
+
 **Preconditions**
-- Storm mode is active.
-- Forecast generation is triggered for a known scope.
+- Execute a full successful scenario.
 
 **Steps**
-1. Trigger forecast generation for a selected category/geography/time window.
-2. Inspect the rendered forecast view (or API output) focusing on uncertainty bands.
+1. Retrieve operational records for the scenario.
+2. Verify correlation across forecast behavior context, storm-mode state, alert evaluation, and notification outcome.
 
 **Expected Results**
-- Forecast output includes expanded uncertainty bands consistent with storm-mode rules.
-- Output remains readable and clearly indicates storm mode influence (labeling may be implementation-dependent).
+- One coherent review trail is available.
+- Records are sufficient for operator follow-up.
 
 ---
 
-## AT-06 — System evaluates demand conditions using updated sensitivity and generates alerts accordingly
-**Covers**: Main Success Scenario Step 7  
+## AT-06 — Weather context unavailable uses baseline-compatible behavior safely
+**Covers**: Extension 1a
+
 **Preconditions**
-- Storm mode is active.
-- A demand-risk scenario exists that triggers alerts under storm-mode sensitivity but not under baseline sensitivity (or vice versa, as defined).
+- Weather context provider is unavailable.
 
 **Steps**
-1. Run an evaluation with storm mode active for the target scope.
-2. Run the same scenario with storm mode inactive (baseline).
-3. Compare alert outcomes.
+1. Run forecasting and alert evaluation workflow.
+2. Review outputs and records.
 
 **Expected Results**
-- With storm mode active, the system evaluates demand using updated sensitivity and triggers alerts appropriately.
-- The difference vs baseline matches intended behavior (e.g., earlier/more sensitive alerts during storm mode).
+- System records weather-context unavailability.
+- Forecast behavior remains baseline-compatible.
+- Workflow remains operational.
 
 ---
 
-## AT-07 — Notification service sends alerts based on adjusted storm-mode logic
-**Covers**: Main Success Scenario Step 8; Success End Condition  
+## AT-07 — Storm mode inactive keeps alert behavior baseline
+**Covers**: Extension 2a
+
 **Preconditions**
-- Storm mode is active and an alert condition is met (AT-06).
-- Notification Service is operational and configured to notify the Operational Manager.
+- Surge/anomaly confirmation is negative for the scenario.
 
 **Steps**
-1. Trigger an alert condition under storm mode.
-2. Observe Notification Service send attempt and delivery status.
+1. Run alert evaluation.
+2. Inspect storm-mode state and alert behavior context.
 
 **Expected Results**
-- Notification is sent to the Operational Manager.
-- Notification content is consistent with storm-mode evaluation (e.g., indicates storm mode context, if included).
-- Delivery is recorded as successful.
+- Storm mode remains inactive.
+- Alert behavior remains baseline.
 
 ---
 
-## AT-08 — System logs storm mode activation and adjusted operations
-**Covers**: Main Success Scenario Step 9; Success End Condition  
+## AT-08 — Notification failure preserves follow-up outcome
+**Covers**: Extension 5a
+
 **Preconditions**
-- Execute a full storm-mode cycle (AT-02 through AT-07).
+- Alert condition is met.
+- Notification delivery is forced to fail.
 
 **Steps**
-1. Retrieve logs for the run.
-2. Verify storm-mode lifecycle entries are present.
-
-**Expected Results**
-- Logs include:
-  - monitoring active (feed ingest)
-  - detection + validation success
-  - storm mode activation
-  - forecast uncertainty adjustment applied
-  - alert sensitivity adjustment applied
-  - alert evaluation outcome
-  - notification send outcome
-- Entries are correlated via alert id/request id/event id where available.
-
----
-
-## AT-09 — Weather/event data unavailable: system logs and continues with standard forecasting and alerts
-**Covers**: Extension 1a (1a1–1a2); Failed End Condition  
-**Preconditions**
-- Weather/Event Data Service is forced to be unavailable (outage/timeout/5xx).
-
-**Steps**
-1. Start monitoring or trigger a run that requires weather/event data.
-2. Observe logs and system behavior.
-3. Trigger a forecast and alert evaluation run.
-
-**Expected Results**
-- System logs missing external data condition.
-- System does **not** activate storm mode.
-- Forecasts and alerts proceed using standard (baseline) logic.
-- No storm-mode adjustments are applied.
-
----
-
-## AT-10 — False event detection is rejected; storm mode is not activated
-**Covers**: Extension 2a (2a1–2a2)  
-**Preconditions**
-- Weather/Event Data Service is available.
-- Injected feed data represents a borderline/noisy condition that initially flags but should fail validation.
-
-**Steps**
-1. Inject a “false trigger” scenario.
-2. Observe validation outcome and storm mode state.
-3. Inspect logs.
-
-**Expected Results**
-- System flags a potential storm/event but validation rejects it.
-- Storm mode is **not** activated.
-- Logs record the rejection and rationale/category (implementation-dependent).
-- Forecast and alert logic remain standard.
-
----
-
-## AT-11 — Forecast adjustment failure: system logs error and uses standard uncertainty
-**Covers**: Extension 4a (4a1–4a2); Failed End Condition  
-**Preconditions**
-- Storm mode is active (AT-02).
-- Force the Forecasting Engine’s storm-mode adjustment step to fail (model/processing error).
-
-**Steps**
-1. Trigger forecast generation during storm mode.
-2. Inject adjustment failure during uncertainty calculation.
-3. Observe forecast output and logs.
-
-**Expected Results**
-- System logs model adjustment error.
-- Forecast output uses standard uncertainty (no storm-mode expansion).
-- System continues operating (does not crash), and alerting logic follows standard behavior unless otherwise specified by the use case.
-
----
-
-## AT-12 — Notification failure: system logs delivery failure and marks event for retry
-**Covers**: Extension 8a (8a1–8a2)  
-**Preconditions**
-- Storm mode is active.
-- An alert condition is met.
-- Notification Service is forced to fail delivery.
-- A retry marking mechanism exists (queue/status flag).
-
-**Steps**
-1. Trigger an alert under storm mode.
+1. Trigger alert in active operational context.
 2. Inject notification delivery failure.
-3. Observe logs and event status.
+3. Review follow-up state.
 
 **Expected Results**
-- System logs delivery failure with error category and correlation id (if available).
-- Alert/notification event is marked for retry.
-- Operational Manager does not receive the alert at that time (asserted via stubbed channel).
+- Delivery failure is recorded.
+- Notification outcome is marked retry-pending or manual-review-required.
+- Failure remains traceable in the same operational review context.
 
 ---
 
 ## Traceability Matrix
+
 | Acceptance Test | UC-15 Flow Covered |
 |---|---|
-| AT-01 | Main Success Scenario (1) |
-| AT-02 | Main Success Scenario (2–3) |
-| AT-03 | Main Success Scenario (4) |
-| AT-04 | Main Success Scenario (5) |
-| AT-05 | Main Success Scenario (6) |
-| AT-06 | Main Success Scenario (7) |
-| AT-07 | Main Success Scenario (8); Success End Condition |
-| AT-08 | Main Success Scenario (9); Success End Condition |
-| AT-09 | Extension 1a; Failed End Condition |
-| AT-10 | Extension 2a |
-| AT-11 | Extension 4a; Failed End Condition |
-| AT-12 | Extension 8a |
+| AT-01 | Main Scenario (1) |
+| AT-02 | Clarification + Main Scenario (2) |
+| AT-03 | Main Scenario (3) |
+| AT-04 | Main Scenario (4-5) |
+| AT-05 | Main Scenario (6) |
+| AT-06 | Extension 1a |
+| AT-07 | Extension 2a |
+| AT-08 | Extension 5a |
