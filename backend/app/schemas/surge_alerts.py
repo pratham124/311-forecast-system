@@ -7,9 +7,24 @@ from pydantic import BaseModel, ConfigDict, Field
 
 OverallDeliveryStatus = Literal["delivered", "partial_delivery", "retry_pending", "manual_review_required"]
 SurgeEvaluationRunStatus = Literal["running", "completed", "completed_with_failures"]
-TriggerSource = Literal["ingestion_completion"]
+TriggerSource = Literal["ingestion_completion", "manual_replay"]
 CandidateStatus = Literal["flagged", "below_candidate_threshold", "detector_failed"]
 ConfirmationOutcome = Literal["confirmed", "filtered", "suppressed_active_surge", "failed"]
+
+
+class SurgeEvaluationTriggerRequest(BaseModel):
+    forecast_reference_id: str = Field(alias="forecastReferenceId")
+    trigger_source: TriggerSource = Field(alias="triggerSource")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class SurgeEvaluationTriggerResponse(BaseModel):
+    surge_evaluation_run_id: str = Field(alias="surgeEvaluationRunId")
+    status: Literal["accepted"]
+    accepted_at: datetime = Field(alias="acceptedAt")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class SurgeNotificationChannelAttemptRead(BaseModel):

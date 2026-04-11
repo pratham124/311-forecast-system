@@ -194,6 +194,35 @@ def test_surge_alert_evaluation_and_review_contracts(app_client, operational_man
     assert len(event_detail.json()["channelAttempts"]) == 2
 
 
+def test_surge_alert_manual_replay_trigger_contract(app_client, operational_manager_headers, session) -> None:
+    seed_surge_inputs(session)
+    SurgeConfigurationRepository(session).create_configuration(
+        service_category="Roads",
+        z_score_threshold=2.0,
+        percent_above_forecast_floor=100.0,
+        rolling_baseline_window_count=7,
+        notification_channels=["dashboard"],
+        operational_manager_id="manager-1",
+    )
+    session.commit()
+
+    forecast_version_id = ForecastRepository(session).get_current_marker("daily_1_day_demand").forecast_version_id
+    response = app_client.post(
+        "/api/v1/surge-alerts/evaluations",
+        json={
+            "forecastReferenceId": forecast_version_id,
+            "triggerSource": "manual_replay",
+        },
+        headers=operational_manager_headers,
+    )
+
+    assert response.status_code == 202
+    body = response.json()
+    assert body["status"] == "accepted"
+    assert body["surgeEvaluationRunId"]
+    assert body["acceptedAt"]
+
+
 def test_surge_alert_api_requires_auth(app_client, viewer_headers) -> None:
     assert app_client.get("/api/v1/surge-alerts/events").status_code == 401
     assert app_client.get("/api/v1/surge-alerts/events", headers=viewer_headers).status_code == 403

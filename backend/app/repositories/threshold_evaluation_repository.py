@@ -12,6 +12,9 @@ class ThresholdEvaluationRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def get_run(self, threshold_evaluation_run_id: str) -> ThresholdEvaluationRun | None:
+        return self.session.get(ThresholdEvaluationRun, threshold_evaluation_run_id)
+
     def create_run(
         self,
         *,

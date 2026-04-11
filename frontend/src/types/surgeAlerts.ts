@@ -34,7 +34,7 @@ export type SurgeCandidate = {
 export type SurgeEvaluationRunSummary = {
   surgeEvaluationRunId: string;
   ingestionRunId: string;
-  triggerSource: 'ingestion_completion';
+  triggerSource: 'ingestion_completion' | 'manual_replay';
   status: SurgeRunStatus;
   evaluatedScopeCount: number;
   candidateCount: number;
@@ -47,6 +47,12 @@ export type SurgeEvaluationRunSummary = {
 
 export type SurgeEvaluationRunDetail = SurgeEvaluationRunSummary & {
   candidates: SurgeCandidate[];
+};
+
+export type SurgeEvaluationTriggerResponse = {
+  surgeEvaluationRunId: string;
+  status: 'accepted';
+  acceptedAt: string;
 };
 
 export type SurgeNotificationChannelAttempt = {

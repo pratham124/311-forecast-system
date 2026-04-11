@@ -277,9 +277,11 @@ def test_surge_evaluation_repository_missing_and_filter_paths(session) -> None:
     )
     session.commit()
 
+    assert repository.get_run(first.surge_evaluation_run_id) is not None
     assert len(repository.list_runs(ingestion_run_id="ing-1")) == 1
     assert len(repository.list_runs(status="completed")) == 1
     assert repository.get_run_detail("missing") is None
+    assert repository.get_candidate_bundle("missing") is None
     detail = repository.get_run_detail(first.surge_evaluation_run_id)
     assert detail is not None
     assert detail.candidates[0].confirmation is None
