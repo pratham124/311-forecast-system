@@ -102,6 +102,19 @@ Overall, the implementation covers most flows from the use case, with one remain
 11. Supported-selection latency target validation (5-second path for supported selections) -> backend/tests/integration/test_weather_overlay_latency.py
 12. Remaining gap (weather-layer readability and explicit frontend render-failure fallback component behavior) -> No clear dedicated frontend component test found; tracked by `T043` in `specs/009-add-weather-overlay/tasks.md`
 
+## Use Case 15
+
+Overall, the implementation covers all flows from the use case:
+
+1. Acceptance Scenario 1 (Forecast behavior is weather-aware) -> backend/tests/unit/test_forecast_pipeline.py, backend/tests/integration/test_forecast_generation.py, backend/tests/unit/test_open_meteo_client.py
+2. Acceptance Scenario 2 (UC-15 storm mode) -> backend/tests/contract/test_surge_alert_api.py, backend/tests/integration/test_surge_alert_flows.py
+3. Acceptance Scenario 3 (Storm-mode-aware alert behavior) -> backend/tests/integration/test_surge_alert_flows.py
+4. Acceptance Scenario 4 (Demand-risk evaluation) -> backend/tests/contract/test_surge_alert_api.py, backend/tests/integration/test_surge_alert_flows.py
+5. Acceptance Scenario 5 (Operational records preserved) -> backend/tests/contract/test_surge_alert_api.py, backend/tests/integration/test_surge_alert_flows.py
+6. Acceptance Scenario 6 (Weather context unavailable) -> backend/tests/integration/test_forecast_failures.py, backend/tests/unit/test_open_meteo_client.py
+7. Acceptance Scenario 7 (Storm mode inactive) -> backend/tests/integration/test_surge_alert_flows.py
+8. Acceptance Scenario 8 (Notification failure) -> backend/tests/unit/test_notification_delivery_service.py
+
 ## Use Case 17
 
 Overall, the implementation covers all flows from the use case.
