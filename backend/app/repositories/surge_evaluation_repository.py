@@ -25,6 +25,9 @@ class SurgeEvaluationRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def get_run(self, surge_evaluation_run_id: str) -> SurgeEvaluationRun | None:
+        return self.session.get(SurgeEvaluationRun, surge_evaluation_run_id)
+
     def create_run(self, *, ingestion_run_id: str, trigger_source: str) -> SurgeEvaluationRun:
         run = SurgeEvaluationRun(
             ingestion_run_id=ingestion_run_id,
@@ -88,25 +91,57 @@ class SurgeEvaluationRepository:
         run = self.session.get(SurgeEvaluationRun, surge_evaluation_run_id)
         if run is None:
             return None
-        candidates = list(
-            self.session.scalars(
-                select(SurgeCandidate)
-                .where(SurgeCandidate.surge_evaluation_run_id == surge_evaluation_run_id)
-                .order_by(SurgeCandidate.detected_at.asc(), SurgeCandidate.service_category.asc())
-            )
+        candidates = self._list_candidates_for_statement(
+            select(SurgeCandidate)
+            .where(SurgeCandidate.surge_evaluation_run_id == surge_evaluation_run_id)
+            .order_by(SurgeCandidate.detected_at.asc(), SurgeCandidate.service_category.asc())
         )
+        return SurgeEvaluationDetailBundle(
+            run=run,
+            candidates=candidates,
+        )
+
+    def get_candidate_bundle(self, surge_candidate_id: str) -> SurgeCandidateBundle | None:
+        candidate = self.session.get(SurgeCandidate, surge_candidate_id)
+        if candidate is None:
+            return None
+        confirmation = self.session.scalar(
+            select(SurgeConfirmationOutcome).where(SurgeConfirmationOutcome.surge_candidate_id == surge_candidate_id)
+        )
+        return SurgeCandidateBundle(candidate=candidate, confirmation=confirmation)
+
+    def list_candidate_bundles_for_window(
+        self,
+        *,
+        service_category: str,
+        detected_at_start: datetime,
+        detected_at_end: datetime,
+    ) -> list[SurgeCandidateBundle]:
+        return self._list_candidates_for_statement(
+            select(SurgeCandidate)
+            .where(
+                SurgeCandidate.service_category == service_category,
+                SurgeCandidate.detected_at >= detected_at_start,
+                SurgeCandidate.detected_at <= detected_at_end,
+            )
+            .order_by(SurgeCandidate.detected_at.asc(), SurgeCandidate.service_category.asc())
+        )
+
+    def _list_candidates_for_statement(self, statement) -> list[SurgeCandidateBundle]:
+        candidates = list(self.session.scalars(statement))
+        if not candidates:
+            return []
         confirmations = list(
             self.session.scalars(
-                select(SurgeConfirmationOutcome)
-                .join(SurgeCandidate, SurgeCandidate.surge_candidate_id == SurgeConfirmationOutcome.surge_candidate_id)
-                .where(SurgeCandidate.surge_evaluation_run_id == surge_evaluation_run_id)
+                select(SurgeConfirmationOutcome).where(
+                    SurgeConfirmationOutcome.surge_candidate_id.in_(
+                        [item.surge_candidate_id for item in candidates]
+                    )
+                )
             )
         )
         confirmation_by_candidate = {item.surge_candidate_id: item for item in confirmations}
-        return SurgeEvaluationDetailBundle(
-            run=run,
-            candidates=[
-                SurgeCandidateBundle(candidate=item, confirmation=confirmation_by_candidate.get(item.surge_candidate_id))
-                for item in candidates
-            ],
-        )
+        return [
+            SurgeCandidateBundle(candidate=item, confirmation=confirmation_by_candidate.get(item.surge_candidate_id))
+            for item in candidates
+        ]

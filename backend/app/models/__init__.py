@@ -31,6 +31,7 @@ from app.models.validation_models import (
     ValidationRun,
 )
 from app.models.visualization_models import VisualizationLoadRecord, VisualizationSnapshot
+from app.models.alert_detail_models import AlertDetailLoadRecord
 from app.models.auth_models import RefreshSession, SignupAllowlistEntry, UserAccount
 from app.models.evaluation_models import (
     CurrentEvaluationMarker,
@@ -87,6 +88,7 @@ from app.models.forecast_accuracy import (
 
 __all__ = [
     "CandidateDataset",
+    "AlertDetailLoadRecord",
     "SignupAllowlistEntry",
     "CleanedCurrentRecord",
     "CurrentDatasetMarker",

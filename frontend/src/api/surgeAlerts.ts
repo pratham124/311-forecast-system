@@ -4,6 +4,7 @@ import type {
   SurgeAlertEventSummary,
   SurgeEvaluationRunDetail,
   SurgeEvaluationRunSummary,
+  SurgeEvaluationTriggerResponse,
 } from '../types/surgeAlerts';
 import { buildHeaders, contentTypeFromHeaders, ApiError } from './evaluations';
 import { refreshStoredSession } from './auth';
@@ -51,7 +52,7 @@ export async function fetchSurgeEvents(): Promise<SurgeAlertEventSummary[]> {
     throw await parseApiError(response, `Surge alert event request failed with status ${response.status}`);
   }
   const body = (await response.json()) as { items: SurgeAlertEventSummary[] };
-  return body.items;
+  return Array.isArray(body.items) ? body.items : [];
 }
 
 export async function fetchSurgeEvent(surgeNotificationEventId: string): Promise<SurgeAlertEvent> {
@@ -60,4 +61,19 @@ export async function fetchSurgeEvent(surgeNotificationEventId: string): Promise
     throw await parseApiError(response, `Surge alert detail request failed with status ${response.status}`);
   }
   return response.json() as Promise<SurgeAlertEvent>;
+}
+
+export async function triggerSurgeEvaluation(payload: {
+  forecastReferenceId: string;
+  triggerSource: 'ingestion_completion' | 'manual_replay';
+}): Promise<SurgeEvaluationTriggerResponse> {
+  const response = await fetchWithAuthRetry(`${env.apiBaseUrl}/api/v1/surge-alerts/evaluations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw await parseApiError(response, `Surge evaluation failed with status ${response.status}`);
+  }
+  return response.json() as Promise<SurgeEvaluationTriggerResponse>;
 }
