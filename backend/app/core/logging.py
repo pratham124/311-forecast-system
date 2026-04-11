@@ -149,6 +149,18 @@ def summarize_threshold_alert_failure(event: str, **fields: Any) -> dict[str, An
     return summarize_threshold_alert_event(event, outcome="failure", **fields)
 
 
+def summarize_surge_alert_event(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_status(event, **fields)
+
+
+def summarize_surge_alert_success(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_surge_alert_event(event, outcome="success", **fields)
+
+
+def summarize_surge_alert_failure(event: str, **fields: Any) -> dict[str, Any]:
+    return summarize_surge_alert_event(event, outcome="failure", **fields)
+
+
 def summarize_forecast_accuracy_event(event: str, **fields: Any) -> dict[str, Any]:
     return summarize_status(event, **fields)
 

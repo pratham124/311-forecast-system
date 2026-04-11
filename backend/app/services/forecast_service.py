@@ -22,6 +22,7 @@ from app.schemas.forecast import CurrentForecastRead, ForecastBucketRead, Foreca
 from app.services.forecast_activation_service import ForecastActivationService, ForecastStorageError
 from app.services.forecast_bucket_service import ForecastBucketService
 from app.services.forecast_training_service import ForecastModelStorageError, ForecastTrainingService
+from app.services.surge_alert_trigger_service import run_surge_alert_evaluation_for_forecast
 from app.services.threshold_alert_trigger_service import run_threshold_alert_evaluation
 
 
@@ -273,6 +274,36 @@ class ForecastService:
             except Exception as exc:  # noqa: BLE001
                 self.logger.warning(
                     "threshold alert evaluation failed for forecast_version_id=%s: %s",
+                    forecast_version_id,
+                    exc,
+                )
+            try:
+                self.logger.info(
+                    "%s",
+                    summarize_status(
+                        "forecast.surge_alert_trigger.started",
+                        forecast_run_id=run.forecast_run_id,
+                        forecast_version_id=forecast_version_id,
+                        trigger_source="ingestion_completion",
+                    ),
+                )
+                run_surge_alert_evaluation_for_forecast(
+                    self.forecast_repository.session,
+                    forecast_version_id=forecast_version_id,
+                    trigger_source="ingestion_completion",
+                )
+                self.logger.info(
+                    "%s",
+                    summarize_status(
+                        "forecast.surge_alert_trigger.completed",
+                        forecast_run_id=run.forecast_run_id,
+                        forecast_version_id=forecast_version_id,
+                        trigger_source="ingestion_completion",
+                    ),
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning(
+                    "surge alert evaluation failed for forecast_version_id=%s: %s",
                     forecast_version_id,
                     exc,
                 )

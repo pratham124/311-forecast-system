@@ -130,6 +130,9 @@ class DatasetRepository:
     def get_current(self, source_name: str) -> CurrentDatasetMarker | None:
         return self.session.get(CurrentDatasetMarker, source_name)
 
+    def get_dataset_version(self, dataset_version_id: str) -> DatasetVersion | None:
+        return self.session.get(DatasetVersion, dataset_version_id)
+
     def list_dataset_records(self, dataset_version_id: str) -> list[DatasetRecord]:
         statement = select(DatasetRecord).where(DatasetRecord.dataset_version_id == dataset_version_id)
         return list(self.session.scalars(statement))

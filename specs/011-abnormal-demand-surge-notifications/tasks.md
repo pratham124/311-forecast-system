@@ -29,13 +29,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create surge-alert persistence models in `backend/src/models/surge_detection_configuration.py`, `backend/src/models/surge_evaluation_run.py`, `backend/src/models/surge_candidate.py`, `backend/src/models/surge_confirmation_outcome.py`, `backend/src/models/surge_state.py`, `backend/src/models/surge_notification_event.py`, and `backend/src/models/surge_notification_channel_attempt.py`
-- [ ] T005 [P] Create the initial surge-alert schema migration in `backend/src/models/migrations/011_surge_alerts.py`
-- [ ] T006 [P] Implement shared repository interfaces in `backend/src/repositories/surge_configuration_repository.py`, `backend/src/repositories/surge_evaluation_repository.py`, `backend/src/repositories/surge_state_repository.py`, and `backend/src/repositories/surge_notification_event_repository.py`
-- [ ] T007 [P] Implement shared API schemas for manual replay triggers plus surge evaluation and event review in `backend/src/api/schemas/surge_alerts.py`
-- [ ] T008 [P] Implement authenticated routing and authorization scaffolding for surge alerts in `backend/src/api/routes/surge_alerts.py` and `backend/src/core/auth.py`
-- [ ] T009 [P] Implement notification delivery client abstractions for surge alerts in `backend/src/clients/notification_service.py`
-- [ ] T010 Implement surge-evaluation pipeline orchestration and structured logging scaffolding in `backend/src/pipelines/surge_alert_evaluation_pipeline.py` and `backend/src/core/logging.py`
+- [X] T004 Create surge-alert persistence models in `backend/src/models/surge_detection_configuration.py`, `backend/src/models/surge_evaluation_run.py`, `backend/src/models/surge_candidate.py`, `backend/src/models/surge_confirmation_outcome.py`, `backend/src/models/surge_state.py`, `backend/src/models/surge_notification_event.py`, and `backend/src/models/surge_notification_channel_attempt.py`
+- [X] T005 [P] Create the initial surge-alert schema migration in `backend/src/models/migrations/011_surge_alerts.py`
+- [X] T006 [P] Implement shared repository interfaces in `backend/src/repositories/surge_configuration_repository.py`, `backend/src/repositories/surge_evaluation_repository.py`, `backend/src/repositories/surge_state_repository.py`, and `backend/src/repositories/surge_notification_event_repository.py`
+- [X] T007 [P] Implement shared API schemas for manual replay triggers plus surge evaluation and event review in `backend/src/api/schemas/surge_alerts.py`
+- [X] T008 [P] Implement authenticated routing and authorization scaffolding for surge alerts in `backend/src/api/routes/surge_alerts.py` and `backend/src/core/auth.py`
+- [X] T009 [P] Implement notification delivery client abstractions for surge alerts in `backend/src/clients/notification_service.py`
+- [X] T010 Implement surge-evaluation pipeline orchestration and structured logging scaffolding in `backend/src/pipelines/surge_alert_evaluation_pipeline.py` and `backend/src/core/logging.py`
 
 **Checkpoint**: Foundation ready. User story implementation can now proceed.
 
@@ -45,21 +45,21 @@
 
 **Goal**: Detect residual-based surge candidates after successful ingestion, confirm them with the dual-threshold rule, create one notification when a scope newly enters surge state, and persist successful delivery outcomes.
 
-**Independent Test**: Complete a successful UC-01 ingestion run for a service category and optional geography whose newly ingested actual demand produces a residual against the active LightGBM P50 forecast with both a z-score above threshold and a percent-above-forecast above floor, and confirm exactly one notification event is created, delivered, and logged for that scope while it remains in surge state.
+**Independent Test**: Complete a successful UC-01 ingestion run for a service category whose newly ingested actual demand produces a residual against the active LightGBM P50 forecast with both a z-score above threshold and a percent-above-forecast above floor, and confirm exactly one notification event is created, delivered, and logged for that scope while it remains in surge state.
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add contract tests for manual replay `POST /api/v1/surge-alerts/evaluations` in `tests/contract/test_surge_alert_evaluations.py`
-- [ ] T012 [P] [US1] Add integration tests for confirmed-surge candidate creation, confirmation, and notification-event persistence in `tests/integration/test_confirmed_surge_alerts.py`
+- [X] T011 [P] [US1] Add contract tests for manual replay `POST /api/v1/surge-alerts/evaluations` in `tests/contract/test_surge_alert_evaluations.py`
+- [X] T012 [P] [US1] Add integration tests for confirmed-surge candidate creation, confirmation, and notification-event persistence in `tests/integration/test_confirmed_surge_alerts.py`
 - [ ] T013 [P] [US1] Add integration tests for daily and weekly forecast-product evaluation and notification delivery success in `tests/integration/test_surge_forecast_product_evaluation.py`
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Implement ingestion-linked scope aggregation and active forecast lineage lookup for daily and weekly products in `backend/src/services/surge_scope_service.py`
-- [ ] T015 [US1] Implement residual calculation, rolling-baseline z-score computation, and percent-above-forecast helpers in `backend/src/services/surge_detection_service.py`
-- [ ] T016 [US1] Implement dual-threshold confirmation and confirmed-notification creation helpers in `backend/src/services/surge_confirmation_service.py`
-- [ ] T017 [US1] Implement surge notification-event and channel-attempt persistence for successful deliveries in `backend/src/repositories/surge_notification_event_repository.py`
-- [ ] T018 [US1] Connect manual-replay route handling to the surge-evaluation pipeline and delivery flow in `backend/src/api/routes/surge_alerts.py` and `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
+- [X] T014 [US1] Implement ingestion-linked scope aggregation and active forecast lineage lookup for daily and weekly products in `backend/src/services/surge_scope_service.py`
+- [X] T015 [US1] Implement residual calculation, rolling-baseline z-score computation, and percent-above-forecast helpers in `backend/src/services/surge_detection_service.py`
+- [X] T016 [US1] Implement dual-threshold confirmation and confirmed-notification creation helpers in `backend/src/services/surge_confirmation_service.py`
+- [X] T017 [US1] Implement surge notification-event and channel-attempt persistence for successful deliveries in `backend/src/repositories/surge_notification_event_repository.py`
+- [X] T018 [US1] Connect manual-replay route handling to the surge-evaluation pipeline and delivery flow in `backend/src/api/routes/surge_alerts.py` and `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -73,16 +73,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add integration tests for filtered candidates that fail one confirmation threshold in `tests/integration/test_filtered_surge_candidates.py`
-- [ ] T020 [P] [US2] Add unit tests for dual-threshold confirmation decisions in `tests/unit/test_surge_confirmation.py`
-- [ ] T021 [P] [US2] Add integration tests for active-surge duplicate suppression and re-arming after return to normal in `tests/integration/test_surge_state_suppression.py`
+- [X] T019 [P] [US2] Add integration tests for filtered candidates that fail one confirmation threshold in `tests/integration/test_filtered_surge_candidates.py`
+- [X] T020 [P] [US2] Add unit tests for dual-threshold confirmation decisions in `tests/unit/test_surge_confirmation.py`
+- [X] T021 [P] [US2] Add integration tests for active-surge duplicate suppression and re-arming after return to normal in `tests/integration/test_surge_state_suppression.py`
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Implement confirmation-outcome persistence for `filtered` and `suppressed_active_surge` results in `backend/src/repositories/surge_evaluation_repository.py`
-- [ ] T023 [US2] Implement surge-state transitions and notification re-arming logic in `backend/src/services/surge_state_service.py`
-- [ ] T024 [US2] Integrate filtered-candidate handling, duplicate suppression, and return-to-normal state updates into `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
-- [ ] T025 [US2] Persist per-scope surge state and active-surge linkage without duplicate notification creation in `backend/src/repositories/surge_state_repository.py`
+- [X] T022 [US2] Implement confirmation-outcome persistence for `filtered` and `suppressed_active_surge` results in `backend/src/repositories/surge_evaluation_repository.py`
+- [X] T023 [US2] Implement surge-state transitions and notification re-arming logic in `backend/src/services/surge_state_service.py`
+- [X] T024 [US2] Integrate filtered-candidate handling, duplicate suppression, and return-to-normal state updates into `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
+- [X] T025 [US2] Persist per-scope surge state and active-surge linkage without duplicate notification creation in `backend/src/repositories/surge_state_repository.py`
 
 **Checkpoint**: User Stories 1 and 2 are both independently functional and testable.
 
@@ -97,21 +97,21 @@
 ### Tests for User Story 3
 
 - [ ] T026 [P] [US3] Add integration tests for detector failures, partial delivery, and total delivery failure outcomes in `tests/integration/test_surge_alert_failures.py`
-- [ ] T027 [P] [US3] Add contract tests for surge-evaluation and surge-event retrieval endpoints in `tests/contract/test_surge_alert_events.py`
+- [X] T027 [P] [US3] Add contract tests for surge-evaluation and surge-event retrieval endpoints in `tests/contract/test_surge_alert_events.py`
 - [ ] T028 [P] [US3] Add contract assertions for surge-evaluation review payload fields, surge-event review payload fields, and channel-attempt detail in `tests/contract/test_surge_alert_review_payload.py`
-- [ ] T029 [P] [US3] Add frontend interaction tests for surge-evaluation review, surge-event review, and failed-channel visibility in `frontend/tests/test_surge_alert_review.tsx`
+- [X] T029 [P] [US3] Add frontend interaction tests for surge-evaluation review, surge-event review, and failed-channel visibility in `frontend/tests/test_surge_alert_review.tsx`
 - [ ] T030 [P] [US3] Add performance validation for the 5-minute surge confirmation and persistence target in `tests/integration/test_surge_alert_latency.py`
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Implement detector-failure persistence, confirmation-failure outcomes, and run-level failure summarization in `backend/src/repositories/surge_evaluation_repository.py`
-- [ ] T032 [US3] Implement multi-channel delivery aggregation with `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required` statuses in `backend/src/services/surge_notification_delivery_service.py`
-- [ ] T033 [US3] Persist failed channel attempts, follow-up reasons, and shared correlation identifiers in `backend/src/repositories/surge_notification_event_repository.py`
-- [ ] T034 [US3] Implement surge-evaluation and surge-event list/detail query services in `backend/src/services/surge_alert_review_service.py`
-- [ ] T035 [US3] Implement surge-evaluation and surge-event retrieval endpoints in `backend/src/api/routes/surge_alerts.py`
-- [ ] T036 [US3] Implement frontend surge-alert API list/detail retrieval methods and typed contracts for evaluations and events in `frontend/src/api/surge_alerts.ts` and `frontend/src/types/surge_alerts.ts`
-- [ ] T037 [US3] Build typed surge-alert review UI state and rendering for evaluation outcomes, confirmation metrics, overall delivery outcomes, and failed channels in `frontend/src/features/surge_alerts/surge_alert_review.tsx`
-- [ ] T038 [US3] Integrate detector-failure handling and delivery-failure follow-up logic into `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
+- [X] T031 [US3] Implement detector-failure persistence, confirmation-failure outcomes, and run-level failure summarization in `backend/src/repositories/surge_evaluation_repository.py`
+- [X] T032 [US3] Implement multi-channel delivery aggregation with `delivered`, `partial_delivery`, `retry_pending`, and `manual_review_required` statuses in `backend/src/services/surge_notification_delivery_service.py`
+- [X] T033 [US3] Persist failed channel attempts, follow-up reasons, and shared correlation identifiers in `backend/src/repositories/surge_notification_event_repository.py`
+- [X] T034 [US3] Implement surge-evaluation and surge-event list/detail query services in `backend/src/services/surge_alert_review_service.py`
+- [X] T035 [US3] Implement surge-evaluation and surge-event retrieval endpoints in `backend/src/api/routes/surge_alerts.py`
+- [X] T036 [US3] Implement frontend surge-alert API list/detail retrieval methods and typed contracts for evaluations and events in `frontend/src/api/surge_alerts.ts` and `frontend/src/types/surge_alerts.ts`
+- [X] T037 [US3] Build typed surge-alert review UI state and rendering for evaluation outcomes, confirmation metrics, overall delivery outcomes, and failed channels in `frontend/src/features/surge_alerts/surge_alert_review.tsx`
+- [X] T038 [US3] Integrate detector-failure handling and delivery-failure follow-up logic into `backend/src/pipelines/surge_alert_evaluation_pipeline.py`
 
 **Checkpoint**: All user stories are independently functional and reviewable.
 
