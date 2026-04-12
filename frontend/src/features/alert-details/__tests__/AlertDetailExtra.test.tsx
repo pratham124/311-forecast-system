@@ -2,6 +2,7 @@ import { act, render, renderHook, screen, waitFor } from '@testing-library/react
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlertDetailPanel } from '../AlertDetailPanel';
 import { useAlertDetail } from '../useAlertDetail';
+import type { AlertSummary } from '../../../types/alertDetails';
 
 vi.mock('../../../api/alertDetails', () => ({
   fetchAlertDetail: vi.fn(),
@@ -144,9 +145,9 @@ describe('alert detail extra coverage', () => {
           selectedAlert: {
             alertId: 'alert-2',
             alertSource: 'threshold_alert',
-          } as never,
+          } as AlertSummary,
         },
-      },
+      } as { initialProps: { selectedAlert: AlertSummary | null } },
     );
 
     await waitFor(() => {

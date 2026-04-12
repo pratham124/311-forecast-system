@@ -45,15 +45,15 @@ describe('api edge coverage', () => {
       .mockResolvedValueOnce(new Response(null, { status: 401 }))
       .mockResolvedValueOnce(new Response('still-not-json', { status: 503 }));
 
-    await expect(fetchAlertDetail('threshold_alert', 'alert-1')).rejects.toMatchObject<ApiError>({
+    await expect(fetchAlertDetail('threshold_alert', 'alert-1')).rejects.toMatchObject({
       status: 418,
       message: 'Alert detail request failed with status 418',
     });
-    await expect(fetchThresholdAlertEvents()).rejects.toMatchObject<ApiError>({
+    await expect(fetchThresholdAlertEvents()).rejects.toMatchObject({
       status: 502,
       message: 'Alert event request failed with status 502',
     });
-    await expect(fetchSurgeEvaluations()).rejects.toMatchObject<ApiError>({
+    await expect(fetchSurgeEvaluations()).rejects.toMatchObject({
       status: 503,
       message: 'Surge evaluation request failed with status 503',
     });
@@ -73,17 +73,17 @@ describe('api edge coverage', () => {
         forecastProduct: 'daily',
         triggerSource: 'manual_replay',
       }),
-    ).rejects.toMatchObject<ApiError>({
+    ).rejects.toMatchObject({
       status: 422,
       message: 'Threshold evaluation failed with status 422',
     });
 
-    await expect(fetchSurgeEvents()).rejects.toMatchObject<ApiError>({
+    await expect(fetchSurgeEvents()).rejects.toMatchObject({
       status: 500,
       message: 'surge events failed',
     });
 
-    await expect(fetchSurgeEvent('event-2')).rejects.toMatchObject<ApiError>({
+    await expect(fetchSurgeEvent('event-2')).rejects.toMatchObject({
       status: 409,
       message: 'Surge alert detail request failed with status 409',
     });

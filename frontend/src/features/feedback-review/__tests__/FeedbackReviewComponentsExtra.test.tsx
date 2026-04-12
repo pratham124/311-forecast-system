@@ -15,7 +15,7 @@ describe('Feedback review components extra coverage', () => {
               submitterKind: 'anonymous',
               processingStatus: 'forwarded',
               submittedAt: '2026-04-10T18:00:00Z',
-              triageStatus: 'done_review',
+              triageStatus: 'resolved',
             },
           ]}
           selectedId={null}
@@ -32,11 +32,11 @@ describe('Feedback review components extra coverage', () => {
             processingStatus: 'forwarded',
             externalReference: 'ABC-123',
             submittedAt: '2026-04-10T18:05:00Z',
-            triageStatus: 'done_review',
-            visibilityStatus: 'hidden_from_queue',
+            triageStatus: 'resolved',
+            visibilityStatus: 'hidden',
             statusEvents: [
               {
-                eventType: 'custom_event',
+                eventType: 'forward_failed',
                 eventReason: 'Something custom happened.',
                 recordedAt: '2026-04-10T18:05:00Z',
               },
@@ -48,8 +48,8 @@ describe('Feedback review components extra coverage', () => {
 
     expect(screen.getByText(/product feedback received/i)).toBeInTheDocument();
     expect(screen.getAllByText(/forwarded/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/done review/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/hidden from queue/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/resolved/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/hidden/i)).toBeInTheDocument();
     expect(screen.getByText(/abc-123/i)).toBeInTheDocument();
     expect(screen.getByText(/something custom happened\./i)).toBeInTheDocument();
   });

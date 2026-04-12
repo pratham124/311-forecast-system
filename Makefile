@@ -21,7 +21,7 @@ API_BASE_URL := http://127.0.0.1:$(BACKEND_PORT)
 .PHONY: help \
 	db-up db-down \
 	backend-venv backend-install backend-run backend-run-debug backend-run-scheduled backend-test backend-coverage backend-test-auth \
-	frontend-install frontend-dev frontend-test frontend-build \
+	frontend-install frontend-dev frontend-test frontend-build frontend-coverage \
 	install test coverage
 
 help:
@@ -49,9 +49,10 @@ help:
 	@echo "  make frontend-dev         Run frontend dev server"
 	@echo "  make frontend-test        Run frontend test suite"
 	@echo "  make frontend-build       Build frontend"
+	@echo "  make frontend-coverage    Run frontend tests with coverage"
 	@echo "  make install              Install backend and frontend dependencies"
 	@echo "  make test                 Run backend and frontend tests"
-	@echo "  make coverage             Test with branch coverage"
+	@echo "  make coverage             Run backend and frontend coverage"
 
 db-up:
 	POSTGRES_PORT=$(POSTGRES_PORT) docker compose up -d postgres
@@ -115,9 +116,12 @@ frontend-test:
 frontend-build:
 	cd $(FRONTEND_DIR) && VITE_API_BASE_URL='$(API_BASE_URL)' npm run build
 
+frontend-coverage:
+	cd $(FRONTEND_DIR) && npm test -- --coverage
+
 install: backend-install frontend-install
 
 test: backend-test frontend-test
 
-# Lab-style aggregate: run from repo root after feature work (backend branch coverage).
-coverage: backend-coverage
+# Lab-style aggregate: run from repo root after feature work.
+coverage: backend-coverage frontend-coverage

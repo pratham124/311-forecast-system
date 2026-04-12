@@ -71,23 +71,23 @@ describe('more api coverage', () => {
       .mockResolvedValueOnce(jsonResponse({ detail: 'surge trigger failed' }, 400))
       .mockResolvedValueOnce(new Response(null, { status: 500 }));
 
-    await expect(fetchAlertDetail('threshold_alert', 'missing')).rejects.toMatchObject<ApiError>({ status: 404, message: 'not found' });
+    await expect(fetchAlertDetail('threshold_alert', 'missing')).rejects.toMatchObject({ status: 404, message: 'not found' });
     await expect(submitForecastAccuracyRenderEvent('fa-1', { renderStatus: 'rendered' })).rejects.toThrow(
       'Forecast accuracy render event failed with status 500',
     );
-    await expect(createThresholdConfiguration({} as never)).rejects.toMatchObject<ApiError>({ message: 'save failed' });
-    await expect(updateThresholdConfiguration('id-1', {} as never)).rejects.toMatchObject<ApiError>({ message: 'update failed' });
-    await expect(deleteThresholdConfiguration('id-1')).rejects.toMatchObject<ApiError>({ message: 'delete failed' });
-    await expect(fetchThresholdAlertEvents()).rejects.toMatchObject<ApiError>({ message: 'events failed' });
-    await expect(fetchThresholdAlertConfigurations()).rejects.toMatchObject<ApiError>({ message: 'configs failed' });
-    await expect(fetchThresholdServiceCategories()).rejects.toMatchObject<ApiError>({ message: 'categories failed' });
-    await expect(fetchThresholdAlertEvent('event-1')).rejects.toMatchObject<ApiError>({ message: 'event failed' });
+    await expect(createThresholdConfiguration({} as never)).rejects.toMatchObject({ message: 'save failed' });
+    await expect(updateThresholdConfiguration('id-1', {} as never)).rejects.toMatchObject({ message: 'update failed' });
+    await expect(deleteThresholdConfiguration('id-1')).rejects.toMatchObject({ message: 'delete failed' });
+    await expect(fetchThresholdAlertEvents()).rejects.toMatchObject({ message: 'events failed' });
+    await expect(fetchThresholdAlertConfigurations()).rejects.toMatchObject({ message: 'configs failed' });
+    await expect(fetchThresholdServiceCategories()).rejects.toMatchObject({ message: 'categories failed' });
+    await expect(fetchThresholdAlertEvent('event-1')).rejects.toMatchObject({ message: 'event failed' });
     await expect(submitPublicForecastDisplayEvent('public-1', { displayOutcome: 'rendered' } as never)).rejects.toThrow(
       'Public forecast render event submission failed with status 500',
     );
-    await expect(fetchSurgeEvaluation('run-1')).rejects.toMatchObject<ApiError>({ message: 'surge detail failed' });
-    await expect(fetchSurgeEvent('event-1')).rejects.toMatchObject<ApiError>({ message: 'surge event failed' });
-    await expect(triggerSurgeEvaluation({ forecastReferenceId: 'forecast-1', triggerSource: 'ingestion_completion' })).rejects.toMatchObject<ApiError>({ message: 'surge trigger failed' });
+    await expect(fetchSurgeEvaluation('run-1')).rejects.toMatchObject({ message: 'surge detail failed' });
+    await expect(fetchSurgeEvent('event-1')).rejects.toMatchObject({ message: 'surge event failed' });
+    await expect(triggerSurgeEvaluation({ forecastReferenceId: 'forecast-1', triggerSource: 'ingestion_completion' })).rejects.toMatchObject({ message: 'surge trigger failed' });
     await expect(submitUserGuideRenderEvent('guide-1', { renderOutcome: 'rendered' } as never)).rejects.toThrow(
       'User guide render event failed with status 500',
     );

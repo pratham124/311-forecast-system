@@ -1,6 +1,44 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ForecastAccuracyPage } from '../ForecastAccuracyPage';
+import type { ForecastAccuracyResponse } from '../../types/forecastAccuracy';
+
+type ForecastAccuracyHookState = {
+  filters: Record<string, never>;
+  setFilters: ReturnType<typeof vi.fn>;
+  serviceCategoryOptions: string[];
+  response: ForecastAccuracyResponse | null;
+  isLoading: boolean;
+  isSubmitting: boolean;
+  error: string | null;
+  submit: ReturnType<typeof vi.fn>;
+  reportRenderEvent: ReturnType<typeof vi.fn>;
+};
+
+function makeResponse(overrides: Partial<ForecastAccuracyResponse>): ForecastAccuracyResponse {
+  return {
+    forecastAccuracyRequestId: 'fa-base',
+    forecastAccuracyResultId: 'result-base',
+    timeRangeStart: '2026-03-01T00:00:00Z',
+    timeRangeEnd: '2026-03-31T00:00:00Z',
+    forecastProductName: 'daily_1_day',
+    comparisonGranularity: 'hourly',
+    viewStatus: 'unavailable',
+    alignedBuckets: [],
+    ...overrides,
+  };
+}
+
+function makeBucket(serviceCategory: string) {
+  return {
+    bucketStart: '2026-03-01T00:00:00Z',
+    bucketEnd: '2026-03-01T01:00:00Z',
+    serviceCategory,
+    forecastValue: 1,
+    actualValue: 2,
+    absoluteErrorValue: 1,
+  };
+}
 
 const hookState = vi.hoisted(() => ({
   value: {
@@ -13,7 +51,7 @@ const hookState = vi.hoisted(() => ({
     error: null,
     submit: vi.fn(),
     reportRenderEvent: vi.fn(),
-  },
+  } as ForecastAccuracyHookState,
 }));
 
 vi.mock('../../features/forecast-accuracy/hooks/useForecastAccuracy', () => ({
@@ -66,11 +104,11 @@ describe('ForecastAccuracyPage extra coverage', () => {
   it('renders default unavailable and error fallback copy', () => {
     const { rerender } = render(<ForecastAccuracyPage />);
 
-    hookState.value.response = { viewStatus: 'unavailable' };
+    hookState.value.response = makeResponse({ viewStatus: 'unavailable' });
     rerender(<ForecastAccuracyPage />);
     expect(screen.getByText(/forecast accuracy is unavailable\./i)).toBeInTheDocument();
 
-    hookState.value.response = { viewStatus: 'error' };
+    hookState.value.response = makeResponse({ viewStatus: 'error' });
     rerender(<ForecastAccuracyPage />);
     expect(screen.getByText(/forecast accuracy could not be prepared\./i)).toBeInTheDocument();
   });
@@ -78,12 +116,14 @@ describe('ForecastAccuracyPage extra coverage', () => {
   it('reports render failures for both rendered states', () => {
     const reportRenderEvent = vi.fn();
     hookState.value.reportRenderEvent = reportRenderEvent;
-    hookState.value.response = {
+    hookState.value.response = makeResponse({
       forecastAccuracyRequestId: 'fa-1',
+      forecastAccuracyResultId: 'result-1',
       viewStatus: 'rendered_with_metrics',
       metrics: { mae: 1, rmse: 1, mape: 1 },
-      alignedBuckets: [{ serviceCategory: 'Crash' }],
-    };
+      metricResolutionStatus: 'computed_on_demand',
+      alignedBuckets: [makeBucket('Crash')],
+    });
 
     const { rerender } = render(<ForecastAccuracyPage />);
 
@@ -92,12 +132,13 @@ describe('ForecastAccuracyPage extra coverage', () => {
     expect(reportRenderEvent).toHaveBeenCalledWith({ renderStatus: 'render_failed', failureReason: 'comparison crashed' });
 
     reportRenderEvent.mockClear();
-    hookState.value.response = {
+    hookState.value.response = makeResponse({
       forecastAccuracyRequestId: 'fa-2',
+      forecastAccuracyResultId: 'result-2',
       viewStatus: 'rendered_without_metrics',
       statusMessage: undefined,
-      alignedBuckets: [{ serviceCategory: 'Crash' }],
-    };
+      alignedBuckets: [makeBucket('Crash')],
+    });
     rerender(<ForecastAccuracyPage />);
 
     expect(screen.getByText(/metrics are unavailable\./i)).toBeInTheDocument();

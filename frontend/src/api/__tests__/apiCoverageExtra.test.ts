@@ -76,13 +76,13 @@ describe('extra api coverage', () => {
       .mockResolvedValueOnce(new Response('not-json', { status: 500 }));
 
     await expect(fetchAlertDetail('threshold_alert', 'alert-1')).resolves.toEqual({ alertDetailLoadId: 'load-1' });
-    await expect(submitAlertDetailRenderEvent('load-1', { renderStatus: 'rendered' })).rejects.toMatchObject<ApiError>({
+    await expect(submitAlertDetailRenderEvent('load-1', { renderStatus: 'rendered' })).rejects.toMatchObject({
       status: 503,
       message: 'detail unavailable',
     });
     await expect(
       submitAlertDetailRenderEvent('load-2', { renderStatus: 'render_failed', failureReason: 'chart failed' }),
-    ).rejects.toMatchObject<ApiError>({
+    ).rejects.toMatchObject({
       status: 500,
       message: 'Alert detail render event failed with status 500',
     });
@@ -157,7 +157,7 @@ describe('extra api coverage', () => {
         forecastProduct: 'weekly',
         triggerSource: 'scheduled_recheck',
       }),
-    ).rejects.toMatchObject<ApiError>({ status: 400, message: 'threshold broke' });
+    ).rejects.toMatchObject({ status: 400, message: 'threshold broke' });
   });
 
   it('covers public forecast api success and failure branches', async () => {
@@ -192,7 +192,7 @@ describe('extra api coverage', () => {
 
   it('covers surge alert api errors', async () => {
     fetchMock.mockResolvedValueOnce(new Response('bad', { status: 502 }));
-    await expect(fetchSurgeEvaluations()).rejects.toMatchObject<ApiError>({
+    await expect(fetchSurgeEvaluations()).rejects.toMatchObject({
       status: 502,
       message: 'Surge evaluation request failed with status 502',
     });

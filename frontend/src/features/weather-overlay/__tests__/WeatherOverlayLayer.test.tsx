@@ -42,7 +42,7 @@ describe('WeatherOverlayLayer', () => {
           weatherMeasure: 'snowfall',
           overlayStatus: 'disabled',
           baseForecastPreserved: true,
-          userVisible: false,
+          userVisible: true,
           stateSource: 'overlay-assembly',
           observations: [],
         }}
