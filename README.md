@@ -61,7 +61,7 @@ By default, you are always able to register the account "manager@example.com" an
 
 ### Configuration
 
-Copy and adapt [`backend/.env.example`](backend/.env.example). The root `Makefile` passes core variables inline for `make backend-run`; for ad hoc runs, export `DATABASE_URL`, `FRONTEND_ORIGIN`, JWT settings, and **`AUTH_SIGNUP_ALLOWLIST`** (comma-separated `email:Role` entries; roles such as `CityPlanner` and `OperationalManager`) so first-time signup works locally.
+Copy and adapt [`backend/.env.example`](backend/.env.example). The root `Makefile` passes core variables inline for `make backend-run`; for ad hoc runs, export `DATABASE_URL`, `FRONTEND_ORIGIN`, JWT settings, and **`AUTH_SIGNUP_ALLOWLIST`** (comma-separated `email:Role` entries; roles such as `CityPlanner` and `OperationalManager`) so first-time signup works locally. **Remember:**, you can always use `manager@example.com` and `planner@example.com` if this environment variable is not manually set.
 
 Optional: enable scheduled jobs with `make backend-run-scheduled` (sets `SCHEDULER_ENABLED=true`).
 
