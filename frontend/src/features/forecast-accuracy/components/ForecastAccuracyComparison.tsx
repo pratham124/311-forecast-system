@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ForecastAccuracyAlignedBucket } from '../../../types/forecastAccuracy';
 
 function formatBucketTime(value: string): string {
@@ -29,13 +30,55 @@ const SEVERITY_DOT = {
   high: 'bg-red-400',
 } as const;
 
+type SortKey = 'time' | 'serviceCategory' | 'forecastValue' | 'actualValue' | 'absoluteErrorValue';
+type SortDirection = 'asc' | 'desc';
+
+function compareBuckets(left: ForecastAccuracyAlignedBucket, right: ForecastAccuracyAlignedBucket, sortKey: SortKey): number {
+  switch (sortKey) {
+    case 'time':
+      return new Date(left.bucketStart).getTime() - new Date(right.bucketStart).getTime();
+    case 'serviceCategory':
+      return (left.serviceCategory ?? 'All categories').localeCompare(right.serviceCategory ?? 'All categories');
+    case 'forecastValue':
+      return left.forecastValue - right.forecastValue;
+    case 'actualValue':
+      return left.actualValue - right.actualValue;
+    case 'absoluteErrorValue':
+      return left.absoluteErrorValue - right.absoluteErrorValue;
+  }
+}
+
 export function ForecastAccuracyComparison({ alignedBuckets }: { alignedBuckets: ForecastAccuracyAlignedBucket[] }) {
+  const [sortKey, setSortKey] = useState<SortKey>('time');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
   if (alignedBuckets.length === 0) {
     return (
       <div className="rounded-[22px] border border-dashed border-slate-300 bg-slate-50/60 p-8 text-center">
         <p className="m-0 text-sm text-muted">No aligned buckets to display.</p>
       </div>
     );
+  }
+
+  const sortedBuckets = [...alignedBuckets].sort((left, right) => {
+    const result = compareBuckets(left, right, sortKey);
+    return sortDirection === 'asc' ? result : -result;
+  });
+
+  function toggleSort(nextSortKey: SortKey) {
+    if (nextSortKey === sortKey) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      return;
+    }
+    setSortKey(nextSortKey);
+    setSortDirection('asc');
+  }
+
+  function getSortLabel(columnSortKey: SortKey, label: string): string {
+    if (columnSortKey !== sortKey) {
+      return `${label}: unsorted`;
+    }
+    return `${label}: sorted ${sortDirection === 'asc' ? 'ascending' : 'descending'}`;
   }
 
   return (
@@ -64,16 +107,32 @@ export function ForecastAccuracyComparison({ alignedBuckets }: { alignedBuckets:
       </div>
 
       {/* Table-style header row */}
-      <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr] gap-2 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-        <span>Time</span>
-        <span className="text-right">Forecast</span>
-        <span className="text-right">Actual</span>
-        <span className="text-right">Abs Error</span>
+      <div className="grid grid-cols-[1.2fr_1fr_0.9fr_0.9fr_0.9fr] gap-2 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+        <button type="button" className="flex items-center gap-1 text-left" onClick={() => toggleSort('time')} aria-label={getSortLabel('time', 'Time')}>
+          <span>Time</span>
+          <span aria-hidden="true">{sortKey === 'time' ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}</span>
+        </button>
+        <button type="button" className="flex items-center gap-1 text-left" onClick={() => toggleSort('serviceCategory')} aria-label={getSortLabel('serviceCategory', 'Service Category')}>
+          <span>Service Category</span>
+          <span aria-hidden="true">{sortKey === 'serviceCategory' ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}</span>
+        </button>
+        <button type="button" className="flex items-center justify-end gap-1 text-right" onClick={() => toggleSort('forecastValue')} aria-label={getSortLabel('forecastValue', 'Forecast')}>
+          <span>Forecast</span>
+          <span aria-hidden="true">{sortKey === 'forecastValue' ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}</span>
+        </button>
+        <button type="button" className="flex items-center justify-end gap-1 text-right" onClick={() => toggleSort('actualValue')} aria-label={getSortLabel('actualValue', 'Actual')}>
+          <span>Actual</span>
+          <span aria-hidden="true">{sortKey === 'actualValue' ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}</span>
+        </button>
+        <button type="button" className="flex items-center justify-end gap-1 text-right" onClick={() => toggleSort('absoluteErrorValue')} aria-label={getSortLabel('absoluteErrorValue', 'Abs Error')}>
+          <span>Abs Error</span>
+          <span aria-hidden="true">{sortKey === 'absoluteErrorValue' ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}</span>
+        </button>
       </div>
 
       {/* Bucket rows */}
       <div className="max-h-[460px] space-y-1.5 overflow-y-auto pr-1 custom-scrollbar">
-        {alignedBuckets.map((bucket, index) => {
+        {sortedBuckets.map((bucket, index) => {
           const severity = getErrorSeverity(bucket.absoluteErrorValue, bucket.forecastValue);
           const diff = bucket.forecastValue - bucket.actualValue;
           const isOver = diff > 0;
@@ -81,7 +140,7 @@ export function ForecastAccuracyComparison({ alignedBuckets }: { alignedBuckets:
           return (
             <div
               key={`${bucket.bucketStart}:${bucket.serviceCategory ?? 'all'}`}
-              className="group grid grid-cols-[1.3fr_1fr_1fr_1fr] items-center gap-2 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 transition-all duration-200 hover:border-accent/30 hover:bg-white hover:shadow-[0_2px_12px_rgba(15,23,42,0.06)]"
+              className="group grid grid-cols-[1.2fr_1fr_0.9fr_0.9fr_0.9fr] items-center gap-2 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 transition-all duration-200 hover:border-accent/30 hover:bg-white hover:shadow-[0_2px_12px_rgba(15,23,42,0.06)]"
               style={{ animationDelay: `${index * 20}ms` }}
             >
               {/* Time */}
@@ -89,6 +148,9 @@ export function ForecastAccuracyComparison({ alignedBuckets }: { alignedBuckets:
                 <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${SEVERITY_DOT[severity]} transition-transform duration-200 group-hover:scale-125`} />
                 <span className="text-sm font-medium text-ink">{formatBucketTime(bucket.bucketStart)}</span>
               </div>
+
+              {/* Service category */}
+              <span className="truncate text-sm text-slate-600">{bucket.serviceCategory ?? 'All categories'}</span>
 
               {/* Forecast */}
               <span className="text-right text-sm tabular-nums text-slate-600">

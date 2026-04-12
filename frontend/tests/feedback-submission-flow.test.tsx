@@ -55,13 +55,14 @@ describe('feedback submission flow', () => {
       </MemoryRouter>,
     );
 
-    await user.selectOptions(screen.getByLabelText(/report type/i), 'Bug Report');
+    await user.click(screen.getByRole('button', { name: /report type/i }));
+    await user.click(screen.getByRole('option', { name: /^Bug Report$/i }));
     await user.type(screen.getByLabelText(/details/i), 'The chart crashes after switching categories.');
     await user.type(screen.getByLabelText(/contact email/i), 'person@example.com');
     await user.click(screen.getByRole('button', { name: /submit feedback/i }));
 
     expect(await screen.findByText(/report received/i)).toBeInTheDocument();
-    expect(screen.getByText(/submission id fb-1/i)).toBeInTheDocument();
+    expect(screen.queryByText(/submission id/i)).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [, requestInit] = fetchMock.mock.calls[0];
     expect(String(fetchMock.mock.calls[0][0])).toContain('/api/v1/feedback-submissions');
@@ -94,7 +95,8 @@ describe('feedback submission flow', () => {
       </MemoryRouter>,
     );
 
-    await user.selectOptions(screen.getByLabelText(/report type/i), 'Feedback');
+    await user.click(screen.getByRole('button', { name: /report type/i }));
+    await user.click(screen.getByRole('option', { name: /^Feedback$/i }));
     await user.type(screen.getByLabelText(/details/i), 'The issue form should explain the delayed state.');
     await user.click(screen.getByRole('button', { name: /submit feedback/i }));
 

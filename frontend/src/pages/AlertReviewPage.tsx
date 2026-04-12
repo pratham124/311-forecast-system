@@ -419,7 +419,7 @@ export function AlertReviewPage({ roles }: { roles: string[] }) {
       {activePanel === 'surges' ? <SurgeAlertReview roles={roles} /> : null}
 
       {activePanel === 'alerts' ? (
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <Card className="rounded-[28px] border-white/60 bg-white/85 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
             <CardHeader>
               <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">Alert Review</p>

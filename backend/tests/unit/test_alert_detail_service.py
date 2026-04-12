@@ -406,6 +406,15 @@ def test_distribution_context_covers_daily_weekly_and_unlinked_paths() -> None:
         ),
         SimpleNamespace(
             service_category="Roads",
+            geography_key="Ward 1",
+            bucket_start=start + timedelta(hours=1),
+            bucket_end=start + timedelta(hours=2),
+            quantile_p10=2.5,
+            quantile_p50=4.0,
+            quantile_p90=5.0,
+        ),
+        SimpleNamespace(
+            service_category="Roads",
             geography_key="Ward 2",
             bucket_start=start + timedelta(hours=1),
             bucket_end=start + timedelta(hours=2),
@@ -481,6 +490,7 @@ def test_distribution_context_covers_daily_weekly_and_unlinked_paths() -> None:
             forecast_reference_id="forecast-1",
             window_start=start,
             window_end=start + timedelta(hours=1),
+            secondary_metric_value=4.0,
         )
     )
     daily_missing = daily_service._build_distribution_context(
@@ -500,6 +510,7 @@ def test_distribution_context_covers_daily_weekly_and_unlinked_paths() -> None:
             geography_value="Ward 1",
             window_start=start,
             window_end=start + timedelta(days=1),
+            secondary_metric_value=6.0,
         )
     )
     weekly_missing = daily_service._build_distribution_context(
@@ -515,18 +526,61 @@ def test_distribution_context_covers_daily_weekly_and_unlinked_paths() -> None:
     unlinked = daily_service._build_distribution_context(_resolved(forecast_product=None, forecast_reference_id=None))
 
     assert daily_available.status == "available"
-    assert daily_available.payload.summary_value == 3.0
-    assert [point.p50 for point in daily_available.payload.points] == [3.0]
+    assert daily_available.payload.summary_value == 4.0
+    assert [point.p50 for point in daily_available.payload.points] == [3.0, 4.0]
+    assert [point.is_alerted_bucket for point in daily_available.payload.points] == [False, True]
     assert daily_missing.status == "failed"
     assert daily_missing.reason == "Forecast version not found."
     assert daily_no_points.status == "unavailable"
     assert weekly_available.status == "available"
     assert weekly_available.payload.granularity == "daily"
     assert [point.p50 for point in weekly_available.payload.points] == [6.5, 7.0]
+    assert [point.is_alerted_bucket for point in weekly_available.payload.points] == [True, False]
     assert weekly_missing.status == "failed"
     assert weekly_missing.reason == "Weekly forecast version not found."
     assert weekly_no_points.status == "unavailable"
     assert unlinked.status == "unavailable"
+
+
+def test_weekly_alerted_bucket_date_falls_back_to_window_start_when_threshold_is_never_crossed() -> None:
+    service = _build_service()
+    resolved = _resolved(
+        forecast_product="weekly",
+        forecast_window_type="daily",
+        window_start=datetime(2026, 4, 2, 10, tzinfo=timezone.utc),
+        secondary_metric_value=20.0,
+    )
+
+    alerted_date = service._resolve_alerted_weekly_bucket_date(
+        resolved,
+        {
+            date(2026, 4, 1): {"p50": 6.5},
+            date(2026, 4, 2): {"p50": 7.0},
+        },
+    )
+
+    assert alerted_date == date(2026, 4, 2)
+
+
+def test_weekly_alerted_bucket_date_uses_window_start_for_non_threshold_alerts() -> None:
+    service = _build_service()
+    resolved = _resolved(
+        alert_source="surge_alert",
+        forecast_product="weekly",
+        forecast_window_type="daily",
+        window_start=datetime(2026, 4, 3, 10, tzinfo=timezone.utc),
+        secondary_metric_value=1.0,
+    )
+
+    alerted_date = service._resolve_alerted_weekly_bucket_date(
+        resolved,
+        {
+            date(2026, 4, 1): {"p50": 6.5},
+            date(2026, 4, 2): {"p50": 7.0},
+        },
+    )
+
+    assert alerted_date == date(2026, 4, 3)
 
 
 def test_daily_driver_context_covers_all_branch_outcomes(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -88,14 +88,16 @@ function ComponentCard({
   emptyMessage?: string | null;
 }) {
   return (
-    <section className="grid gap-4 rounded-[24px] border border-[rgba(25,58,90,0.10)] bg-white/80 p-5">
+    <section className="grid gap-4 rounded-[26px] border border-white/80 bg-white/95 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-[0_12px_44px_rgba(15,23,42,0.08)]">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-ink">{title}</h3>
-        <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] ${componentStatusClasses(status)}`}>
+        <h3 className="text-lg font-bold text-ink">{title}</h3>
+        <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${componentStatusClasses(status)}`}>
           {status.replace('_', ' ')}
         </span>
       </div>
-      {status === 'available' ? children : <p className="text-sm text-muted">{emptyMessage}</p>}
+      <div className="pt-2">
+        {status === 'available' ? children : <p className="text-sm italic text-muted/80">{emptyMessage || 'No data currently available for this section.'}</p>}
+      </div>
     </section>
   );
 }
@@ -150,7 +152,7 @@ function AlertDetailPanelContent({
       <RenderReporter alertDetailLoadId={detail.alertDetailLoadId} onRenderSuccess={onRenderSuccess} />
       <ViewStatusBanner detail={detail} />
 
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+      <div className="grid gap-6">
         <ComponentCard
           title="Distribution context"
           status={detail.distribution.status}
