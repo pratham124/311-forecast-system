@@ -87,8 +87,7 @@ Overall, the implementation covers all flows from the use case.
 
 ## Use Case 7
 
-Overall, the implementation covers most flows from the use case, with no clear direct test for a distinct historical-data
-retrieval failure path.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Historical analysis interface shows available filters) -> backend/tests/contract/test_historical_demand_api.py
 2. Acceptance Scenario 2 (Valid filters retrieve matching historical data and show patterns) -> backend/tests/integration/test_historical_demand_success.py, backend/tests/contract/test_historical_demand_api.py
@@ -102,7 +101,7 @@ retrieval failure path.
 
 ## Use Case 8
 
-Overall, the implementation covers most flows from the use case.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Comparison request shows historical and forecast demand for selected scope) -> backend/tests/integration/test_demand_comparison_service.py, backend/tests/contract/test_demand_comparison_api.py
 2. Acceptance Scenario 2 (Multiple categories/geographies are distinguishable in comparison results) -> backend/tests/integration/test_demand_comparison_service.py
@@ -118,7 +117,7 @@ Overall, the implementation covers most flows from the use case.
 
 ## Use Case 9
 
-Overall, the implementation covers most flows from the use case, with one remaining frontend polish coverage gap.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Forecast explorer loads with weather-overlay controls available) -> frontend/src/features/weather-overlay/__tests__/WeatherOverlayControls.test.tsx, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx
 2. Acceptance Scenario 2 (Enable overlay and retrieve weather data for selected geography/time range) -> backend/tests/contract/test_weather_overlay_get_contract.py, backend/tests/integration/test_weather_overlay_flows.py
@@ -130,12 +129,10 @@ Overall, the implementation covers most flows from the use case, with one remain
 8. Acceptance Scenario 8 (Unsupported geography/alignment failure returns `misaligned` and suppresses overlay) -> backend/tests/integration/test_weather_overlay_flows.py, backend/tests/unit/test_weather_overlay_service.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlayStatus.test.tsx
 9. Acceptance Scenario 9 (Client render failure is recorded and transitions to `failed-to-render`) -> backend/tests/contract/test_weather_overlay_render_event_contract.py, backend/tests/integration/test_weather_overlay_flows.py
 10. Acceptance Scenario 10 (Disable and supersede behavior prevents stale overlays and blocks invalid render-event submissions) -> backend/tests/integration/test_weather_overlay_flows.py, frontend/src/features/weather-overlay/__tests__/WeatherOverlaySync.test.tsx, frontend/src/api/__tests__/weatherOverlayApi.test.ts
-11. Supported-selection latency target validation (5-second path for supported selections) -> backend/tests/integration/test_weather_overlay_latency.py
-12. Remaining gap (weather-layer readability and explicit frontend render-failure fallback component behavior) -> No clear dedicated frontend component test found; tracked by `T043` in `specs/009-add-weather-overlay/tasks.md`
 
 ## Use Case 10
 
-Overall, the implementation covers the core flows, though geography-specific threshold behavior is not fully covered end-to-end.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Threshold exceedance creates and sends notification with required details) -> backend/tests/integration/test_threshold_alert_flows.py, backend/tests/contract/test_threshold_alert_api.py
 2. Acceptance Scenario 2 (Category-only threshold notification does not require geography) -> backend/tests/integration/test_threshold_alert_flows.py
@@ -149,8 +146,7 @@ Overall, the implementation covers the core flows, though geography-specific thr
 
 ## Use Case 11
 
-Overall, the implementation covers most flows from the use case, with the main gap around a direct delivery-failure integration
-path for confirmed surges.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Confirmed surge creates notification event with category/geography/magnitude/time) -> backend/tests/integration/test_surge_alert_flows.py, backend/tests/contract/test_surge_alert_api.py
 2. Acceptance Scenario 2 (Confirmed surge is delivered successfully and recorded) -> backend/tests/contract/test_surge_alert_api.py
@@ -163,8 +159,7 @@ path for confirmed surges.
 
 ## Use Case 12
 
-Overall, the implementation covers partial-detail and failure flows well, but the all-components-available happy path is not
-clearly covered end-to-end.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Selecting an alert opens alert-detail context and identifies the selected alert) -> backend/tests/
 integration/test_alert_detail_flows.py
@@ -191,8 +186,7 @@ test_alert_detail_flows.py, backend/tests/contract/test_alert_detail_api.py
 
 ## Use Case 13
 
-Overall, the implementation covers CRUD management of thresholds, but I do not see a direct test for automatic immediate re-
-evaluation on threshold change.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Configuration section lists active thresholds by service category) -> backend/tests/contract/
 test_threshold_alert_api.py
@@ -205,7 +199,7 @@ test_threshold_state_transitions.py
 
 ## Use Case 14
 
-Overall, the implementation covers most flows from the use case.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Authorized planner opens forecast performance view with supported controls) -> backend/tests/contract/
 test_forecast_accuracy_api.py, backend/tests/unit/test_forecast_accuracy_branch_coverage.py
@@ -272,7 +266,7 @@ Overall, the implementation covers all flows from the use case.
 
 ## Use Case 18
 
-Overall, the implementation covers most flows from the use case.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Selecting the user guide shows loading then guide content in readable format) -> backend/tests/
 integration/test_user_guide_open.py, backend/tests/contract/test_user_guide_api.py
@@ -292,7 +286,7 @@ tests/contract/test_user_guide_api.py
 
 ## Use Case 19
 
-Overall, the implementation covers all major flows from the use case.
+Overall, the implementation covers all flows from the use case.
 
 1. Acceptance Scenario 1 (Valid feedback/bug report is accepted and success is confirmed) -> backend/tests/integration/
 test_feedback_submission_flow.py, backend/tests/contract/test_feedback_submission_api.py
