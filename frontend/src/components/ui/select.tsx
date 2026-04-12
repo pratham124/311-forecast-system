@@ -1,12 +1,21 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
-const Select = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & {
+type SelectChangeEvent = {
+  target: {
+    value: string;
+    name?: string;
+  };
+};
+
+type SelectProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> & {
   value?: string;
-  onChange?: (event: { target: { value: string; name?: string } }) => void;
+  onChange?: (event: SelectChangeEvent) => void;
   name?: string;
   id?: string;
-}>((({ className, children, value, onChange, name, id, ...props }, ref) => {
+};
+
+const Select = React.forwardRef<HTMLDivElement, SelectProps>((({ className, children, value, onChange, name, id, ...props }, ref) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
