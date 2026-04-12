@@ -243,6 +243,20 @@ Overall, the implementation covers all flows from the use case:
 7. Acceptance Scenario 7 (Storm mode inactive) -> backend/tests/integration/test_surge_alert_flows.py
 8. Acceptance Scenario 8 (Notification failure) -> backend/tests/unit/test_notification_delivery_service.py
 
+## Use Case 16
+
+Overall, the implementation covers all flows from the use case.
+
+1. Acceptance Scenario 1 (Forecast visualization loads for the operational manager) -> ui-playwright/tests/uc16-forecast-confidence-e2e.spec.ts, ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts
+2. Acceptance Scenario 2 (System retrieves forecast data and associated confidence or quality signals) -> ui-playwright/tests/uc16-forecast-confidence-e2e.spec.ts, ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, backend/tests/contract/test_forecast_confidence_api.py
+3. Acceptance Scenario 3 (Degraded confidence conditions are detected from signals) -> backend/tests/integration/test_forecast_confidence_flows.py, backend/tests/contract/test_forecast_confidence_api.py, ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts
+4. Acceptance Scenario 4 (System prepares a visual confidence indicator for degraded confidence) -> frontend/src/features/forecast-confidence/components/ForecastConfidenceBanner.test.tsx, ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts
+5. Acceptance Scenario 5 (UI displays forecast together with the degradation indicator) -> ui-playwright/tests/uc16-forecast-confidence-e2e.spec.ts, ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx
+6. Acceptance Scenario 6 (System logs display of degraded confidence status) -> ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, backend/tests/contract/test_forecast_confidence_api.py, backend/tests/integration/test_forecast_confidence_flows.py
+7. Acceptance Scenario 7 (Confidence signals unavailable: forecast shown without indicator and missing confidence is logged) -> ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, backend/tests/integration/test_forecast_confidence_flows.py, frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx
+8. Acceptance Scenario 8 (False degradation signal is dismissed and forecast is shown normally) -> ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, ui-playwright/tests/uc16-forecast-confidence.spec.ts, frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPage.test.tsx
+9. Acceptance Scenario 9 (Visualization rendering error: indicator not displayed and failure is logged) -> ui-playwright/tests/uc16-forecast-confidence-scenarios.spec.ts, frontend/src/features/forecast-visualization/__tests__/ForecastVisualizationPageConfidenceCrash.test.tsx, backend/tests/integration/test_forecast_confidence_flows.py
+
 ## Use Case 17
 
 Overall, the implementation covers all flows from the use case.

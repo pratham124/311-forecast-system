@@ -6,7 +6,11 @@ from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.forecast_repository import ForecastRepository
 from app.repositories.forecast_run_repository import ForecastRunRepository
+from app.repositories.surge_evaluation_repository import SurgeEvaluationRepository
+from app.repositories.surge_state_repository import SurgeStateRepository
 from app.repositories.visualization_repository import VisualizationRepository
+from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
+from app.services.forecast_confidence_service import ForecastConfidenceService
 from app.services.forecast_visualization_service import ForecastVisualizationService
 from app.services.forecast_visualization_sources import ForecastVisualizationSourceService
 from app.services.historical_demand_service import HistoricalDemandService
@@ -20,13 +24,19 @@ def _build_service(session):
     return ForecastVisualizationService(
         cleaned_dataset_repository=CleanedDatasetRepository(session),
         forecast_repository=ForecastRepository(session),
-        weekly_forecast_repository=__import__("app.repositories.weekly_forecast_repository", fromlist=["WeeklyForecastRepository"]).WeeklyForecastRepository(session),
+        weekly_forecast_repository=WeeklyForecastRepository(session),
         visualization_repository=visualization_repository,
         historical_demand_service=HistoricalDemandService(CleanedDatasetRepository(session), settings.source_name),
         source_service=ForecastVisualizationSourceService(),
         snapshot_service=VisualizationSnapshotService(visualization_repository, settings.visualization_fallback_age_hours),
         settings=settings,
         logger=__import__('logging').getLogger('test.visualization'),
+        confidence_service=ForecastConfidenceService(
+            surge_state_repository=SurgeStateRepository(session),
+            surge_evaluation_repository=SurgeEvaluationRepository(session),
+            settings=settings,
+            logger=__import__('logging').getLogger('test.visualization.confidence'),
+        ),
     )
 
 

@@ -47,6 +47,15 @@ class VisualizationLoadRecord(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     render_reported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence_assessment_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    confidence_indicator_state: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    confidence_reason_categories_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence_supporting_signals_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence_signal_resolution_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    confidence_render_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    confidence_render_reported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    confidence_render_failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class VisualizationSnapshot(Base):

@@ -10,7 +10,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchDemandComparisonAvailability, fetchDemandComparisonContext, submitDemandComparisonQuery } from '../demandComparisons';
 import { fetchCurrentEvaluation, fetchEvaluationRunStatus, triggerEvaluationRun } from '../evaluations';
-import { fetchCurrentForecastVisualization, fetchServiceCategoryOptions } from '../forecastVisualizations';
+import {
+  contentTypeFromHeaders,
+  fetchCurrentForecastVisualization,
+  fetchServiceCategoryOptions,
+  submitConfidenceRenderEvent,
+} from '../forecastVisualizations';
 import { fetchHistoricalDemandContext, submitHistoricalDemandQuery } from '../historicalDemand';
 import { fetchCurrentDataset, fetchIngestionRunStatus, triggerIngestionRun } from '../ingestion';
 import { loginUser } from '../auth';
@@ -223,6 +228,19 @@ describe('forecastVisualizations: buildQuery skips falsy categories', () => {
     expect(calledUrl).not.toMatch(/serviceCategory=&|serviceCategory=$/);
     expect(calledUrl).toContain('excludeServiceCategory=Waste');
   });
+
+  it('reads content type from a Headers instance', () => {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    expect(contentTypeFromHeaders(headers)).toBe('application/json');
+  });
+
+  it('returns undefined when a Headers instance has no content type', () => {
+    expect(contentTypeFromHeaders(new Headers())).toBeUndefined();
+  });
+
+  it('reads lowercase content-type from a plain header object', () => {
+    expect(contentTypeFromHeaders({ 'content-type': 'application/json' })).toBe('application/json');
+  });
 });
 
 // ─── forecastVisualizations.ts: 401 retry path ───────────────────────────────
@@ -256,6 +274,29 @@ describe('forecastVisualizations: buildHeaders with accessToken', () => {
     await fetchServiceCategoryOptions('daily_1_day');
     const initArg = fetchMock.mock.calls[0][1] as RequestInit;
     expect((initArg.headers as Headers).get('Authorization')).toBe('Bearer tok');
+  });
+
+  it('posts confidence render events to the dedicated endpoint', async () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storedSession));
+    fetchMock.mockResolvedValue(new Response(null, { status: 202 }));
+
+    await submitConfidenceRenderEvent('load-2', { renderStatus: 'rendered' });
+
+    const [calledUrl, initArg] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(calledUrl).toContain('/confidence-render-events');
+    expect((initArg.headers as Headers).get('Content-Type')).toBe('application/json');
+  });
+
+  it('extracts content type from array headers and surfaces confidence render failures', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 500 }));
+
+    await expect(
+      submitConfidenceRenderEvent('load-3', { renderStatus: 'rendered' }),
+    ).rejects.toThrow('Confidence render event submission failed with status 500');
+
+    const arrayHeaders = [['Content-Type', 'application/json']] as HeadersInit;
+    const initArg = { headers: arrayHeaders } as RequestInit;
+    expect((await import('../forecastVisualizations')).contentTypeFromHeaders(initArg.headers)).toBe('application/json');
   });
 });
 

@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchCurrentForecastVisualization, fetchServiceCategoryOptions, submitVisualizationRenderEvent } from '../../../api/forecastVisualizations';
+import {
+  fetchCurrentForecastVisualization,
+  fetchServiceCategoryOptions,
+  submitConfidenceRenderEvent,
+  submitVisualizationRenderEvent,
+} from '../../../api/forecastVisualizations';
 import { env } from '../../../config/env';
 import type { ForecastProduct, ForecastVisualization, VisualizationRenderEvent } from '../../../types/forecastVisualization';
 
@@ -12,6 +17,7 @@ export function useForecastVisualization() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reported = useRef<Record<string, boolean>>({});
+  const confidenceReported = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
     const controller = new AbortController();
@@ -74,6 +80,14 @@ export function useForecastVisualization() {
     await submitVisualizationRenderEvent(visualization.visualizationLoadId, payload);
   };
 
+  const reportConfidenceRenderEvent = async (payload: VisualizationRenderEvent) => {
+    if (!visualization) return;
+    const key = `${visualization.visualizationLoadId}:${payload.renderStatus}`;
+    if (confidenceReported.current[key]) return;
+    confidenceReported.current[key] = true;
+    await submitConfidenceRenderEvent(visualization.visualizationLoadId, payload);
+  };
+
   return {
     forecastProduct,
     setForecastProduct,
@@ -84,5 +98,6 @@ export function useForecastVisualization() {
     isLoading,
     error,
     reportRenderEvent,
+    reportConfidenceRenderEvent,
   };
 }

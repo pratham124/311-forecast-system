@@ -100,3 +100,23 @@ export async function submitVisualizationRenderEvent(
     throw new Error(`Render event submission failed with status ${response.status}`);
   }
 }
+
+export async function submitConfidenceRenderEvent(
+  visualizationLoadId: string,
+  payload: VisualizationRenderEvent,
+): Promise<void> {
+  if (env.renderEventSubmission === 'disabled') {
+    return;
+  }
+  const response = await fetchWithAuthRetry(
+    `${env.apiBaseUrl}/api/v1/forecast-visualizations/${visualizationLoadId}/confidence-render-events`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Confidence render event submission failed with status ${response.status}`);
+  }
+}

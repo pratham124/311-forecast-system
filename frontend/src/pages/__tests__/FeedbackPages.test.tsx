@@ -54,6 +54,7 @@ describe('Feedback pages', () => {
     expect(screen.getByRole('link', { name: /back to dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open feedback inbox/i })).toBeInTheDocument();
     expect(screen.getByText(/report received/i)).toBeInTheDocument();
+    expect(screen.queryByText(/submission id/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /submit another report/i }));
     expect(reset).toHaveBeenCalledTimes(1);

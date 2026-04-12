@@ -45,7 +45,7 @@ describe('Feedback review components', () => {
 
     const buttons = screen.getAllByRole('button');
     expect(buttons[0]?.className).toContain('border-accent');
-    expect(buttons[1]?.className).toContain('hover:border-accent/50');
+    expect(buttons[1]?.className).toContain('hover:border-accent/40');
     expect(screen.getByText(/deferred for retry/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /bug report/i }));
@@ -91,8 +91,10 @@ describe('Feedback review components', () => {
       />,
     );
 
-    expect(screen.getByText(/contact: not provided/i)).toBeInTheDocument();
-    expect(screen.getByText(/issue tracker reference: not forwarded yet/i)).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
+    expect(screen.getByText('Not provided')).toBeInTheDocument();
+    expect(screen.getByText('Issue tracker reference')).toBeInTheDocument();
+    expect(screen.getByText('Not forwarded yet')).toBeInTheDocument();
     expect(screen.getByText(/saved locally for retry\./i)).toBeInTheDocument();
     expect(screen.getAllByText(/forward failed/i)).toHaveLength(2);
   });

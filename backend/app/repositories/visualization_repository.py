@@ -62,6 +62,12 @@ class VisualizationRepository:
         source_cleaned_dataset_version_id: str | None = None,
         source_forecast_version_id: str | None = None,
         source_weekly_forecast_version_id: str | None = None,
+        confidence_assessment_status: str | None = None,
+        confidence_indicator_state: str | None = None,
+        confidence_reason_categories: list[str] | None = None,
+        confidence_supporting_signals: list[str] | None = None,
+        confidence_message: str | None = None,
+        confidence_signal_resolution_status: str | None = None,
     ) -> VisualizationLoadRecord:
         record = self.require_load_record(visualization_load_id)
         record.status = status
@@ -83,6 +89,18 @@ class VisualizationRepository:
             record.source_forecast_version_id = source_forecast_version_id
         if source_weekly_forecast_version_id is not None:
             record.source_weekly_forecast_version_id = source_weekly_forecast_version_id
+        if confidence_assessment_status is not None:
+            record.confidence_assessment_status = confidence_assessment_status
+        if confidence_indicator_state is not None:
+            record.confidence_indicator_state = confidence_indicator_state
+        if confidence_reason_categories is not None:
+            record.confidence_reason_categories_json = _serialize_list(confidence_reason_categories)
+        if confidence_supporting_signals is not None:
+            record.confidence_supporting_signals_json = _serialize_list(confidence_supporting_signals)
+        if confidence_message is not None:
+            record.confidence_message = confidence_message
+        if confidence_signal_resolution_status is not None:
+            record.confidence_signal_resolution_status = confidence_signal_resolution_status
         self.session.flush()
         return record
 
@@ -100,6 +118,22 @@ class VisualizationRepository:
             record.failure_reason = failure_reason
             if record.completed_at is None:
                 record.completed_at = datetime.utcnow()
+        self.session.flush()
+        return record
+
+    def report_confidence_render_event(
+        self,
+        visualization_load_id: str,
+        *,
+        render_status: str,
+        failure_reason: str | None,
+    ) -> VisualizationLoadRecord:
+        record = self.require_load_record(visualization_load_id)
+        record.confidence_render_status = render_status
+        record.confidence_render_reported_at = datetime.utcnow()
+        record.confidence_render_failure_reason = failure_reason
+        if render_status == "render_failed":
+            record.confidence_indicator_state = "render_failed"
         self.session.flush()
         return record
 
@@ -179,3 +213,7 @@ class VisualizationRepository:
             return snapshot
         self.session.flush()
         return None
+
+
+def _serialize_list(values: list[str]) -> str:
+    return json.dumps(values)

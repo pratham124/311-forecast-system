@@ -10,9 +10,12 @@ from app.core.config import get_settings
 from app.core.db import get_db_session
 from app.repositories.cleaned_dataset_repository import CleanedDatasetRepository
 from app.repositories.forecast_repository import ForecastRepository
+from app.repositories.surge_evaluation_repository import SurgeEvaluationRepository
+from app.repositories.surge_state_repository import SurgeStateRepository
 from app.repositories.visualization_repository import VisualizationRepository
 from app.repositories.weekly_forecast_repository import WeeklyForecastRepository
 from app.schemas.forecast_visualization import ForecastVisualizationRead, ServiceCategoryOptionsRead, VisualizationRenderEvent
+from app.services.forecast_confidence_service import ForecastConfidenceService
 from app.services.forecast_visualization_service import ForecastVisualizationService
 from app.services.forecast_visualization_sources import ForecastVisualizationSourceService
 from app.services.historical_demand_service import HistoricalDemandService
@@ -40,6 +43,12 @@ def build_visualization_service(session: Session) -> ForecastVisualizationServic
         ),
         settings=settings,
         logger=logging.getLogger("forecast_visualization.api"),
+        confidence_service=ForecastConfidenceService(
+            surge_state_repository=SurgeStateRepository(session),
+            surge_evaluation_repository=SurgeEvaluationRepository(session),
+            settings=settings,
+            logger=logging.getLogger("forecast_visualization.confidence"),
+        ),
     )
 
 
@@ -94,6 +103,21 @@ def record_visualization_render_event(
     service = build_visualization_service(session)
     try:
         service.record_render_event(visualization_load_id, payload)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail="Visualization load not found") from exc
+    return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@router.post('/{visualization_load_id}/confidence-render-events', status_code=status.HTTP_202_ACCEPTED)
+def record_forecast_confidence_render_event(
+    visualization_load_id: str,
+    payload: VisualizationRenderEvent,
+    session: Session = Depends(get_db_session),
+    _claims: dict = Depends(require_visualization_writer),
+) -> Response:
+    service = build_visualization_service(session)
+    try:
+        service.record_confidence_render_event(visualization_load_id, payload)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail="Visualization load not found") from exc
     return Response(status_code=status.HTTP_202_ACCEPTED)

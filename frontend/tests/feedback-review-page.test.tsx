@@ -63,7 +63,8 @@ describe('feedback review page', () => {
     );
 
     expect(await screen.findByRole('heading', { name: /feedback and bug reports/i })).toBeInTheDocument();
-    expect(await screen.findByText(/issue tracker reference: FB-00001/i)).toBeInTheDocument();
+    expect(await screen.findByText(/issue tracker reference/i)).toBeInTheDocument();
+    expect(screen.getByText('FB-00001')).toBeInTheDocument();
     expect(screen.getByText(/status history/i)).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });

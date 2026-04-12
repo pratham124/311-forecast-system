@@ -3,12 +3,15 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ForecastProduct = Literal["daily_1_day", "weekly_7_day"]
 RenderStatus = Literal["rendered", "render_failed"]
 ViewStatus = Literal["success", "degraded", "fallback_shown", "unavailable", "render_failed"]
 DegradationType = Literal["history_missing", "uncertainty_missing"]
+ForecastConfidenceAssessmentStatus = Literal["degraded_confirmed", "normal", "signals_missing", "dismissed"]
+ForecastConfidenceIndicatorState = Literal["display_required", "not_required", "render_failed"]
+ForecastConfidenceReasonCategory = Literal["missing_inputs", "anomaly", "shock"]
 
 
 class CategoryFilter(BaseModel):
@@ -78,6 +81,16 @@ class FallbackMetadata(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class ForecastConfidenceRead(BaseModel):
+    assessment_status: ForecastConfidenceAssessmentStatus = Field(alias="assessmentStatus")
+    indicator_state: ForecastConfidenceIndicatorState = Field(alias="indicatorState")
+    reason_categories: list[ForecastConfidenceReasonCategory] = Field(default_factory=list, alias="reasonCategories")
+    supporting_signals: list[str] = Field(default_factory=list, alias="supportingSignals")
+    message: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class ForecastVisualizationRead(BaseModel):
     visualization_load_id: str = Field(alias="visualizationLoadId")
     forecast_product: ForecastProduct = Field(alias="forecastProduct")
@@ -98,6 +111,7 @@ class ForecastVisualizationRead(BaseModel):
     alerts: list[StatusMessage] = Field(default_factory=list)
     pipeline_status: list[StatusMessage] = Field(default_factory=list, alias="pipelineStatus")
     fallback: FallbackMetadata | None = None
+    forecast_confidence: ForecastConfidenceRead | None = Field(default=None, alias="forecastConfidence")
     view_status: ViewStatus = Field(alias="viewStatus")
     degradation_type: DegradationType | None = Field(default=None, alias="degradationType")
     summary: str | None = None
@@ -113,8 +127,18 @@ class VisualizationRenderEvent(BaseModel):
 
     @field_validator("failure_reason")
     @classmethod
+    def validate_failure_reason_field(cls, value: str | None, info):
+        return cls.validate_failure_reason(value, info)
+
+    @classmethod
     def validate_failure_reason(cls, value: str | None, info):
-        render_status = info.data.get("render_status")
+        render_status = getattr(info, "data", {}).get("render_status")
         if render_status == "render_failed" and not value:
             raise ValueError("failureReason is required when renderStatus is render_failed")
         return value
+
+    @model_validator(mode="after")
+    def validate_failure_reason_model(self):
+        if self.render_status == "render_failed" and not self.failure_reason:
+            raise ValueError("failureReason is required when renderStatus is render_failed")
+        return self

@@ -451,6 +451,7 @@ class AlertDetailService:
             grouped[key]["p10"] += float(bucket.quantile_p10)
             grouped[key]["p50"] += float(bucket.quantile_p50)
             grouped[key]["p90"] += float(bucket.quantile_p90)
+        alerted_start = self._resolve_alerted_daily_bucket_start(resolved, grouped)
         points: list[AlertDistributionPointRead] = []
         for key in sorted(grouped):
             payload = grouped[key]
@@ -462,7 +463,7 @@ class AlertDetailService:
                     p10=payload["p10"],
                     p50=payload["p50"],
                     p90=payload["p90"],
-                    isAlertedBucket=payload["bucket_start"] == _ensure_utc(resolved.window_start),
+                    isAlertedBucket=payload["bucket_start"] == alerted_start,
                 )
             )
         return points
@@ -477,11 +478,11 @@ class AlertDetailService:
             key = bucket.forecast_date_local
             if key not in grouped:
                 grouped[key] = {"p10": 0.0, "p50": 0.0, "p90": 0.0}
-            grouped[key]["p10"] += float(bucket.quantile_p10)
+                grouped[key]["p10"] += float(bucket.quantile_p10)
             grouped[key]["p50"] += float(bucket.quantile_p50)
             grouped[key]["p90"] += float(bucket.quantile_p90)
         points: list[AlertDistributionPointRead] = []
-        alert_date = _ensure_utc(resolved.window_start).date()
+        alert_date = self._resolve_alerted_weekly_bucket_date(resolved, grouped)
         for forecast_date in sorted(grouped):
             payload = grouped[forecast_date]
             points.append(
@@ -495,6 +496,28 @@ class AlertDetailService:
                 )
             )
         return points
+
+    def _resolve_alerted_daily_bucket_start(
+        self,
+        resolved: _ResolvedAlertSource,
+        grouped: dict[tuple[datetime, datetime], dict[str, Any]],
+    ) -> datetime:
+        if resolved.alert_source == "threshold_alert":
+            for bucket_start, _bucket_end in sorted(grouped):
+                if float(grouped[(bucket_start, _bucket_end)]["p50"]) >= resolved.secondary_metric_value:
+                    return bucket_start
+        return _ensure_utc(resolved.window_start)
+
+    def _resolve_alerted_weekly_bucket_date(
+        self,
+        resolved: _ResolvedAlertSource,
+        grouped: dict[date, dict[str, Any]],
+    ) -> date:
+        if resolved.alert_source == "threshold_alert":
+            for forecast_date in sorted(grouped):
+                if float(grouped[forecast_date]["p50"]) >= resolved.secondary_metric_value:
+                    return forecast_date
+        return _ensure_utc(resolved.window_start).date()
 
     def _build_driver_context(self, resolved: _ResolvedAlertSource) -> _ComponentOutcome:
         if resolved.forecast_product == "daily" and resolved.forecast_reference_id:

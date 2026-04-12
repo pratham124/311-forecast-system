@@ -25,10 +25,17 @@ afterEach(() => {
   fetchMock.mockReset();
 });
 
-describe('submitVisualizationRenderEvent with renderEventSubmission=disabled', () => {
-  it('returns immediately without making a network request', async () => {
+describe('forecast visualization render events with renderEventSubmission=disabled', () => {
+  it('returns immediately without making a network request for chart renders', async () => {
     const { submitVisualizationRenderEvent } = await import('../forecastVisualizations');
     const result = await submitVisualizationRenderEvent('load-1', { renderStatus: 'rendered' });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+  });
+
+  it('returns immediately without making a network request for confidence renders', async () => {
+    const { submitConfidenceRenderEvent } = await import('../forecastVisualizations');
+    const result = await submitConfidenceRenderEvent('load-2', { renderStatus: 'rendered' });
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
   });

@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.models import VisualizationLoadRecord, VisualizationSnapshot
 from app.repositories.visualization_repository import VisualizationRepository
 from app.schemas.forecast_visualization import FallbackMetadata, ForecastVisualizationRead
+from app.services.forecast_confidence_service import build_fallback_confidence_read
 from app.services.forecast_visualization_sources import NormalizedForecastSource
 
 
@@ -62,6 +63,7 @@ class VisualizationSnapshotService:
         payload = json.loads(snapshot.payload_json)
         payload["visualizationLoadId"] = visualization_load_id
         payload["viewStatus"] = "fallback_shown"
+        payload["forecastConfidence"] = build_fallback_confidence_read().model_dump(by_alias=True, mode="json")
         payload["fallback"] = FallbackMetadata(
             snapshotId=snapshot.visualization_snapshot_id,
             createdAt=_as_utc(snapshot.created_at),

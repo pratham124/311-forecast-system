@@ -20,8 +20,8 @@ export function FeedbackSubmissionPage({ isAuthenticated }: FeedbackSubmissionPa
       <div className="mx-auto w-full max-w-6xl">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[28px] border border-white/70 bg-white/72 px-5 py-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-accent">UC-19</p>
-            <p className="mt-1 text-sm text-muted">Submit feedback or report a bug</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-accent/80">Support & Feedback</p>
+            <p className="mt-1 text-sm text-muted">Report technical issues or suggest system improvements</p>
           </div>
           <nav className="flex flex-wrap items-center gap-2" aria-label="feedback navigation">
             <Link
@@ -56,12 +56,7 @@ export function FeedbackSubmissionPage({ isAuthenticated }: FeedbackSubmissionPa
               {result ? (
                 <Alert>
                   <AlertTitle>{result.userOutcome === 'accepted' ? 'Report received' : 'Report received with delayed processing'}</AlertTitle>
-                  <AlertDescription>
-                    <p>{result.statusMessage}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.14em] text-accent">
-                      Submission ID {result.feedbackSubmissionId}
-                    </p>
-                  </AlertDescription>
+                  <AlertDescription>{result.statusMessage}</AlertDescription>
                 </Alert>
               ) : null}
 

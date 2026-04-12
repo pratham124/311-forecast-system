@@ -7,7 +7,10 @@ const degradationCopy: Record<DegradationType, string> = {
 
 export function buildStatusSummary(visualization: ForecastVisualization): string {
   if (visualization.viewStatus === 'fallback_shown') {
-    return "You're seeing the most recent saved view because the latest forecast is not available right now.";
+    return appendConfidenceSummary(
+      "You're seeing the most recent saved view because the latest forecast is not available right now.",
+      visualization,
+    );
   }
   if (visualization.viewStatus === 'unavailable') {
     return visualization.summary ?? "We can't show this forecast right now.";
@@ -15,7 +18,7 @@ export function buildStatusSummary(visualization: ForecastVisualization): string
   if (visualization.degradationType) {
     return degradationCopy[visualization.degradationType];
   }
-  return 'This view shows the latest forecast alongside recent demand.';
+  return appendConfidenceSummary('This view shows the latest forecast alongside recent demand.', visualization);
 }
 
 export function groupStatusMessages(messages: StatusMessage[]): Record<StatusMessage['level'], StatusMessage[]> {
@@ -26,4 +29,15 @@ export function groupStatusMessages(messages: StatusMessage[]): Record<StatusMes
     },
     { info: [], warning: [], error: [] } as Record<StatusMessage['level'], StatusMessage[]>,
   );
+}
+
+function appendConfidenceSummary(base: string, visualization: ForecastVisualization): string {
+  const confidence = visualization.forecastConfidence;
+  if (!confidence) {
+    return base;
+  }
+  if (confidence.assessmentStatus !== 'signals_missing' && confidence.assessmentStatus !== 'dismissed') {
+    return base;
+  }
+  return `${base} ${confidence.message}`;
 }

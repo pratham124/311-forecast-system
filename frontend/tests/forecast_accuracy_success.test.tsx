@@ -43,6 +43,7 @@ describe('forecast accuracy success flow', () => {
               {
                 bucketStart: '2026-03-01T00:00:00Z',
                 bucketEnd: '2026-03-01T01:00:00Z',
+                serviceCategory: 'Roads',
                 forecastValue: 4,
                 actualValue: 3,
                 absoluteErrorValue: 1,
@@ -61,8 +62,9 @@ describe('forecast accuracy success flow', () => {
     );
 
     expect(await screen.findByText(/compare retained forecasts against actual demand/i)).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: /service category/i })).toBeInTheDocument();
+    expect(await screen.findByLabelText(/^service category$/i)).toBeInTheDocument();
     expect(await screen.findByText('1.0000')).toBeInTheDocument();
+    expect(await screen.findByText('Roads')).toBeInTheDocument();
     expect(await screen.findByText(/2026/i)).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     expect(String(fetchMock.mock.calls[2][0])).toContain('/render-events');
