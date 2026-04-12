@@ -16,8 +16,7 @@ function buildHeaders(contentType?: string): Headers {
 }
 
 async function fetchWithAuthRetry(input: string, init: RequestInit = {}): Promise<Response> {
-  const headers = init.headers instanceof Headers ? init.headers : new Headers(init.headers);
-  const contentType = headers.get('Content-Type') ?? undefined;
+  const contentType = new Headers(init.headers).get('Content-Type') ?? undefined;
 
   let response = await fetch(input, { ...init, headers: buildHeaders(contentType) });
   if (response.status !== 401) {

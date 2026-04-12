@@ -114,4 +114,21 @@ describe('ForecastVisualizationChart – additional branches', () => {
     expect(data.length).toBeGreaterThan(0);
     expect(data.some((point) => point.p10 !== undefined || point.p90 !== undefined)).toBe(false);
   });
+
+  it('builds overlay points for visible overlays with timestamps outside the base series', () => {
+    const data = buildChartData(base, {
+      overlayRequestId: 'overlay-1',
+      geographyId: 'citywide',
+      timeRangeStart: '2026-03-13T00:00:00Z',
+      timeRangeEnd: '2026-03-27T00:00:00Z',
+      weatherMeasure: 'temperature',
+      overlayStatus: 'visible',
+      baseForecastPreserved: true,
+      userVisible: true,
+      observations: [{ timestamp: '2026-03-25T00:00:00Z', value: 4 }],
+      stateSource: 'overlay-assembly',
+    });
+
+    expect(data.some((point) => point.timestamp === '2026-03-25T00:00:00Z' && point.overlay === 4)).toBe(true);
+  });
 });
