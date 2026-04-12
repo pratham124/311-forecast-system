@@ -67,7 +67,7 @@ Optional: enable scheduled jobs with `make backend-run-scheduled` (sets `SCHEDUL
 
 ## Testing
 
-To run tests, use `make test`. If you want to generate the coverage report, use `make coverage` or `make backend-coverage`. Also make sure to check out any other `make` targets you are interested in.
+To run tests, use `make test`. If you want to generate the coverage report, use `make coverage`. Also make sure to check out any other `make` targets you are interested in.
 
 ## Common Make targets
 
@@ -77,15 +77,15 @@ Run `make help` for the full list. Highlights:
 |--------|-------------|
 | `make db-up` / `make db-down` | Start/stop Postgres (`compose.yaml`) |
 | `make backend-test` | Pytest in `backend/` |
-| `make backend-coverage` | Pytest with branch coverage |
-| `make frontend-test` | Vitest |
+| `make frontend-test` | Run tests in frontend |
+| `make coverage` | Test with branch coverage |
 | `make frontend-build` | Production build |
 | `make install` | Backend + frontend dependencies |
 | `make test` | Backend and frontend tests |
 
 ## Continuous integration
 
-GitHub Actions (`.github/workflows/ci.yml`) runs backend tests against **SQLite** and frontend `npm ci`, tests, and build.
+GitHub Actions (`.github/workflows/ci.yml`) runs tests against **SQLite** and frontend `npm ci`, tests, and build.
 
 ## Specs and APIs
 

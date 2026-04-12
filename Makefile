@@ -45,14 +45,13 @@ help:
 	@echo "  make backend-run-scheduled Run backend locally with scheduler enabled"
 	@echo "  make backend-test         Run full backend test suite"
 	@echo "  make backend-test-auth    Run auth-focused backend tests"
-	@echo "  make backend-coverage     Run backend coverage"
 	@echo "  make frontend-install     Install frontend dependencies"
 	@echo "  make frontend-dev         Run frontend dev server"
 	@echo "  make frontend-test        Run frontend test suite"
 	@echo "  make frontend-build       Build frontend"
 	@echo "  make install              Install backend and frontend dependencies"
 	@echo "  make test                 Run backend and frontend tests"
-	@echo "  make coverage             Backend pytest with branch coverage (alias of backend-coverage)"
+	@echo "  make coverage             Test with branch coverage"
 
 db-up:
 	POSTGRES_PORT=$(POSTGRES_PORT) docker compose up -d postgres
