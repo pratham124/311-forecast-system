@@ -1,18 +1,18 @@
-# 311 Forecast System Details + Setup (MUST READ)
+# 311 Forecast System Details + Setup (MUST READ) group 13
 
 Platform for **Edmonton 311** service-demand data: ingestion from the open data API, validation and deduplication, **LightGBM**-based daily and weekly demand forecasts, visualizations, evaluations, threshold alerts, and a React operator UI. The backend is **FastAPI** on **PostgreSQL**; the frontend is **Vite + React + TypeScript + Tailwind**.
 
 ## Repository layout
 
-| Path | Purpose |
-|------|---------|
-| `backend/` | FastAPI app, SQLAlchemy models, Alembic migrations (`backend/migrations/`), pytest suite |
-| `frontend/` | Vite React SPA |
-| `tests/` | Additional tests outside `backend/tests/` (when present) |
-| `specs/` | Feature specs, plans, tasks, and OpenAPI drafts per use case |
-| `docs/` | Project documentation |
-| `ui-playwright/` | Optional Playwright UI smoke runs (see `ui-playwright/README.md`) |
-| `scripts/` | Helper scripts (including Codex UC runners) |
+| Path             | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `backend/`       | FastAPI app, SQLAlchemy models, Alembic migrations (`backend/migrations/`), pytest suite |
+| `frontend/`      | Vite React SPA                                                                           |
+| `tests/`         | Additional tests outside `backend/tests/` (when present)                                 |
+| `specs/`         | Feature specs, plans, tasks, and OpenAPI drafts per use case                             |
+| `docs/`          | Project documentation                                                                    |
+| `ui-playwright/` | Optional Playwright UI smoke runs (see `ui-playwright/README.md`)                        |
+| `scripts/`       | Helper scripts (including Codex UC runners)                                              |
 
 Agent-oriented conventions and technology notes: [`AGENTS.md`](AGENTS.md).
 
@@ -73,15 +73,15 @@ To run tests, use `make test`. If you want to generate the coverage report, use 
 
 Run `make help` for the full list. Highlights:
 
-| Target | Description |
-|--------|-------------|
+| Target                        | Description                          |
+| ----------------------------- | ------------------------------------ |
 | `make db-up` / `make db-down` | Start/stop Postgres (`compose.yaml`) |
-| `make backend-test` | Pytest in `backend/` |
-| `make frontend-test` | Run tests in frontend |
-| `make coverage` | Test with branch coverage |
-| `make frontend-build` | Production build |
-| `make install` | Backend + frontend dependencies |
-| `make test` | Backend and frontend tests |
+| `make backend-test`           | Pytest in `backend/`                 |
+| `make frontend-test`          | Run tests in frontend                |
+| `make coverage`               | Test with branch coverage            |
+| `make frontend-build`         | Production build                     |
+| `make install`                | Backend + frontend dependencies      |
+| `make test`                   | Backend and frontend tests           |
 
 ## Continuous integration
 
